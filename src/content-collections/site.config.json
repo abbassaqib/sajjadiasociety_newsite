@@ -2,12 +2,11 @@
   "general": {
     "name": "Sajjadia Islamic Society",
     "description": "IN THE NAME OF ALLAH, THE MOST GRACIOUS, THE MOST MERCIFUL",
-    "logo": "src/assets/SajjadiaLogo_Horiz2 copy.png",
     "youtube": "https://www.youtube.com/@SajjadiaSocietyOfficial"
   },
   "header": {
     "displayTitle": true,
-    "displayLogo": true
+    "displayLogo": false
   },
   "body": {
     "hero": {
