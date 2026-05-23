@@ -1,12 +1,13 @@
 {
   "general": {
-    "name": "Astro Church",
-    "description": "We exist to be and make eternally joyful disciples of Jesus Christ. Sojourners is a baptistic, reformed, non-denominational church in Albert Lea, Minnesota. Join us Sundays at 10am in the Skyline Plaza!",
-    "youtube": "https://www.youtube.com/@sojournerschurch7048"
+    "name": "Sajjadia Islamic Society",
+    "description": "IN THE NAME OF ALLAH, THE MOST GRACIOUS, THE MOST MERCIFUL",
+    "logo": "src/assets/SajjadiaLogo_Horiz2 copy.png",
+    "youtube": "https://www.youtube.com/@SajjadiaSocietyOfficial"
   },
   "header": {
     "displayTitle": true,
-    "displayLogo": false
+    "displayLogo": true
   },
   "body": {
     "hero": {
