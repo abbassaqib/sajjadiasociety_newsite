@@ -1,0 +1,20 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { paths } from "@/utils/findPathByType";
+import { allBlogData } from "@/data/contentCollectionDataFetching";
+
+import FilteredBlogWrapper from "./_components/FilteredBlogWrapper";
+
+// Get static paths
+export const getStaticPaths = () => {
+  return paths.blog?.path ? [{ params: { blog: paths.blog.path } }] : [];
+};
+---
+
+<BaseLayout pageTitle={paths.blog?.label || "Blog"}>
+  <main class="layout-base gap-8 py-8">
+    <section class="flex flex-col gap-2">
+      <FilteredBlogWrapper {allBlogData} {paths} client:load />
+    </section>
+  </main>
+</BaseLayout>

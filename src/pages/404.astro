@@ -1,0 +1,31 @@
+---
+import StyledText from "@/components/StyledText";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { CircleX, ArrowLeft } from "lucide-react";
+import { buttonVariants } from "@/components/ui/button";
+---
+
+<BaseLayout pageTitle="Not Found">
+  <main class="layout-base gap-8 py-8 min-h-[calc(100vh-6.5rem)]">
+    <StyledText
+      as="h1"
+      variant="displayXL"
+      className="text-primary flex items-center gap-4"
+    >
+      <CircleX className="sm:w-18 sm:h-18 w-12 h-12" aria-hidden="true" />
+      404: Oops!
+    </StyledText>
+    <p>
+      Sorry, we couldn't find the page you were looking for. It might have been
+      moved or deleted.
+    </p>
+    <StyledText
+      as={"a"}
+      href="/"
+      className={buttonVariants({ variant: "secondary" })}
+    >
+      <ArrowLeft aria-hidden="true" />
+      Go back to homepage.
+    </StyledText>
+  </main>
+</BaseLayout>

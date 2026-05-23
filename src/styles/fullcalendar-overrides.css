@@ -1,0 +1,74 @@
+:root {
+  /* -------------- */
+  /*      TABLE    */
+  /* -------------- */
+  /* Borders */
+  --fc-border-color: var(--color-muted);
+
+  /* -------------- */
+  /*      HEADER    */
+  /* -------------- */
+  /* Title (Month YYYY) */
+  .fc .fc-toolbar-title {
+    @apply text-xl font-bold uppercase md:text-3xl;
+  }
+  /* Today Button */
+  .fc .fc-today-button {
+    @apply font-medium uppercase;
+  }
+  /* Buttons */
+  .fc .fc-button-primary:focus {
+    @apply focus-visible:border-ring focus-visible:ring-ring shadow-none outline-none focus-visible:ring-2;
+  }
+  /* Buttons */
+  .fc .fc-button-primary:not(:disabled):active:focus {
+    @apply shadow-none;
+  }
+  /* Button BG */
+  --fc-button-bg-color: var(--color-muted);
+  /* Button Text */
+  --fc-button-text-color: var(--color-muted-foreground);
+  /* Button Border */
+  --fc-button-border-color: var(--fc-button-bg-color);
+  /* Button Hover */
+  --fc-button-hover-bg-color: var(--color-accent);
+  /* Button Hover Border */
+  --fc-button-hover-border-color: var(--fc-button-hover-bg-color);
+  /* Button Hover Press */
+  --fc-button-active-bg-color: color-mix(
+    in srgb,
+    var(--color-muted),
+    transparent 50%
+  );
+  /* Button Hover Press Border */
+  --fc-button-active-border-color: var(--fc-button-active-bg-color);
+
+  /* --------------------- */
+  /*      DAY HEADINGS     */
+  /* --------------------- */
+  /* Day Heading */
+  .fc-list-day-text,
+  .fc-list-day-side-text {
+    @apply text-muted-foreground font-medium uppercase;
+  }
+  --fc-neutral-bg-color: var(--color-muted);
+  /* Highlight "Today" text */
+  .fc-day-today .fc-list-day-text,
+  .fc-day-today .fc-list-day-side-text {
+    @apply text-primary;
+  }
+
+  /* --------------- */
+  /*      EVENTS     */
+  /* --------------- */
+  /* Event Hover */
+  --fc-list-event-hover-bg-color: var(--color-accent);
+  /* Underline Event Title on Hover */
+  .fc .fc-list-event.fc-event-forced-url:hover a {
+    @apply decoration-primary;
+  }
+  /* Event Dot */
+  --fc-event-border-color: var(--color-primary);
+  /* Event Dot Size */
+  --fc-list-event-dot-width: 10px;
+}

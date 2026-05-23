@@ -1,0 +1,68 @@
+@import "tailwindcss";
+@import "./shadcn-theme.css";
+@import "./fullcalendar-overrides.css";
+@import "./tw-prose-overrides.css";
+@import "tw-animate-css";
+@plugin "tailwindcss-react-aria-components";
+@plugin "@tailwindcss/typography";
+
+@custom-variant dark (&:is(.dark *));
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* ---------------------- */
+/* ----- CUSTOM CSS ----- */
+/* ---------------------- */
+
+/* https://tailwindcss.com/docs/upgrade-guide#buttons-use-the-default-cursor */
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+/* https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/scrollbar-color */
+@layer base {
+  :root {
+    scrollbar-color: var(--muted-foreground) var(--muted);
+    a {
+      @apply focus-visible:border-ring focus-visible:ring-ring outline-none focus-visible:ring-2;
+    }
+  }
+}
+
+@theme {
+  --breakpoint-xs: 24rem;
+  --layout-base: 70rem;
+  --layout-sermon: 40rem;
+  --layout-full: 100%;
+}
+
+@utility layout-* {
+  --layout-max-width: --value(--layout-*);
+  --layout-padding: calc(var(--spacing) * 8);
+
+  display: grid;
+
+  place-content: center;
+  grid-template-columns:
+    minmax(var(--layout-padding), 1fr)
+    min(var(--layout-max-width), 100% - var(--layout-padding) * 2)
+    minmax(var(--layout-padding), 1fr);
+
+  & > * {
+    grid-column: 2 / 3;
+  }
+
+  & > .full-width {
+    grid-column: 1 / -1;
+  }
+}

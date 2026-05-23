@@ -1,0 +1,90 @@
+---
+import StyledText from "@/components/StyledText";
+import SubscribeForm from "@/components/SubscribeForm";
+import SocialMediaLinks from "@/components/SocialMediaLinks";
+import { siteConfig } from "@/data/contentCollectionDataFetching";
+import { buttonVariants } from "@/components/ui/button";
+
+const left = siteConfig?.data.footer?.left;
+const form = siteConfig?.data.footer?.form;
+const give = siteConfig?.data.footer?.give;
+
+const RESEND_SEGMENT_ID = import.meta.env.RESEND_SEGMENT_ID;
+const RESEND_API_KEY = import.meta.env.RESEND_API_KEY;
+---
+
+<footer class="bg-secondary text-secondary-foreground layout-base py-8">
+  <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+    <section class="flex flex-col gap-8">
+      <h2 class="sr-only">Address & Contact Info</h2>
+      {
+        left?.sections &&
+          left.sections.map((section) => (
+            <div class="flex flex-col">
+              <StyledText
+                as="h3"
+                variant="heading"
+                className="pb-2"
+                set:html={section.heading}
+              />
+              <div set:html={section.description} />
+            </div>
+          ))
+      }
+
+      {
+        left?.social && left.social.length > 0 && (
+          <SocialMediaLinks social={left.social} client:idle />
+        )
+      }
+    </section>
+
+    {
+      form?.isActive &&
+        (RESEND_SEGMENT_ID && RESEND_API_KEY ? (
+          <section class="flex flex-col gap-4">
+            <div class="flex flex-col gap-2">
+              <StyledText as="h2" variant="heading" set:html={form.heading} />
+              <div set:html={form.description} />
+            </div>
+            <SubscribeForm client:idle />
+          </section>
+        ) : (
+          <section class="flex flex-col gap-4">
+            <div class="flex flex-col gap-2">
+              <StyledText
+                as="h2"
+                variant="heading"
+                className="text-destructive"
+              >
+                ERROR: Missing RESEND_API_KEY or RESEND_SEGMENT_ID. Check site
+                config.
+              </StyledText>
+            </div>
+          </section>
+        ))
+    }
+
+    {
+      give?.isActive && (
+        <section class="flex flex-col gap-4">
+          <div class="flex flex-col gap-2">
+            <StyledText as="h2" variant="heading" set:html={give.heading} />
+            <div set:html={give.description} />
+          </div>
+          {give.link && (
+            <StyledText
+              as={"a"}
+              target="_blank"
+              rel="noopener noreferrer"
+              href={give.link}
+              className={buttonVariants({ variant: "footer-button" })}
+            >
+              Give
+            </StyledText>
+          )}
+        </section>
+      )
+    }
+  </div>
+</footer>

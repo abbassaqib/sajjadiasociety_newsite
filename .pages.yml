@@ -1,0 +1,392 @@
+media:
+  - name: assets
+    label: Assets
+    input: src/assets
+    output: src/assets
+  - name: series-graphics
+    label: Series Graphics
+    input: public/series-graphics
+    output: /series-graphics
+  - name: public
+    label: Public
+    input: public
+    output: /
+content:
+  - name: sermons
+    label: Sermons
+    type: collection
+    path: src/content-collections/sermons
+    filename: "{fields.date}-{fields.title}.md"
+    view:
+      fields: [title, date, preacher, scripture]
+      default: { sort: date, order: desc }
+    fields:
+      - name: title
+        label: Title
+        type: string
+        required: true
+      - name: date
+        label: Date Preached
+        type: date
+        required: true
+      - name: series
+        label: Sermon Series
+        type: reference
+        options:
+          collection: series
+          # value: "{slug}"
+          label: "{title}"
+        required: true
+      - name: scripture
+        label: Sermon Text
+        type: string
+        list: true
+      - name: preacher
+        label: Preacher
+        type: reference
+        options:
+          collection: preachers
+          label: "{fields.name}"
+        required: true
+      - name: mediaURL
+        label: Media URL
+        type: string
+      - name: bulletinURL
+        label: Bulletin URL
+        type: string
+      - name: body
+        label: Notes
+        type: rich-text
+  - name: preachers
+    label: Preachers
+    type: collection
+    path: src/content-collections/preachers
+    filename: "{primary}.md"
+    fields:
+      - name: name
+        label: Name
+        type: string
+        required: true
+        pattern:
+          message: "Please enter a first and last name."
+          regex: "^[a-zA-Z]+([ '-][a-zA-Z]+)+$"
+      - name: isGuest
+        label: Guest Preacher
+        type: boolean
+        required: true
+        default: true
+      - name: priority
+        label: Priority (1 is highest, 0 is lowest)
+        type: number
+        default: 0
+      - name: image
+        label: Upload a Picture
+        type: image
+      - name: body
+        label: Bio
+        type: rich-text
+    view:
+      primary: name
+  - name: series
+    label: Sermon Series
+    type: collection
+    path: src/content-collections/series
+    filename: "{primary}.md"
+    view:
+      fields: [title, image, book]
+    fields:
+      - name: title
+        label: Series Title
+        type: string
+        required: true
+      - name: startDate
+        label: Start Date
+        type: date
+        required: true
+      - name: image
+        label: Series Image
+        type: image
+        options:
+          media: series-graphics
+      - name: book
+        label: Bible Book(s)
+        type: select
+        options:
+          multiple: true
+          values:
+            [
+              "Genesis",
+              "Exodus",
+              "Leviticus",
+              "Numbers",
+              "Deuteronomy",
+              "Joshua",
+              "Judges",
+              "Ruth",
+              "1 Samuel",
+              "2 Samuel",
+              "1 Kings",
+              "2 Kings",
+              "1 Chronicles",
+              "2 Chronicles",
+              "Ezra",
+              "Nehemiah",
+              "Esther",
+              "Job",
+              "Psalms",
+              "Proverbs",
+              "Ecclesiastes",
+              "Song of Solomon",
+              "Isaiah",
+              "Jeremiah",
+              "Lamentations",
+              "Ezekiel",
+              "Daniel",
+              "Hosea",
+              "Joel",
+              "Amos",
+              "Obadiah",
+              "Jonah",
+              "Micah",
+              "Nahum",
+              "Habakkuk",
+              "Zephaniah",
+              "Haggai",
+              "Zechariah",
+              "Malachi",
+              "Matthew",
+              "Mark",
+              "Luke",
+              "John",
+              "Acts",
+              "Romans",
+              "1 Corinthians",
+              "2 Corinthians",
+              "Galatians",
+              "Ephesians",
+              "Philippians",
+              "Colossians",
+              "1 Thessalonians",
+              "2 Thessalonians",
+              "1 Timothy",
+              "2 Timothy",
+              "Titus",
+              "Philemon",
+              "Hebrews",
+              "James",
+              "1 Peter",
+              "2 Peter",
+              "1 John",
+              "2 John",
+              "3 John",
+              "Jude",
+              "Revelation",
+            ]
+  - name: blog
+    label: Blog
+    type: collection
+    path: src/content-collections/blog
+    filename: "{fields.date}-{fields.title}.md"
+    fields:
+      - { name: title, label: Title, type: string, required: true }
+      - { name: date, label: Date Posted, type: date, required: true }
+      - { name: tags, label: Tags, type: string, list: { min: 1 } }
+      - { name: body, label: Body, type: rich-text, required: true }
+  - name: pages
+    label: Pages
+    type: collection
+    path: src/content-collections/pages
+    filename: "{primary}.md"
+    view:
+      fields: [title, order]
+      primary: title
+      sort: [order, title]
+      default:
+        sort: order
+        order: asc
+    fields:
+      - { name: title, label: Title, type: string, required: true }
+      - name: order
+        label: Order
+        type: number
+      - name: type
+        label: Type
+        type: select
+        description: Ensure you only select each item ONCE in the whole menu
+        options:
+          values:
+            [
+              { value: "blog", label: "Blog" },
+              { value: "events", label: "Events" },
+              { value: "sermons", label: "Sermons" },
+            ]
+      - { name: body, label: Body, type: rich-text }
+
+  - name: config
+    label: Site Config
+    type: file
+    path: src/content-collections/site.config.json
+    fields:
+      - name: general
+        label: General Settings
+        type: object
+        fields:
+          - { name: name, label: Church Name, type: string, required: true }
+          - {
+              name: description,
+              label: Church Description,
+              type: string,
+              required: true,
+              description: For SEO metadata.,
+            }
+          - { name: logo, label: Logo, type: image }
+          - { name: youtube, label: YouTube Channel, type: string }
+      - name: header
+        label: Header
+        type: object
+        fields:
+          - {
+              name: displayTitle,
+              label: Display Church Name in Header,
+              type: boolean,
+              default: true,
+              required: true,
+            }
+          - {
+              name: displayLogo,
+              label: Display Church Logo in Header,
+              type: boolean,
+              default: false,
+              required: true,
+            }
+      - name: body
+        label: Body
+        type: object
+        fields:
+          - name: hero
+            label: Hero Component
+            type: object
+            fields:
+              - name: text
+                label: Hero Text
+                type: code
+                options: { language: html }
+                required: true
+              - name: bgImage
+                label: Background Image
+                description: Use https://squoosh.app/ to process images.
+                type: image
+          - name: cta
+            label: CTA Button
+            type: object
+            fields:
+              - name: text
+                label: CTA Text
+                type: code
+                options: { language: html }
+              - { name: link, label: CTA Link, type: string }
+      - name: footer
+        label: Footer
+        type: object
+        fields:
+          - name: left
+            label: Left
+            type: object
+            fields:
+              - name: sections
+                label: Sections
+                type: object
+                list:
+                  collapsible:
+                    collapsed: true
+                    summary: "{fields.heading}"
+                fields:
+                  - name: heading
+                    label: Heading
+                    type: string
+                    required: true
+                  - name: description
+                    label: Description
+                    type: code
+                    options: { language: html }
+                    required: true
+              - name: social
+                label: Social Icons
+                type: object
+                list:
+                  collapsible:
+                    collapsed: true
+                    summary: "{fields.name}"
+                fields:
+                  - name: name
+                    label: Name
+                    type: string
+                    required: true
+                  - name: icon
+                    label: Icon
+                    description: Use name from https://iconify.design/
+                    type: string
+                    required: true
+                  - name: link
+                    label: Link
+                    type: string
+                    required: true
+                  - name: hint
+                    label: Hint
+                    type: string
+          - name: form
+            label: Form
+            type: object
+            fields:
+              - name: isActive
+                label: Active
+                type: boolean
+                default: true
+                required: true
+              - name: heading
+                label: Heading
+                type: string
+              - name: description
+                label: Description
+                type: rich-text
+          - name: give
+            label: Give
+            type: object
+            fields:
+              - name: isActive
+                label: Active
+                type: boolean
+                default: true
+                required: true
+              - name: heading
+                label: Heading
+                type: string
+              - name: description
+                label: Description
+                type: rich-text
+              - name: link
+                label: Link
+                type: string
+      - name: theme
+        label: Theme
+        type: object
+        fields:
+          - name: colorScheme
+            label: Color Scheme
+            type: select
+            description: Select Auto to support user preferences or Light or Dark to force theme color scheme.
+            default: auto
+            required: true
+            options:
+              values:
+                - value: auto
+                  label: Auto
+                - value: light
+                  label: Light
+                - value: dark
+                  label: Dark
+          - name: customCSS
+            label: Custom CSS
+            type: code
+            options: { language: css }
+            description: Select or create a theme at https://tweakcn.com/ and copy/paste it here.

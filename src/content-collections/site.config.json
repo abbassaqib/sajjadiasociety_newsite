@@ -1,0 +1,66 @@
+{
+  "general": {
+    "name": "Astro Church",
+    "description": "We exist to be and make eternally joyful disciples of Jesus Christ. Sojourners is a baptistic, reformed, non-denominational church in Albert Lea, Minnesota. Join us Sundays at 10am in the Skyline Plaza!",
+    "youtube": "https://www.youtube.com/@sojournerschurch7048"
+  },
+  "header": {
+    "displayTitle": true,
+    "displayLogo": false
+  },
+  "body": {
+    "hero": {
+      "text": "<span class='opacity-40'>Free, open-source template</span><span class='text-primary'> for building great church websites</span><span class='opacity-40'> with Astro</span>",
+      "bgImage": "src/assets/hero-bg.webp"
+    },
+    "cta": {
+      "text": "10 am Sundays | Click here for livestream",
+      "link": "http://youtube.com/channel/UC5HBSGOC-FxOa3-ERY5X6mw/live"
+    }
+  },
+  "footer": {
+    "left": {
+      "sections": [
+        {
+          "heading": "Sundays at 10am",
+          "description": "<address>1679 West Main Street </br> Skyline Plaza </br> Albert Lea, MN 56007</address>"
+        },
+        {
+          "heading": "Contact Us",
+          "description": "<a href='mailto:notarealemail@astro.church'>notarealemail@astro.church</a><br />(123)456-7899"
+        }
+      ],
+      "social": [
+        {
+          "name": "Facebook",
+          "icon": "simple-icons:facebook",
+          "link": "https://www.facebook.com/SojournersMN"
+        },
+        {
+          "name": "Youtube",
+          "icon": "simple-icons:youtube",
+          "link": "https://www.youtube.com/@sojournerschurch7048"
+        },
+        {
+          "name": "Spotify",
+          "icon": "simple-icons:spotify",
+          "link": "https://open.spotify.com/show/4XUQE1mKNoKG2r4Ovr7FoQ?si=18866bd4d2b84a06"
+        }
+      ]
+    },
+    "form": {
+      "isActive": true,
+      "heading": "Weekly Bulletin",
+      "description": "Sign up to stay informed and connected to Astro Church weekly happenings."
+    },
+    "give": {
+      "isActive": true,
+      "heading": "Give to Astro Church",
+      "description": "Click below to set up a one time or recurring gift to Astro Church.",
+      "link": "https://get.tithe.ly/"
+    }
+  },
+  "theme": {
+    "colorScheme": "auto"
+  }
+}

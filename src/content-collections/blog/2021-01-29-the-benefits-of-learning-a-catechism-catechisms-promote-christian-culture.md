@@ -1,0 +1,25 @@
+---
+title: "The Benefits of Learning a Catechism: Catechisms promote Christian Culture"
+date: 2021-01-29
+tags:
+  - Catechesis
+---
+**This week brings us to the third benefit of catechisms: catechisms promote Christian culture.** Christian culture has gotten a bad rap in the news lately—often for good reason. Our country will have a hard time forgetting mobs waving signs with the name of Jesus as they illegally entered the capitol building.
+
+Yet when I say Christian culture, I am **not** meaning a kind of Cultural Christianity. We are not aiming for either the anti-Christian Cultural Christianity expressed in much of the capitol riots or the often benign Cultural Christianity expressed in Christian music and Christian kitsch and Christian camps. What we are after is something much different. **The kind of culture catechisms promote is the distinctly Christian culture expressed in the local church.** Let me explain.
+
+In the constitution proposed by the Sojourners Elders, we talk about the local church this way: _"\[Local churches\] are marked by believers gathered together in covenant with God and one another and united by a personal and common confession of faith in Jesus Christ."_ Many churches today place a massive emphasis on _personal_ and almost no emphasis on _common_ confession. This emphasis on personal confession means all it takes to be "Christian" is some kind of general affirmation: "I believe in Jesus". Without a robust common confession in the church, “I believe in Jesus” often means very different things depending on the person. To believe in Jesus becomes defined by the individual. Catechisms can provide a helpful corrective.
+
+**In learning catechisms, we learn the contours of the faith we together confess.** Take [question #34 of the New City Catechism](http://newcitycatechism.com/new-city-catechism/#34), for example: _"Q: Since we are redeemed by grace alone, through Christ alone, must we still do good works and obey God’s Word?"_ Ask many who profess a personal relationship with Jesus and you'll get a vast array of answers, some more biblical than others. The question of the relationship between our faith and works is sometimes confusing to believers.
+
+But the Bible is clear, and therefore so is any catechism based on the Bible: _"A: Yes, because Christ, having redeemed us by his blood, also renews us by his Spirit; so that our lives may show love and gratitude to God; so that we may be assured of our faith by the fruits; and so that by our godly behavior others may be won to Christ."_ In other words, Christians saved by grace through faith still pursue godliness (1) to show our love and gratitude to God, (2) to strengthen our own assurance of salvation, and (3) as an evangelical witness to unbelievers. We saw this clearly taught in Titus: grace works. Any congregation who _together_ holds this confession will be shaped by it to display a distinctly Christ-shaped culture.
+
+As we go through these questions, we are syncing up our diverse understandings and readings of the scriptures with a common confession that we all can share. **We are learning the grammar of our faith**. This common confession acts as a [_plumb line_](https://www.gotquestions.org/plumb-line-Bible.html) for the culture of the church. In this way, catechisms promote the unity of the local church and unite us with the church universal in common confession.
+
+**Catechesis doesn't just unite, however; it also divides.** The distinctly Christian culture of the church exists in local expressions amid the anti-Christ culture of the world. Our confession of the core doctrines taught in God's word will bring us into conflict with a culture that has rejected the witness of God's word.
+
+For example, this weekend, we will be studying the first question and answer: _"Q: What is our only hope in life and death? A: That we are not our own but belong, body and soul, both in life and death, to God and to our Savior Jesus Christ."_
+
+In America, the news that you are not your own but belong to someone else is anathema. **When we gather and repeat these words together, we are standing in counter-cultural witness to the word of God and dividing ourselves from the world and the world from us.** When we scatter and live out these words, we are embodying true reality—but a reality which a world blinded by Satan cannot see and does not want to see.
+
+Jesus called us to be _"a chosen race, a royal priesthood, a holy nation, a people for his own possession, that you may proclaim the excellencies of him who called you out of darkness into his marvelous light."_ ([1 Peter 2:9](https://ref.ly/1%20Pet%202.9;esv?t=biblia)). **As a holy nation, we have a distinct culture. And as part of a holy nation, local churches function as kingdom outposts—testifying through our culture to the reality and coming return of the King.** Catechisms are one tool to help us do this. So let's gather this weekend and study the catechism together in eager anticipation of Christ working in us through his Spirit to build us into his people—people who proclaim his excellencies through a distinctly Christian culture.

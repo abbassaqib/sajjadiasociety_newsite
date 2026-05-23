@@ -1,0 +1,51 @@
+name: Daily Netlify Build on Change
+on:
+  schedule:
+    - cron: "0 0 * * *" # Runs every day at midnight UTC
+  workflow_dispatch: # Allows you to run it manually for testing
+
+jobs:
+  check_and_build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for changes in last 24 hours
+        id: check
+        run: |
+          CHANGES=$(git log --since='24 hours ago' --oneline)
+              if [ -n "$CHANGES" ]; then
+                echo "changes=true" >> $GITHUB_OUTPUT
+                echo "Found changes in last 24 hours:"
+                echo "$CHANGES"
+              else
+                echo "changes=false" >> $GITHUB_OUTPUT
+                echo "No changes found in last 24 hours"
+              fi
+
+      - name: Trigger Netlify Build
+        if: steps.check.outputs.changes == 'true'
+        run: |
+          RESPONSE=$(curl -X POST -d {} -w "\n%{http_code}" -s ${{ secrets.NETLIFY_BUILD_HOOK }})
+              HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+
+              if [ "$HTTP_CODE" -eq 200 ] || [ "$HTTP_CODE" -eq 201 ]; then
+                echo "✅ Netlify build triggered successfully"
+              else
+                echo "🛑 Failed to trigger Netlify build (HTTP $HTTP_CODE)"
+                exit 1
+              fi
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## Workflow Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- Changes detected: ${{ steps.check.outputs.changes }}" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.check.outputs.changes }}" == "true" ]; then
+            echo "- Netlify build: Triggered ✅" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- Netlify build: Skipped (no changes) ⏭️" >> $GITHUB_STEP_SUMMARY
+          fi

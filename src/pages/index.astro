@@ -1,0 +1,77 @@
+---
+import { type ImageMetadata } from "astro";
+import { Image } from "astro:assets";
+import StyledText from "@/components/StyledText";
+
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { siteConfig } from "@/data/contentCollectionDataFetching";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
+const hero = siteConfig?.data.body?.hero;
+const cta = siteConfig?.data.body?.cta;
+
+const bgImages = import.meta.glob<{ default: ImageMetadata }>(
+  "/src/assets/*.{jpeg,jpg,png,webp,svg}",
+);
+
+const imagePath = `/${hero?.bgImage}`;
+const selectedImage = hero?.bgImage ? bgImages[imagePath] : null;
+---
+
+<BaseLayout pageTitle="Home">
+  <main class="relative min-h-[calc(100vh-6.5rem)]">
+    <h1 class="sr-only">{siteConfig?.data.general.name}</h1>
+    <section
+      class="grid min-h-[calc(100vh-6.5rem)] w-full bg-cover bg-right"
+      aria-labelledby="hero-heading"
+    >
+      <!-- BACKGROUND IMG & OVERLAY -->
+      {
+        selectedImage && (
+          <>
+            <Image
+              src={selectedImage()}
+              alt="Homepage background"
+              class="absolute inset-0 h-full w-full object-cover"
+              priority
+            />
+            <div
+              class="bg-muted z-10 col-start-1 row-start-1 h-full w-full opacity-85"
+              aria-hidden="true"
+            />
+          </>
+        )
+      }
+
+      <!-- HERO CONTENT -->
+      <div class="layout-base isolate z-20 col-start-1 row-start-1 gap-y-8">
+        <StyledText
+          as="h2"
+          id="hero-heading"
+          variant="displayXL"
+          set:html={hero?.text}
+        />
+        {
+          cta?.text && (
+            <StyledText
+              as="a"
+              variant="button"
+              href={cta.link ?? "#"}
+              target={cta.link?.startsWith("http") ? "_blank" : "_self"}
+              rel={
+                cta.link?.startsWith("http") ? "noopener noreferrer" : undefined
+              }
+              className={cn(
+                buttonVariants({ variant: "secondary" }),
+                "h-auto w-full whitespace-normal",
+              )}
+            >
+              {cta.text}
+            </StyledText>
+          )
+        }
+      </div>
+    </section>
+  </main>
+</BaseLayout>

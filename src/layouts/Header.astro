@@ -1,0 +1,47 @@
+---
+import NavMenu from "@/components/NavMenu";
+import Sidebar from "@/components/Sidebar";
+import StyledText from "@/components/StyledText";
+import { menu } from "@/utils/getMenuItems";
+import { Image } from "astro:assets";
+import { type ImageMetadata } from "astro";
+import { siteConfig } from "@/data/contentCollectionDataFetching";
+
+const logoImage = import.meta.glob<{ default: ImageMetadata }>(`src/assets/*`);
+
+const currentPath = Astro.url.pathname;
+---
+
+<header
+  class:list={["layout-full py-4 h-26", currentPath !== "/" && "bg-muted"]}
+>
+  <div class="flex w-full items-center">
+    {
+      siteConfig?.data.header?.displayTitle ? (
+        <StyledText as="h2" variant="displayLG" className="flex-1">
+          <a href="/">{siteConfig?.data.general.name}</a>
+        </StyledText>
+      ) : (
+        <h2 class="sr-only">{siteConfig?.data.general.name}</h2>
+      )
+    }
+
+    {
+      siteConfig?.data.header?.displayLogo && siteConfig.data.general.logo && (
+        <Image
+          src={logoImage[`/${siteConfig.data.general.logo}`]()}
+          alt="logo"
+          class={"max-h-18"}
+        />
+      )
+    }
+
+    <NavMenu
+      className="hidden gap-2 lg:inline-flex items-center flex-wrap"
+      menu={menu}
+      client:load
+    />
+
+    <Sidebar menu={menu} client:load />
+  </div>
+</header>

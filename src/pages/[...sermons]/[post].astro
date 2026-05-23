@@ -1,0 +1,70 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import StyledText from "@/components/StyledText";
+import Meta from "@/components/Meta";
+import { render } from "astro:content";
+import { paths } from "@/utils/findPathByType";
+import type { GetStaticPaths } from "astro";
+import { allSermonData } from "@/data/contentCollectionDataFetching";
+import MediaEmbed from "@/components/MediaEmbed";
+import { listInvalidScriptureRefs } from "@/utils/scriptureParsing";
+
+// Get static paths
+export const getStaticPaths = (async () => {
+  return paths.sermons?.path
+    ? allSermonData.map((sermon) => ({
+        params: {
+          post: `${paths.sermons?.path}/${sermon.id}`,
+        },
+        props: {
+          sermon,
+        },
+      }))
+    : [];
+}) satisfies GetStaticPaths;
+
+const { sermon } = Astro.props;
+
+const { title, bulletinURL } = sermon.data;
+
+const { Content: SermonContent } = await render(sermon);
+const { Content: PreacherContent } = await render(sermon.preacher);
+
+// Check for invalid scripture refs
+const invalidRefs = listInvalidScriptureRefs([sermon]);
+for (const warning of invalidRefs) {
+  console.warn(warning);
+}
+---
+
+<BaseLayout pageTitle={title}>
+  <main class="layout-sermon gap-4 py-8">
+    <div class="flex min-w-0 flex-col gap-4">
+      <StyledText as="h1" variant="sermonHeading"> {title}</StyledText>
+      <Meta data={sermon} linked {paths} client:load />
+    </div>
+
+    <div class="h-90">
+      <MediaEmbed data={sermon} isCompact={false} client:load />
+    </div>
+
+    <div
+      class="prose prose-custom prose-a:hover:decoration-primary prose-a:hover:text-foreground max-w-none"
+    >
+      {sermon.rendered?.html ? <SermonContent /> : <PreacherContent />}
+      {
+        bulletinURL && (
+          <a href={bulletinURL} target="_blank" rel="noopener noreferrer">
+            View the Bulletin
+          </a>
+        )
+      }
+    </div>
+  </main>
+</BaseLayout>
+
+<script is:inline define:vars={{ invalidRefs }}>
+  for (const warning of invalidRefs) {
+    console.warn(warning);
+  }
+</script>
