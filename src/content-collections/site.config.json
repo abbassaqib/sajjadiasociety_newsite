@@ -15,7 +15,7 @@
     },
     "cta": {
       "text": "10 am Sundays | Click here for livestream",
-      "link": "http://youtube.com/channel/UC5HBSGOC-FxOa3-ERY5X6mw/live"
+      "link": "https://www.youtube.com/@SajjadiaSocietyOfficial/streams"
     }
   },
   "footer": {
@@ -34,17 +34,12 @@
         {
           "name": "Facebook",
           "icon": "simple-icons:facebook",
-          "link": "https://www.facebook.com/SojournersMN"
+          "link": "https://www.facebook.com/sajjadiaislamicsociety"
         },
         {
           "name": "Youtube",
           "icon": "simple-icons:youtube",
-          "link": "https://www.youtube.com/@sojournerschurch7048"
-        },
-        {
-          "name": "Spotify",
-          "icon": "simple-icons:spotify",
-          "link": "https://open.spotify.com/show/4XUQE1mKNoKG2r4Ovr7FoQ?si=18866bd4d2b84a06"
+          "link": "https://www.youtube.com/@SajjadiaSocietyOfficial"
         }
       ]
     },
