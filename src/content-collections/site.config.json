@@ -1,7 +1,7 @@
 {
   "general": {
     "name": "Sajjadia Islamic Society",
-    "description": "IN THE NAME OF ALLAH, THE MOST GRACIOUS, THE MOST MERCIFUL",
+    "description": "In the Name of Allah, the Most Gracious, the Most Merciful",
     "youtube": "https://www.youtube.com/@SajjadiaSocietyOfficial"
   },
   "header": {
@@ -10,24 +10,24 @@
   },
   "body": {
     "hero": {
-      "text": "<span class='opacity-40'>Free, open-source template</span><span class='text-primary'> for building great church websites</span><span class='opacity-40'> with Astro</span>",
+      "text": "<span class='opacity-50'>Serving as a beacon of</span><span class='text-primary'> Islamic conscience</span><span class='opacity-50'> and community service</span>",
       "bgImage": "src/assets/hero-bg.webp"
     },
     "cta": {
-      "text": "10 am Sundays | Click here for livestream",
-      "link": "https://www.youtube.com/@SajjadiaSocietyOfficial/streams"
+      "text": "Join us for Jummah Prayer every Friday",
+      "link": "/programs"
     }
   },
   "footer": {
     "left": {
       "sections": [
         {
-          "heading": "Sundays at 10am",
-          "description": "<address>1679 West Main Street </br> Skyline Plaza </br> Albert Lea, MN 56007</address>"
+          "heading": "Programs & Congregations",
+          "description": "We currently hold programs at various community locations in Riverside County. Check our programs page for current locations and times."
         },
         {
           "heading": "Contact Us",
-          "description": "<a href='mailto:notarealemail@astro.church'>notarealemail@astro.church</a><br />(123)456-7899"
+          "description": "<a href='mailto:info@sajjadiaislamicsociety.org'>info@sajjadiaislamicsociety.org</a>"
         }
       ],
       "social": [
@@ -45,14 +45,14 @@
     },
     "form": {
       "isActive": true,
-      "heading": "Weekly Bulletin",
-      "description": "Sign up to stay informed and connected to Astro Church weekly happenings."
+      "heading": "Community Newsletter",
+      "description": "Sign up to stay informed and connected to the Sajjadia Islamic Society community."
     },
     "give": {
       "isActive": true,
-      "heading": "Give to Astro Church",
-      "description": "Click below to set up a one time or recurring gift to Astro Church.",
-      "link": "https://get.tithe.ly/"
+      "heading": "Support Sajjadia",
+      "description": "Help us build a permanent home for our community. Every contribution makes a difference.",
+      "link": "https://donorbox.org/sajjadia"
     }
   },
   "theme": {

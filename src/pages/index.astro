@@ -2,76 +2,335 @@
 import { type ImageMetadata } from "astro";
 import { Image } from "astro:assets";
 import StyledText from "@/components/StyledText";
-
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import { siteConfig } from "@/data/contentCollectionDataFetching";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import {
+  getCampaign,
+  getAnnouncements,
+  getUpcomingPrograms,
+  getPrayerTimesConfig,
+} from "@/data/sanityQueries";
+
+// ── Fetch Sanity data in parallel ─────────────────────
+const [campaign, announcements, programs, prayerConfig] = await Promise.all([
+  getCampaign(),
+  getAnnouncements(3),
+  getUpcomingPrograms(4),
+  getPrayerTimesConfig(),
+]);
+
+// ── Prayer times from Aladhan API ─────────────────────
+let prayerTimes = null;
+if (prayerConfig?.useAladhanApi) {
+  try {
+    const { latitude, longitude } = prayerConfig.location;
+    const method = prayerConfig.calculationMethod ?? "0";
+    const today = new Date();
+    const dateStr = `${today.getDate()}-${today.getMonth() + 1}-${today.getFullYear()}`;
+    const res = await fetch(
+      `https://api.aladhan.com/v1/timings/${dateStr}?latitude=${latitude}&longitude=${longitude}&method=${method}`
+    );
+    const json = await res.json();
+    if (json.code === 200) prayerTimes = json.data.timings;
+  } catch (e) {
+    console.error("Aladhan API error:", e);
+  }
+}
+
+const manualTimes = prayerConfig?.manualOverride;
+const jummah = prayerConfig?.jummahDetails;
+const isFriday = new Date().getDay() === 5;
+
+function formatTime(time: string | undefined): string {
+  if (!time) return "—";
+  const [h, m] = time.split(":").map(Number);
+  const ampm = h >= 12 ? "PM" : "AM";
+  const hour = h % 12 || 12;
+  return `${hour}:${String(m).padStart(2, "0")} ${ampm}`;
+}
+
+const displayTimes = [
+  { name: "Fajr",    time: prayerTimes?.Fajr    ?? manualTimes?.fajr },
+  { name: "Sunrise", time: prayerTimes?.Sunrise  ?? manualTimes?.sunrise },
+  { name: "Zohr",    time: prayerTimes?.Dhuhr    ?? manualTimes?.zohr },
+  { name: "Asr",     time: prayerTimes?.Asr      ?? manualTimes?.asr },
+  { name: "Maghrib", time: prayerTimes?.Maghrib  ?? manualTimes?.maghrib },
+  { name: "Isha",    time: prayerTimes?.Isha     ?? manualTimes?.isha },
+];
+
+const raised = campaign?.raisedAmount ?? 0;
+const goal   = campaign?.goalAmount   ?? 60000;
+const pct    = Math.min(Math.round((raised / goal) * 100), 100);
 
 const hero = siteConfig?.data.body?.hero;
-const cta = siteConfig?.data.body?.cta;
+const cta  = siteConfig?.data.body?.cta;
 
 const bgImages = import.meta.glob<{ default: ImageMetadata }>(
-  "/src/assets/*.{jpeg,jpg,png,webp,svg}",
+  "/src/assets/*.{jpeg,jpg,png,webp,svg}"
 );
+const selectedImage = hero?.bgImage ? bgImages[`/${hero.bgImage}`] : null;
 
-const imagePath = `/${hero?.bgImage}`;
-const selectedImage = hero?.bgImage ? bgImages[imagePath] : null;
+const todayLabel = new Date().toLocaleDateString("en-US", {
+  weekday: "long", month: "long", day: "numeric",
+});
+
+const programTypeLabel: Record<string, string> = {
+  jummah:            "🕌 Jummah",
+  lecture:           "📖 Lecture",
+  special_event:     "⭐ Special Event",
+  quran_class:       "📚 Quran Class",
+  youth:             "👥 Youth",
+  community_service: "🤝 Community",
+  islamic_occasion:  "☪️ Occasion",
+};
 ---
 
 <BaseLayout pageTitle="Home">
-  <main class="relative min-h-[calc(100vh-6.5rem)]">
-    <h1 class="sr-only">{siteConfig?.data.general.name}</h1>
-    <section
-      class="grid min-h-[calc(100vh-6.5rem)] w-full bg-cover bg-right"
-      aria-labelledby="hero-heading"
-    >
-      <!-- BACKGROUND IMG & OVERLAY -->
-      {
-        selectedImage && (
-          <>
-            <Image
-              src={selectedImage()}
-              alt="Homepage background"
-              class="absolute inset-0 h-full w-full object-cover"
-              priority
-            />
-            <div
-              class="bg-muted z-10 col-start-1 row-start-1 h-full w-full opacity-85"
-              aria-hidden="true"
-            />
-          </>
-        )
-      }
 
-      <!-- HERO CONTENT -->
-      <div class="layout-base isolate z-20 col-start-1 row-start-1 gap-y-8">
-        <StyledText
-          as="h2"
-          id="hero-heading"
-          variant="displayXL"
-          set:html={hero?.text}
+  <!-- ════════════════════════════════════════════════ -->
+  <!-- HERO SECTION                                     -->
+  <!-- ════════════════════════════════════════════════ -->
+  <section
+    class="hero relative flex w-full flex-col items-center justify-center overflow-hidden"
+    aria-labelledby="hero-heading"
+  >
+    <h1 class="sr-only">{siteConfig?.data.general.name}</h1>
+
+    <!-- Background image -->
+    {selectedImage && (
+      <>
+        <Image
+          src={selectedImage()}
+          alt="Sajjadia Islamic Society"
+          class="absolute inset-0 h-full w-full object-cover object-center"
+          priority
         />
-        {
-          cta?.text && (
-            <StyledText
-              as="a"
-              variant="button"
-              href={cta.link ?? "#"}
-              target={cta.link?.startsWith("http") ? "_blank" : "_self"}
-              rel={
-                cta.link?.startsWith("http") ? "noopener noreferrer" : undefined
-              }
-              className={cn(
-                buttonVariants({ variant: "secondary" }),
-                "h-auto w-full whitespace-normal",
+        <div class="absolute inset-0 bg-black/65" aria-hidden="true" />
+      </>
+    )}
+
+    <!-- Hero content — centered with proper padding -->
+    <div class="relative z-10 mx-auto w-full max-w-5xl px-8 py-16 text-center">
+
+      <!-- Tagline -->
+      <StyledText
+        as="h2"
+        id="hero-heading"
+        variant="displayXL"
+        set:html={hero?.text}
+        className="mb-8"
+      />
+
+      <!-- Buttons -->
+      <div class="mb-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
+        {cta?.text && (
+          <a
+            href={cta.link ?? "#"}
+            target={cta.link?.startsWith("http") ? "_blank" : "_self"}
+            rel={cta.link?.startsWith("http") ? "noopener noreferrer" : undefined}
+            class={cn(
+              buttonVariants({ variant: "secondary" }),
+              "h-auto px-6 py-3 text-sm font-semibold"
+            )}
+          >
+            {cta.text}
+          </a>
+        )}
+        {campaign?.isActive && (
+          <a
+            href="/donate"
+            class={cn(
+              buttonVariants({ variant: "default" }),
+              "h-auto bg-accent px-6 py-3 text-sm font-semibold text-accent-foreground hover:bg-accent/90"
+            )}
+          >
+            💛 Donate to New Location Fund
+          </a>
+        )}
+      </div>
+
+      <!-- Prayer times card — rounded, centered, inline width -->
+      <div class="mx-auto inline-block w-full max-w-2xl rounded-2xl bg-black/50 px-6 py-5 text-left backdrop-blur-md">
+
+        <!-- Card header -->
+        <div class="mb-4 flex flex-col gap-0.5 sm:flex-row sm:items-center sm:justify-between">
+          <p class="text-white text-sm font-semibold uppercase tracking-widest">
+            🕐 Today's Prayer Times
+          </p>
+          <p class="text-white/50 text-xs">{todayLabel} · Corona, CA</p>
+        </div>
+
+        <!-- Prayer grid -->
+        <div class="grid grid-cols-3 gap-2 sm:grid-cols-6">
+          {displayTimes.map(({ name, time }) => (
+            <div class="rounded-xl bg-white/10 px-2 py-3 text-center">
+              <p class="text-white/50 mb-1 text-[10px] font-medium uppercase tracking-wider">
+                {name}
+              </p>
+              <p class="text-secondary text-sm font-bold">
+                {formatTime(time)}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        <!-- Jummah row — Fridays only -->
+        {isFriday && jummah && (
+          <div class="mt-3 rounded-xl bg-white/10 px-4 py-3">
+            <div class="flex flex-wrap items-center gap-x-4 gap-y-1">
+              <p class="text-white text-sm font-semibold">🕌 Jummah Prayer Today</p>
+              <p class="text-white/80 text-sm">
+                Azaan: <span class="text-secondary font-semibold">{jummah.azaanTime}</span>
+                &nbsp;·&nbsp;
+                Khutba: <span class="text-secondary font-semibold">{jummah.khutbaTime}</span>
+                {jummah.location && <>&nbsp;·&nbsp;<span class="text-white/60">{jummah.location}</span></>}
+              </p>
+              {jummah.additionalInfo && (
+                <p class="text-white/40 text-xs italic">{jummah.additionalInfo}</p>
               )}
-            >
-              {cta.text}
-            </StyledText>
-          )
-        }
+            </div>
+          </div>
+        )}
+
+      </div>
+      <!-- end prayer card -->
+
+    </div>
+    <!-- end hero content -->
+
+  </section>
+
+  <!-- ════════════════════════════════════════════════ -->
+  <!-- UPCOMING PROGRAMS                                -->
+  <!-- ════════════════════════════════════════════════ -->
+  {programs && programs.length > 0 && (
+    <section class="layout-full bg-background py-12" aria-label="Upcoming Programs">
+      <div class="layout-base">
+        <div class="mb-6 flex items-center justify-between">
+          <h2 class="text-xl font-semibold">Upcoming Programs</h2>
+          <a href="/programs" class="text-secondary text-sm font-medium underline-offset-4 hover:underline">
+            View all →
+          </a>
+        </div>
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {programs.map((program: any) => {
+            const date = new Date(program.startDate);
+            const dateLabel = date.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+            const timeLabel = date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+            return (
+              <a
+                href={`/programs/${program.slug?.current ?? "#"}`}
+                class="bg-card border-border hover:border-secondary group block rounded-lg border p-5 transition-colors"
+              >
+                <p class="text-muted-foreground mb-2 text-xs font-medium uppercase tracking-wider">
+                  {programTypeLabel[program.type] ?? "📅 Program"}
+                </p>
+                <p class="text-card-foreground group-hover:text-secondary mb-3 font-semibold transition-colors">
+                  {program.title}
+                </p>
+                <p class="text-muted-foreground text-sm">{dateLabel} · {timeLabel}</p>
+                {program.location && <p class="text-muted-foreground mt-1 text-sm">{program.location}</p>}
+                {program.speaker && <p class="text-muted-foreground mt-1 text-sm italic">{program.speaker}</p>}
+              </a>
+            );
+          })}
+        </div>
       </div>
     </section>
-  </main>
+  )}
+
+  <!-- ════════════════════════════════════════════════ -->
+  <!-- CAMPAIGN SECTION                                 -->
+  <!-- ════════════════════════════════════════════════ -->
+  {campaign?.isActive && (
+    <section class="layout-full bg-sidebar py-12" aria-label="Fundraising Campaign">
+      <div class="layout-base">
+        <div class="mx-auto max-w-2xl text-center">
+          <p class="text-accent mb-2 text-sm font-medium uppercase tracking-widest">
+            Fundraising Campaign
+          </p>
+          <h2 class="text-sidebar-foreground mb-2 text-2xl font-semibold">
+            {campaign.title}
+          </h2>
+          <p class="text-sidebar-foreground/70 mb-8">{campaign.tagline}</p>
+          <div class="bg-sidebar-foreground/10 mb-3 h-3 w-full overflow-hidden rounded-full">
+            <div
+              class="bg-accent h-3 rounded-full transition-all duration-500"
+              style={`width: ${pct}%`}
+              role="progressbar"
+              aria-valuenow={pct}
+              aria-valuemin={0}
+              aria-valuemax={100}
+            />
+          </div>
+          <div class="text-sidebar-foreground/70 mb-8 flex justify-between text-sm">
+            <span>
+              <span class="text-sidebar-foreground font-semibold">${raised.toLocaleString()}</span> raised
+            </span>
+            <span>{pct}% of ${goal.toLocaleString()} goal</span>
+          </div>
+          {campaign.milestones?.length > 0 && (
+            <div class="mb-8 flex flex-wrap justify-center gap-3">
+              {campaign.milestones.map((m: any) => (
+                <div class={cn(
+                  "rounded-full px-4 py-1 text-sm",
+                  m.reached ? "bg-accent text-accent-foreground" : "bg-sidebar-foreground/10 text-sidebar-foreground/60"
+                )}>
+                  {m.reached ? "✅" : "⬜"} ${m.amount?.toLocaleString()} — {m.label}
+                </div>
+              ))}
+            </div>
+          )}
+          <a
+            href="/donate"
+            class={cn(buttonVariants({ variant: "default" }), "bg-accent text-accent-foreground hover:bg-accent/90 px-8 py-3 text-base")}
+          >
+            {campaign.callToAction ?? "Donate Now"}
+          </a>
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- ════════════════════════════════════════════════ -->
+  <!-- LATEST ANNOUNCEMENTS                             -->
+  <!-- ════════════════════════════════════════════════ -->
+  {announcements && announcements.length > 0 && (
+    <section class="layout-full bg-background py-12" aria-label="Latest Announcements">
+      <div class="layout-base">
+        <div class="mb-6 flex items-center justify-between">
+          <h2 class="text-xl font-semibold">Latest Announcements</h2>
+          <a href="/announcements" class="text-secondary text-sm font-medium underline-offset-4 hover:underline">
+            View all →
+          </a>
+        </div>
+        <div class="grid gap-4 sm:grid-cols-3">
+          {announcements.map((item: any) => {
+            const date = item.publishDate
+              ? new Date(item.publishDate).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })
+              : "";
+            return (
+              <a
+                href={`/announcements/${item.slug?.current ?? "#"}`}
+                class="bg-card border-border hover:border-secondary group block rounded-lg border p-5 transition-colors"
+              >
+                {item.isPinned && (
+                  <span class="bg-accent/10 text-accent mb-2 inline-block rounded-full px-2 py-0.5 text-xs font-medium">
+                    📌 Pinned
+                  </span>
+                )}
+                <p class="text-card-foreground group-hover:text-secondary mb-2 font-semibold transition-colors">
+                  {item.title}
+                </p>
+                {date && <p class="text-muted-foreground text-sm">{date}</p>}
+              </a>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  )}
+
 </BaseLayout>

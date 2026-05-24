@@ -26,6 +26,8 @@
     "@radix-ui/react-separator": "^1.1.8",
     "@radix-ui/react-slot": "^1.2.4",
     "@radix-ui/react-tooltip": "^1.2.8",
+    "@sanity/client": "^7.22.0",
+    "@sanity/image-url": "^2.1.1",
     "@tanstack/react-form": "^1.28.5",
     "@types/bible-reference-formatter": "^1.0.3",
     "bible-passage-reference-parser": "^3.2.0",
