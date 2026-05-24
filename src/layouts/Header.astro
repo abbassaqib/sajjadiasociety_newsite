@@ -13,7 +13,7 @@ const currentPath = Astro.url.pathname;
 ---
 
 <header
-  class:list={["layout-full py-4 h-26 bg-primary text-primary-foreground", currentPath !== "/" && "border-b border-primary-foreground/20"]}
+  class:list={["layout-full py-4 h-26 bg-sidebar text-sidebar-foreground", currentPath !== "/" && "border-b border-sidebar-border"]}
 >
   <div class="flex w-full items-center">
     {
