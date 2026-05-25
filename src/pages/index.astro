@@ -101,11 +101,19 @@ const programTypeLabel: Record<string, string> = {
     <h1 class="sr-only">{siteConfig?.data.general.name}</h1>
 
     <!-- Background image -->
-    <div
-  class="absolute inset-0"
-  style="background-image: url('/hero-bg.jpg'); background-size: cover; background-position: center; background-attachment: fixed;"
-  aria-hidden="true"
-/>
+    {selectedImage && (
+      <>
+        <Image
+          src={selectedImage()}
+          alt="Sajjadia Islamic Society"
+          class="absolute inset-0 h-full w-full object-cover object-center"
+          style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1;"
+          priority
+        />
+        <div class="absolute inset-0 bg-dark/30" aria-hidden="true" />
+      </>
+    )}
+
 <div class="absolute inset-0 bg-dark/30" aria-hidden="true" />
 
     <!-- Hero content — centered with proper padding -->
