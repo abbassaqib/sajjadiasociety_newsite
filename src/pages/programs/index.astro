@@ -30,33 +30,36 @@ const programTypeBadge: Record<string, string> = {
   islamic_occasion:  "bg-accent/10 text-accent",
 };
 
-function formatDate(dateStr: string) {
-  const d = new Date(dateStr);
-  return d.toLocaleDateString("en-US", {
+// Show "May 25" or "May 25 – May 27" if end date exists
+function formatDateRange(startStr: string, endStr?: string): string {
+  const start = new Date(startStr);
+  const startLabel = start.toLocaleDateString("en-US", {
     weekday: "long", month: "long", day: "numeric", year: "numeric",
   });
+  if (!endStr) return startLabel;
+  const end = new Date(endStr);
+  const endLabel = end.toLocaleDateString("en-US", {
+    weekday: "long", month: "long", day: "numeric", year: "numeric",
+  });
+  return `${startLabel} – ${endLabel}`;
 }
 
 function formatTime(dateStr: string) {
-  const d = new Date(dateStr);
-  return d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+  return new Date(dateStr).toLocaleTimeString("en-US", {
+    hour: "numeric", minute: "2-digit",
+  });
 }
 ---
 
 <BaseLayout pageTitle="Programs & Events">
   <main class="layout-base gap-10 py-10">
 
-    <!-- Page header -->
     <div class="border-b border-border pb-6">
-      <h1 class="text-3xl font-bold uppercase tracking-wider mb-2">
-        Programs & Events
-      </h1>
-      <p class="text-muted-foreground">
-        Join us for our regular programs, Jummah prayers, and special events.
-      </p>
+      <h1 class="text-3xl font-bold uppercase tracking-wider mb-2">Programs & Events</h1>
+      <p class="text-muted-foreground">Join us for our regular programs, Jummah prayers, and special events.</p>
     </div>
 
-    <!-- Upcoming programs -->
+    <!-- Upcoming -->
     <section>
       <h2 class="text-xl font-semibold uppercase tracking-wider mb-6 text-primary">
         Upcoming Programs
@@ -71,26 +74,18 @@ function formatTime(dateStr: string) {
             const fullUrl = program.image
               ? urlFor(program.image).width(1600).url()
               : null;
+            const dateRange = formatDateRange(program.startDate, program.endDate);
+            const timeLabel = formatTime(program.startDate);
 
             return (
               <div class="bg-card border border-border rounded-xl overflow-hidden hover:border-secondary transition-colors">
                 <div class="flex flex-col sm:flex-row">
-
-                  <!-- Image thumbnail (if exists) -->
                   {thumbUrl && fullUrl && (
                     <div class="sm:w-64 flex-shrink-0">
-                      <Lightbox
-                        id={program._id}
-                        src={fullUrl}
-                        alt={program.title}
-                        thumbnailSrc={thumbUrl}
-                      />
+                      <Lightbox id={program._id} src={fullUrl} alt={program.title} thumbnailSrc={thumbUrl} />
                     </div>
                   )}
-
-                  <!-- Content -->
                   <div class="flex flex-col gap-3 p-6 flex-1 min-w-0">
-                    <!-- Date badge + type badge -->
                     <div class="flex flex-wrap items-center gap-2">
                       <div class="bg-primary text-primary-foreground rounded-lg px-3 py-1 text-center">
                         <span class="text-xs font-medium uppercase tracking-wider opacity-80">
@@ -113,7 +108,6 @@ function formatTime(dateStr: string) {
                       )}
                     </div>
 
-                    <!-- Title -->
                     <a
                       href={`/programs/${program.slug?.current}`}
                       class="text-lg font-semibold hover:text-secondary transition-colors"
@@ -121,9 +115,9 @@ function formatTime(dateStr: string) {
                       {program.title}
                     </a>
 
-                    <!-- Meta -->
                     <div class="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
-                      <span>🕐 {formatTime(program.startDate)}</span>
+                      <span>📅 {dateRange}</span>
+                      <span>🕐 {timeLabel}</span>
                       {program.location && <span>📍 {program.location}</span>}
                       {program.speaker && <span>🎤 {program.speaker}</span>}
                       {program.isRecurring && program.recurrencePattern && (
@@ -141,15 +135,8 @@ function formatTime(dateStr: string) {
           <p class="text-muted-foreground text-lg mb-2">No upcoming programs scheduled</p>
           <p class="text-muted-foreground text-sm">
             Check back soon or follow us on{" "}
-            <a
-              href="https://www.facebook.com/sajjadiaislamicsociety"
-              class="text-secondary hover:underline"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Facebook
-            </a>{" "}
-            for updates.
+            <a href="https://www.facebook.com/sajjadiaislamicsociety" class="text-secondary hover:underline" target="_blank" rel="noopener noreferrer">Facebook</a>
+            {" "}for updates.
           </p>
         </div>
       )}
@@ -160,17 +147,10 @@ function formatTime(dateStr: string) {
       <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 class="text-xl font-semibold mb-1">🕌 Jummah Prayer</h2>
-          <p class="text-primary-foreground/80 text-sm">
-            Every Friday · Azaan 12:00 PM · Khutba 12:05 PM
-          </p>
-          <p class="text-primary-foreground/60 text-sm mt-1">
-            Location varies — check announcements for current venue
-          </p>
+          <p class="text-primary-foreground/80 text-sm">Every Friday · Azaan 12:00 PM · Khutba 12:05 PM</p>
+          <p class="text-primary-foreground/60 text-sm mt-1">Location varies — check announcements for current venue</p>
         </div>
-        <a
-          href="/announcements"
-          class="mt-4 sm:mt-0 inline-block bg-primary-foreground text-primary font-semibold px-6 py-3 rounded-lg text-sm hover:bg-primary-foreground/90 transition-colors whitespace-nowrap"
-        >
+        <a href="/announcements" class="mt-4 sm:mt-0 inline-block bg-primary-foreground text-primary font-semibold px-6 py-3 rounded-lg text-sm hover:bg-primary-foreground/90 transition-colors whitespace-nowrap">
           View Announcements →
         </a>
       </div>
@@ -190,16 +170,12 @@ function formatTime(dateStr: string) {
             const fullUrl = program.image
               ? urlFor(program.image).width(1600).url()
               : null;
+            const dateRange = formatDateRange(program.startDate, program.endDate);
 
             return (
               <div class="bg-card border border-border rounded-xl overflow-hidden hover:border-secondary transition-colors group">
                 {thumbUrl && fullUrl && (
-                  <Lightbox
-                    id={`past-${program._id}`}
-                    src={fullUrl}
-                    alt={program.title}
-                    thumbnailSrc={thumbUrl}
-                  />
+                  <Lightbox id={`past-${program._id}`} src={fullUrl} alt={program.title} thumbnailSrc={thumbUrl} />
                 )}
                 <div class="p-5">
                   <span class={cn(
@@ -208,13 +184,10 @@ function formatTime(dateStr: string) {
                   )}>
                     {programTypeLabel[program.type] ?? "📅 Program"}
                   </span>
-                  <a
-                    href={`/programs/${program.slug?.current}`}
-                    class="block font-semibold group-hover:text-secondary transition-colors mb-2"
-                  >
+                  <a href={`/programs/${program.slug?.current}`} class="block font-semibold group-hover:text-secondary transition-colors mb-2">
                     {program.title}
                   </a>
-                  <p class="text-muted-foreground text-sm">{formatDate(program.startDate)}</p>
+                  <p class="text-muted-foreground text-sm">📅 {dateRange}</p>
                   {program.speaker && (
                     <p class="text-muted-foreground text-sm mt-1 italic">{program.speaker}</p>
                   )}

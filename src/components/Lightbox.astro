@@ -1,66 +1,71 @@
 ---
-// Lightbox component — renders overlay + handles open/close
-// Usage: <Lightbox id="unique-id" src="image-url" alt="description" />
 interface Props {
   id: string;
   src: string;
   alt: string;
-  thumbnailSrc?: string; // optional smaller thumbnail URL
+  thumbnailSrc?: string;
 }
 const { id, src, alt, thumbnailSrc } = Astro.props;
+const dialogId = `lightbox-${id}`;
 ---
 
 <!-- Thumbnail trigger -->
 <button
-  onclick={`document.getElementById('lightbox-${id}').showModal()`}
-  class="group relative overflow-hidden rounded-xl border border-border hover:border-secondary transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+  onclick={`document.getElementById('${dialogId}').showModal()`}
+  class="group relative w-full overflow-hidden rounded-xl border border-border hover:border-secondary transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
   aria-label={`View full image: ${alt}`}
 >
   <img
     src={thumbnailSrc ?? src}
     alt={alt}
-    class="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
+    class="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-105"
     loading="lazy"
   />
-  <!-- Overlay hint -->
   <div class="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
-    <span class="opacity-0 group-hover:opacity-100 transition-opacity text-white text-sm font-medium bg-black/60 px-3 py-1 rounded-full">
-      🔍 View full
+    <span class="opacity-0 group-hover:opacity-100 transition-opacity text-white text-sm font-medium bg-black/60 px-3 py-1.5 rounded-full">
+      🔍 View full size
     </span>
   </div>
 </button>
 
-<!-- Dialog lightbox -->
+<!-- Native dialog lightbox -->
 <dialog
-  id={`lightbox-${id}`}
-  class="fixed inset-0 z-50 bg-transparent p-4 max-w-none max-h-none w-full h-full backdrop:bg-black/80"
-  onclick="this.close()"
+  id={dialogId}
+  class="fixed inset-0 z-50 bg-transparent p-0 m-0 max-w-none max-h-none w-screen h-screen"
 >
-  <div class="flex items-center justify-center w-full h-full">
+  <!-- Backdrop click closes -->
+  <div
+    class="lightbox-backdrop w-full h-full flex items-center justify-center p-6"
+    onclick={`document.getElementById('${dialogId}').close()`}
+  >
     <div
-      class="relative max-w-5xl max-h-[90vh] w-full"
+      class="relative max-w-5xl w-full"
       onclick="event.stopPropagation()"
     >
-      <!-- Close button -->
-      <button
-        onclick={`document.getElementById('lightbox-${id}').close()`}
-        class="absolute -top-10 right-0 text-white/80 hover:text-white text-sm font-medium flex items-center gap-1 focus:outline-none"
-        aria-label="Close image"
-      >
-        ✕ Close
-      </button>
+      <!-- Top bar: caption left, close right -->
+      <div class="flex items-center justify-between mb-3">
+        <p class="text-white/70 text-sm truncate pr-4">{alt}</p>
+        <button
+          onclick={`document.getElementById('${dialogId}').close()`}
+          class="flex items-center gap-1.5 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 transition-colors px-3 py-1.5 rounded-full text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+          aria-label="Close image"
+        >
+          <span aria-hidden="true">✕</span>
+          <span>Close</span>
+        </button>
+      </div>
 
       <!-- Full image -->
       <img
         src={src}
         alt={alt}
-        class="w-full max-h-[85vh] object-contain rounded-xl shadow-2xl"
+        class="w-full max-h-[80vh] object-contain rounded-xl shadow-2xl"
       />
 
-      <!-- Caption -->
-      {alt && (
-        <p class="text-white/70 text-sm text-center mt-3">{alt}</p>
-      )}
+      <!-- Bottom hint -->
+      <p class="text-white/40 text-xs text-center mt-3">
+        Click outside or press Esc to close
+      </p>
     </div>
   </div>
 </dialog>
@@ -70,13 +75,33 @@ const { id, src, alt, thumbnailSrc } = Astro.props;
     border: none;
     outline: none;
     background: transparent;
+    padding: 0;
+    margin: 0;
   }
   dialog::backdrop {
-    background: rgba(0, 0, 0, 0.85);
+    background: rgba(0, 0, 0, 0.88);
+    backdrop-filter: blur(4px);
   }
   dialog[open] {
     display: flex;
     align-items: center;
     justify-content: center;
   }
+  .lightbox-backdrop {
+    cursor: zoom-out;
+  }
 </style>
+
+<script>
+  // Close on Escape key (native dialog handles this automatically)
+  // Also close when clicking the backdrop div
+  document.querySelectorAll('dialog[id^="lightbox-"]').forEach((dialog) => {
+    dialog.addEventListener('click', (e) => {
+      const rect = (dialog as HTMLElement).getBoundingClientRect();
+      const target = e.target as HTMLElement;
+      if (target === dialog) {
+        (dialog as HTMLDialogElement).close();
+      }
+    });
+  });
+</script>

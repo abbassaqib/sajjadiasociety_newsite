@@ -100,6 +100,7 @@ export async function getUpcomingPrograms(limit = 10) {
       isRecurring,
       recurrencePattern,
       startDate,
+      endDate,
       location,
       speaker,
       description,

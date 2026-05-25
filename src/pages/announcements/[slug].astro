@@ -1,47 +1,70 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
-import { sanityClient } from "@/lib/sanity";
+import Lightbox from "@/components/Lightbox.astro";
+import { sanityClient, urlFor } from "@/lib/sanity";
 
 export async function getStaticPaths() {
-  const items = await sanityClient.fetch(`
-    *[_type == "announcement" && status == "approved"] {
+  const programs = await sanityClient.fetch(`
+    *[_type == "program" && isPublished == true] {
       "slug": slug.current
     }
   `);
-  return items.map((item: any) => ({
-    params: { slug: item.slug },
-  }));
+  return programs.map((p: any) => ({ params: { slug: p.slug } }));
 }
 
 const { slug } = Astro.params;
 
-const announcement = await sanityClient.fetch(`
-  *[_type == "announcement"
-    && status == "approved"
-    && slug.current == $slug][0] {
-    title, category, publishDate,
-    expiryDate, isPinned, body, image
+const program = await sanityClient.fetch(`
+  *[_type == "program" && slug.current == $slug && isPublished == true][0] {
+    _id, title, type, isRecurring, recurrencePattern,
+    startDate, endDate, location, locationAddress,
+    speaker, description, image,
+    registrationRequired, registrationLink
   }
 `, { slug });
 
-if (!announcement) return Astro.redirect("/announcements");
+if (!program) return Astro.redirect("/programs");
 
-const categoryLabel: Record<string, string> = {
-  general:          "General",
-  jummah:           "🕌 Jummah",
-  program:          "📅 Program",
-  campaign:         "💰 Campaign",
-  community:        "🤝 Community",
-  islamic_occasion: "☪️ Islamic Occasion",
+const programTypeLabel: Record<string, string> = {
+  jummah:            "🕌 Jummah Prayer",
+  lecture:           "📖 Islamic Lecture",
+  special_event:     "⭐ Special Event",
+  quran_class:       "📚 Quran Class",
+  youth:             "👥 Youth Program",
+  community_service: "🤝 Community Service",
+  islamic_occasion:  "☪️ Islamic Occasion",
 };
 
-const dateLabel = announcement.publishDate
-  ? new Date(announcement.publishDate).toLocaleDateString("en-US", {
-      weekday: "long", month: "long", day: "numeric", year: "numeric",
-    })
-  : "";
+// Start date always shown; end date only if present
+function formatDateRange(startStr: string, endStr?: string): string {
+  const start = new Date(startStr);
+  const startLabel = start.toLocaleDateString("en-US", {
+    weekday: "long", month: "long", day: "numeric", year: "numeric",
+  });
+  if (!endStr) return startLabel;
+  const end = new Date(endStr);
+  const endLabel = end.toLocaleDateString("en-US", {
+    weekday: "long", month: "long", day: "numeric", year: "numeric",
+  });
+  return `${startLabel} – ${endLabel}`;
+}
 
-// Render portable text blocks as plain HTML
+function formatTime(dateStr: string): string {
+  return new Date(dateStr).toLocaleTimeString("en-US", {
+    hour: "numeric", minute: "2-digit",
+  });
+}
+
+const dateRange = formatDateRange(program.startDate, program.endDate);
+const timeLabel = formatTime(program.startDate);
+
+const thumbUrl = program.image
+  ? urlFor(program.image).width(900).height(500).fit("crop").url()
+  : null;
+const fullUrl = program.image
+  ? urlFor(program.image).width(2000).url()
+  : null;
+
 function renderBody(blocks: any[]): string {
   if (!blocks) return "";
   return blocks.map((block: any) => {
@@ -59,42 +82,62 @@ function renderBody(blocks: any[]): string {
   }).join("");
 }
 
-const bodyHtml = renderBody(announcement.body);
+const bodyHtml = renderBody(program.description);
 ---
 
-<BaseLayout pageTitle={announcement.title}>
+<BaseLayout pageTitle={program.title}>
   <main class="layout-base gap-8 py-10">
 
-    <!-- Back link -->
-    <a href="/announcements" class="text-secondary text-sm hover:underline underline-offset-4">
-      ← Back to Announcements
+    <a href="/programs" class="text-secondary text-sm hover:underline underline-offset-4">
+      ← Back to Programs
     </a>
 
-    <!-- Header -->
-    <div class="border-b border-border pb-6">
-      <div class="flex flex-wrap items-center gap-2 mb-4">
-        {announcement.category && (
-          <span class="text-xs font-medium bg-primary/10 text-primary px-3 py-1 rounded-full">
-            {categoryLabel[announcement.category] ?? announcement.category}
-          </span>
-        )}
-        {announcement.isPinned && (
-          <span class="text-xs font-medium bg-accent/10 text-accent px-3 py-1 rounded-full">
-            📌 Pinned
-          </span>
-        )}
-      </div>
+    {thumbUrl && fullUrl && (
+      <Lightbox id={program._id} src={fullUrl} alt={program.title} thumbnailSrc={thumbUrl} />
+    )}
 
-      <h1 class="text-3xl font-bold uppercase tracking-wider mb-3">
-        {announcement.title}
+    <div class="border-b border-border pb-6">
+      <span class="text-xs font-medium bg-primary/10 text-primary px-3 py-1 rounded-full mb-4 inline-block">
+        {programTypeLabel[program.type] ?? "📅 Program"}
+      </span>
+
+      <h1 class="text-3xl font-bold uppercase tracking-wider mt-3 mb-4">
+        {program.title}
       </h1>
 
-      {dateLabel && (
-        <p class="text-muted-foreground text-sm">{dateLabel}</p>
-      )}
+      <div class="flex flex-col gap-2 text-muted-foreground text-sm">
+        <!-- Date range: start only, or start – end -->
+        <div class="flex items-start gap-2">
+          <span>📅</span>
+          <span>{dateRange}</span>
+        </div>
+        <!-- Time -->
+        <div class="flex items-center gap-2">
+          <span>🕐</span>
+          <span>{timeLabel}</span>
+          {program.isRecurring && program.recurrencePattern && (
+            <span class="text-muted-foreground/60">({program.recurrencePattern})</span>
+          )}
+        </div>
+        {program.location && (
+          <div class="flex items-start gap-2">
+            <span>📍</span>
+            <span>
+              {program.location}
+              {program.locationAddress && (
+                <span class="text-muted-foreground/60"> — {program.locationAddress}</span>
+              )}
+            </span>
+          </div>
+        )}
+        {program.speaker && (
+          <div class="flex items-center gap-2">
+            <span>🎤</span><span>{program.speaker}</span>
+          </div>
+        )}
+      </div>
     </div>
 
-    <!-- Body content -->
     {bodyHtml && (
       <div
         class="prose prose-lg max-w-none dark:prose-invert text-foreground"
@@ -102,12 +145,26 @@ const bodyHtml = renderBody(announcement.body);
       />
     )}
 
-    <!-- Back -->
-    <div class="border-t border-border pt-6">
-      <a href="/announcements" class="text-secondary text-sm hover:underline underline-offset-4">
-        ← Back to Announcements
-      </a>
-    </div>
+    {program.registrationRequired && program.registrationLink && (
+      <div class="bg-secondary/10 border border-secondary/20 rounded-xl p-6">
+        <h2 class="text-lg font-semibold mb-2">Registration Required</h2>
+        <p class="text-muted-foreground text-sm mb-4">
+          Please register in advance to attend this program.
+        </p>
+        <a
+          href={program.registrationLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-block bg-secondary text-secondary-foreground font-semibold px-6 py-3 rounded-lg text-sm hover:bg-secondary/90 transition-colors"
+        >
+          Register Now →
+        </a>
+      </div>
+    )}
+
+    <a href="/programs" class="text-secondary text-sm hover:underline underline-offset-4">
+      ← Back to Programs
+    </a>
 
   </main>
 </BaseLayout>
