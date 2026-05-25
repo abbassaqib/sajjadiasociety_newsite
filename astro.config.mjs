@@ -1,6 +1,6 @@
 // @ts-check
 // deploy adapter
-import netlify from "@astrojs/netlify";
+import vercel from '@astrojs/vercel';
 import react from "@astrojs/react";
 import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
@@ -32,5 +32,5 @@ export default defineConfig({
     }),
     sitemap(),
   ],
-  adapter: netlify(),
+  adapter: vercel(),
 });
