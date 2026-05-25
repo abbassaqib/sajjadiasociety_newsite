@@ -110,7 +110,7 @@ const programTypeLabel: Record<string, string> = {
           style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1;"
           priority
         />
-        <div class="absolute inset-0 bg-dark/30" aria-hidden="true" />
+        <div class="absolute inset-0 bg-dark/90" aria-hidden="true" />
       </>
     )}
 
@@ -121,18 +121,12 @@ const programTypeLabel: Record<string, string> = {
 
       <!-- Tagline -->
       <p class="text-foreground/50 mb-3 text-sm font-medium uppercase tracking-widest">
-  {sanitySettings?.tagline}
-</p>
-<StyledText
-  as="h2"
-  id="hero-heading"
-  variant="displayXL"
-  set:html={hero?.text}
-  className="mb-8"
-/>
-<p class="text-foreground/70 mt-2 mb-6 text-lg">
-  {sanitySettings?.shortDescription}
-</p>
+        {sanitySettings?.tagline}
+      </p>
+      <StyledText as="h2" id="hero-heading" variant="displayXL" set:html={hero?.text} className="mb-8" />
+      <p class="text-foreground/70 mt-2 mb-6 text-lg">
+        {sanitySettings?.shortDescription}
+      </p>
 
       <!-- Buttons -->
       <div class="mb-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
