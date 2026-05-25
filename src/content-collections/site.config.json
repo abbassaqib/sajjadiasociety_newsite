@@ -10,8 +10,8 @@
   },
   "body": {
     "hero": {
-      "text": "<span class='opacity-50'>Serving as a beacon of</span><span class='text-primary'> Islamic conscience</span><span class='opacity-50'> and community service</span>",
-      "bgImage": "src/assets/hero-bg.webp"
+      "text": "<span class='text-foreground/60'>Serving as a beacon of</span><span class='text-primary'> Islamic conscience</span><span class='text-foreground/60'> and community service</span>",
+      "bgImage": "src/assets/hero-bg.jpg"
     },
     "cta": {
       "text": "Join us for Jummah Prayer every Friday",
