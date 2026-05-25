@@ -1,0 +1,82 @@
+---
+// Lightbox component — renders overlay + handles open/close
+// Usage: <Lightbox id="unique-id" src="image-url" alt="description" />
+interface Props {
+  id: string;
+  src: string;
+  alt: string;
+  thumbnailSrc?: string; // optional smaller thumbnail URL
+}
+const { id, src, alt, thumbnailSrc } = Astro.props;
+---
+
+<!-- Thumbnail trigger -->
+<button
+  onclick={`document.getElementById('lightbox-${id}').showModal()`}
+  class="group relative overflow-hidden rounded-xl border border-border hover:border-secondary transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+  aria-label={`View full image: ${alt}`}
+>
+  <img
+    src={thumbnailSrc ?? src}
+    alt={alt}
+    class="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
+    loading="lazy"
+  />
+  <!-- Overlay hint -->
+  <div class="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
+    <span class="opacity-0 group-hover:opacity-100 transition-opacity text-white text-sm font-medium bg-black/60 px-3 py-1 rounded-full">
+      🔍 View full
+    </span>
+  </div>
+</button>
+
+<!-- Dialog lightbox -->
+<dialog
+  id={`lightbox-${id}`}
+  class="fixed inset-0 z-50 bg-transparent p-4 max-w-none max-h-none w-full h-full backdrop:bg-black/80"
+  onclick="this.close()"
+>
+  <div class="flex items-center justify-center w-full h-full">
+    <div
+      class="relative max-w-5xl max-h-[90vh] w-full"
+      onclick="event.stopPropagation()"
+    >
+      <!-- Close button -->
+      <button
+        onclick={`document.getElementById('lightbox-${id}').close()`}
+        class="absolute -top-10 right-0 text-white/80 hover:text-white text-sm font-medium flex items-center gap-1 focus:outline-none"
+        aria-label="Close image"
+      >
+        ✕ Close
+      </button>
+
+      <!-- Full image -->
+      <img
+        src={src}
+        alt={alt}
+        class="w-full max-h-[85vh] object-contain rounded-xl shadow-2xl"
+      />
+
+      <!-- Caption -->
+      {alt && (
+        <p class="text-white/70 text-sm text-center mt-3">{alt}</p>
+      )}
+    </div>
+  </div>
+</dialog>
+
+<style>
+  dialog {
+    border: none;
+    outline: none;
+    background: transparent;
+  }
+  dialog::backdrop {
+    background: rgba(0, 0, 0, 0.85);
+  }
+  dialog[open] {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+</style>

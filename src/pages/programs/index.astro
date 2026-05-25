@@ -1,0 +1,230 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import Lightbox from "@/components/Lightbox.astro";
+import { getUpcomingPrograms, getPastPrograms } from "@/data/sanityQueries";
+import { urlFor } from "@/lib/sanity";
+import { cn } from "@/lib/utils";
+
+const [upcoming, past] = await Promise.all([
+  getUpcomingPrograms(20),
+  getPastPrograms(20),
+]);
+
+const programTypeLabel: Record<string, string> = {
+  jummah:            "🕌 Jummah Prayer",
+  lecture:           "📖 Islamic Lecture",
+  special_event:     "⭐ Special Event",
+  quran_class:       "📚 Quran Class",
+  youth:             "👥 Youth Program",
+  community_service: "🤝 Community Service",
+  islamic_occasion:  "☪️ Islamic Occasion",
+};
+
+const programTypeBadge: Record<string, string> = {
+  jummah:            "bg-primary/10 text-primary",
+  lecture:           "bg-secondary/10 text-secondary",
+  special_event:     "bg-accent/10 text-accent",
+  quran_class:       "bg-primary/10 text-primary",
+  youth:             "bg-secondary/10 text-secondary",
+  community_service: "bg-muted text-muted-foreground",
+  islamic_occasion:  "bg-accent/10 text-accent",
+};
+
+function formatDate(dateStr: string) {
+  const d = new Date(dateStr);
+  return d.toLocaleDateString("en-US", {
+    weekday: "long", month: "long", day: "numeric", year: "numeric",
+  });
+}
+
+function formatTime(dateStr: string) {
+  const d = new Date(dateStr);
+  return d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+}
+---
+
+<BaseLayout pageTitle="Programs & Events">
+  <main class="layout-base gap-10 py-10">
+
+    <!-- Page header -->
+    <div class="border-b border-border pb-6">
+      <h1 class="text-3xl font-bold uppercase tracking-wider mb-2">
+        Programs & Events
+      </h1>
+      <p class="text-muted-foreground">
+        Join us for our regular programs, Jummah prayers, and special events.
+      </p>
+    </div>
+
+    <!-- Upcoming programs -->
+    <section>
+      <h2 class="text-xl font-semibold uppercase tracking-wider mb-6 text-primary">
+        Upcoming Programs
+      </h2>
+
+      {upcoming && upcoming.length > 0 ? (
+        <div class="flex flex-col gap-6">
+          {upcoming.map((program: any) => {
+            const thumbUrl = program.image
+              ? urlFor(program.image).width(600).height(400).fit("crop").url()
+              : null;
+            const fullUrl = program.image
+              ? urlFor(program.image).width(1600).url()
+              : null;
+
+            return (
+              <div class="bg-card border border-border rounded-xl overflow-hidden hover:border-secondary transition-colors">
+                <div class="flex flex-col sm:flex-row">
+
+                  <!-- Image thumbnail (if exists) -->
+                  {thumbUrl && fullUrl && (
+                    <div class="sm:w-64 flex-shrink-0">
+                      <Lightbox
+                        id={program._id}
+                        src={fullUrl}
+                        alt={program.title}
+                        thumbnailSrc={thumbUrl}
+                      />
+                    </div>
+                  )}
+
+                  <!-- Content -->
+                  <div class="flex flex-col gap-3 p-6 flex-1 min-w-0">
+                    <!-- Date badge + type badge -->
+                    <div class="flex flex-wrap items-center gap-2">
+                      <div class="bg-primary text-primary-foreground rounded-lg px-3 py-1 text-center">
+                        <span class="text-xs font-medium uppercase tracking-wider opacity-80">
+                          {new Date(program.startDate).toLocaleDateString("en-US", { month: "short" })}
+                        </span>
+                        <span class="text-xl font-bold ml-1">
+                          {new Date(program.startDate).getDate()}
+                        </span>
+                      </div>
+                      <span class={cn(
+                        "text-xs font-medium px-2 py-0.5 rounded-full",
+                        programTypeBadge[program.type] ?? "bg-muted text-muted-foreground"
+                      )}>
+                        {programTypeLabel[program.type] ?? "📅 Program"}
+                      </span>
+                      {program.isRecurring && (
+                        <span class="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
+                          🔁 Recurring
+                        </span>
+                      )}
+                    </div>
+
+                    <!-- Title -->
+                    <a
+                      href={`/programs/${program.slug?.current}`}
+                      class="text-lg font-semibold hover:text-secondary transition-colors"
+                    >
+                      {program.title}
+                    </a>
+
+                    <!-- Meta -->
+                    <div class="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
+                      <span>🕐 {formatTime(program.startDate)}</span>
+                      {program.location && <span>📍 {program.location}</span>}
+                      {program.speaker && <span>🎤 {program.speaker}</span>}
+                      {program.isRecurring && program.recurrencePattern && (
+                        <span>🔁 {program.recurrencePattern}</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div class="bg-muted rounded-xl p-10 text-center">
+          <p class="text-muted-foreground text-lg mb-2">No upcoming programs scheduled</p>
+          <p class="text-muted-foreground text-sm">
+            Check back soon or follow us on{" "}
+            <a
+              href="https://www.facebook.com/sajjadiaislamicsociety"
+              class="text-secondary hover:underline"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Facebook
+            </a>{" "}
+            for updates.
+          </p>
+        </div>
+      )}
+    </section>
+
+    <!-- Jummah info box -->
+    <section class="bg-primary text-primary-foreground rounded-2xl p-8">
+      <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 class="text-xl font-semibold mb-1">🕌 Jummah Prayer</h2>
+          <p class="text-primary-foreground/80 text-sm">
+            Every Friday · Azaan 12:00 PM · Khutba 12:05 PM
+          </p>
+          <p class="text-primary-foreground/60 text-sm mt-1">
+            Location varies — check announcements for current venue
+          </p>
+        </div>
+        <a
+          href="/announcements"
+          class="mt-4 sm:mt-0 inline-block bg-primary-foreground text-primary font-semibold px-6 py-3 rounded-lg text-sm hover:bg-primary-foreground/90 transition-colors whitespace-nowrap"
+        >
+          View Announcements →
+        </a>
+      </div>
+    </section>
+
+    <!-- Past programs -->
+    {past && past.length > 0 && (
+      <section>
+        <h2 class="text-xl font-semibold uppercase tracking-wider mb-6 text-muted-foreground">
+          Past Programs
+        </h2>
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {past.map((program: any) => {
+            const thumbUrl = program.image
+              ? urlFor(program.image).width(400).height(260).fit("crop").url()
+              : null;
+            const fullUrl = program.image
+              ? urlFor(program.image).width(1600).url()
+              : null;
+
+            return (
+              <div class="bg-card border border-border rounded-xl overflow-hidden hover:border-secondary transition-colors group">
+                {thumbUrl && fullUrl && (
+                  <Lightbox
+                    id={`past-${program._id}`}
+                    src={fullUrl}
+                    alt={program.title}
+                    thumbnailSrc={thumbUrl}
+                  />
+                )}
+                <div class="p-5">
+                  <span class={cn(
+                    "text-xs font-medium px-2 py-0.5 rounded-full mb-3 inline-block",
+                    programTypeBadge[program.type] ?? "bg-muted text-muted-foreground"
+                  )}>
+                    {programTypeLabel[program.type] ?? "📅 Program"}
+                  </span>
+                  <a
+                    href={`/programs/${program.slug?.current}`}
+                    class="block font-semibold group-hover:text-secondary transition-colors mb-2"
+                  >
+                    {program.title}
+                  </a>
+                  <p class="text-muted-foreground text-sm">{formatDate(program.startDate)}</p>
+                  {program.speaker && (
+                    <p class="text-muted-foreground text-sm mt-1 italic">{program.speaker}</p>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+    )}
+
+  </main>
+</BaseLayout>

@@ -1,0 +1,134 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import Lightbox from "@/components/Lightbox.astro";
+import { getAnnouncements } from "@/data/sanityQueries";
+import { urlFor } from "@/lib/sanity";
+
+const announcements = await getAnnouncements(50);
+
+const categoryLabel: Record<string, string> = {
+  general:          "General",
+  jummah:           "🕌 Jummah",
+  program:          "📅 Program",
+  campaign:         "💰 Campaign",
+  community:        "🤝 Community",
+  islamic_occasion: "☪️ Islamic Occasion",
+};
+
+const categoryBadge: Record<string, string> = {
+  general:          "bg-muted text-muted-foreground",
+  jummah:           "bg-primary/10 text-primary",
+  program:          "bg-secondary/10 text-secondary",
+  campaign:         "bg-accent/10 text-accent",
+  community:        "bg-primary/10 text-primary",
+  islamic_occasion: "bg-accent/10 text-accent",
+};
+---
+
+<BaseLayout pageTitle="Announcements">
+  <main class="layout-base gap-10 py-10">
+
+    <!-- Page header -->
+    <div class="border-b border-border pb-6">
+      <h1 class="text-3xl font-bold uppercase tracking-wider mb-2">
+        Announcements
+      </h1>
+      <p class="text-muted-foreground">
+        Latest news and updates from Sajjadia Islamic Society.
+      </p>
+    </div>
+
+    <!-- Announcements list -->
+    {announcements && announcements.length > 0 ? (
+      <div class="flex flex-col gap-4">
+        {announcements.map((item: any) => {
+          const isExpired = item.expiryDate
+            ? new Date(item.expiryDate) < new Date()
+            : false;
+          if (isExpired) return null;
+
+          const thumbUrl = item.image
+            ? urlFor(item.image).width(300).height(300).fit("crop").url()
+            : null;
+          const fullUrl = item.image
+            ? urlFor(item.image).width(1600).url()
+            : null;
+
+          const date = item.publishDate
+            ? new Date(item.publishDate).toLocaleDateString("en-US", {
+                weekday: "long", month: "long", day: "numeric", year: "numeric",
+              })
+            : "";
+
+          return (
+            <div class="bg-card border border-border rounded-xl overflow-hidden hover:border-secondary transition-colors group flex flex-col sm:flex-row">
+
+              <!-- Image thumbnail (if exists) -->
+              {thumbUrl && fullUrl && (
+                <div class="sm:w-48 flex-shrink-0">
+                  <Lightbox
+                    id={item._id}
+                    src={fullUrl}
+                    alt={item.title}
+                    thumbnailSrc={thumbUrl}
+                  />
+                </div>
+              )}
+
+              <!-- Content -->
+              <div class="flex flex-1 min-w-0 p-6 flex-col gap-2">
+                <!-- Badges -->
+                <div class="flex flex-wrap items-center gap-2">
+                  {item.category && (
+                    <span class={`text-xs font-medium px-2 py-0.5 rounded-full ${categoryBadge[item.category] ?? "bg-muted text-muted-foreground"}`}>
+                      {categoryLabel[item.category] ?? item.category}
+                    </span>
+                  )}
+                  {item.isPinned && (
+                    <span class="text-xs bg-accent/10 text-accent px-2 py-0.5 rounded-full font-medium">
+                      📌 Pinned
+                    </span>
+                  )}
+                </div>
+
+                <!-- Title -->
+                <a
+                  href={`/announcements/${item.slug?.current}`}
+                  class="text-lg font-semibold group-hover:text-secondary transition-colors"
+                >
+                  {item.title}
+                </a>
+
+                {date && (
+                  <p class="text-muted-foreground text-sm">{date}</p>
+                )}
+              </div>
+
+              <!-- Arrow -->
+              <div class="hidden sm:flex items-center pr-6 text-muted-foreground group-hover:text-secondary transition-colors">
+                →
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    ) : (
+      <div class="bg-muted rounded-xl p-12 text-center">
+        <p class="text-muted-foreground text-lg mb-2">No announcements yet</p>
+        <p class="text-muted-foreground text-sm">
+          Follow us on{" "}
+          <a
+            href="https://www.facebook.com/sajjadiaislamicsociety"
+            class="text-secondary hover:underline"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Facebook
+          </a>{" "}
+          for the latest updates.
+        </p>
+      </div>
+    )}
+
+  </main>
+</BaseLayout>

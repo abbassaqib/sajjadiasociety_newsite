@@ -1,0 +1,128 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { sanityClient } from "@/lib/sanity";
+import { PortableText } from "@portabletext/react";
+
+export async function getStaticPaths() {
+  const programs = await sanityClient.fetch(`
+    *[_type == "program" && isPublished == true] {
+      "slug": slug.current
+    }
+  `);
+  return programs.map((p: any) => ({
+    params: { slug: p.slug },
+  }));
+}
+
+const { slug } = Astro.params;
+
+const program = await sanityClient.fetch(`
+  *[_type == "program" && slug.current == $slug && isPublished == true][0] {
+    title, type, isRecurring, recurrencePattern,
+    startDate, endDate, location, locationAddress,
+    speaker, description, registrationRequired, registrationLink
+  }
+`, { slug });
+
+if (!program) return Astro.redirect("/programs");
+
+const programTypeLabel: Record<string, string> = {
+  jummah:            "🕌 Jummah Prayer",
+  lecture:           "📖 Islamic Lecture",
+  special_event:     "⭐ Special Event",
+  quran_class:       "📚 Quran Class",
+  youth:             "👥 Youth Program",
+  community_service: "🤝 Community Service",
+  islamic_occasion:  "☪️ Islamic Occasion",
+};
+
+const dateLabel = new Date(program.startDate).toLocaleDateString("en-US", {
+  weekday: "long", month: "long", day: "numeric", year: "numeric",
+});
+const timeLabel = new Date(program.startDate).toLocaleTimeString("en-US", {
+  hour: "numeric", minute: "2-digit",
+});
+---
+
+<BaseLayout pageTitle={program.title}>
+  <main class="layout-base gap-8 py-10">
+
+    <!-- Back link -->
+    <a href="/programs" class="text-secondary text-sm hover:underline underline-offset-4">
+      ← Back to Programs
+    </a>
+
+    <!-- Header -->
+    <div class="border-b border-border pb-6">
+      <span class="text-xs font-medium bg-primary/10 text-primary px-3 py-1 rounded-full mb-4 inline-block">
+        {programTypeLabel[program.type] ?? "📅 Program"}
+      </span>
+      <h1 class="text-3xl font-bold uppercase tracking-wider mt-3 mb-4">
+        {program.title}
+      </h1>
+
+      <!-- Meta details -->
+      <div class="flex flex-col gap-2 text-muted-foreground text-sm">
+        <div class="flex items-center gap-2">
+          <span>📅</span>
+          <span>{dateLabel}</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span>🕐</span>
+          <span>{timeLabel}</span>
+          {program.isRecurring && program.recurrencePattern && (
+            <span class="text-muted-foreground/60">({program.recurrencePattern})</span>
+          )}
+        </div>
+        {program.location && (
+          <div class="flex items-center gap-2">
+            <span>📍</span>
+            <span>
+              {program.location}
+              {program.locationAddress && (
+                <span class="text-muted-foreground/60"> — {program.locationAddress}</span>
+              )}
+            </span>
+          </div>
+        )}
+        {program.speaker && (
+          <div class="flex items-center gap-2">
+            <span>🎤</span>
+            <span>{program.speaker}</span>
+          </div>
+        )}
+      </div>
+    </div>
+
+    <!-- Description -->
+    {program.description && (
+      <div class="prose prose-lg max-w-none dark:prose-invert">
+        <PortableText value={program.description} />
+      </div>
+    )}
+
+    <!-- Registration -->
+    {program.registrationRequired && program.registrationLink && (
+      <div class="bg-secondary/10 border border-secondary/20 rounded-xl p-6">
+        <h2 class="text-lg font-semibold mb-2">Registration Required</h2>
+        <p class="text-muted-foreground text-sm mb-4">
+          Please register in advance to attend this program.
+        </p>
+        <a
+          href={program.registrationLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-block bg-secondary text-secondary-foreground font-semibold px-6 py-3 rounded-lg text-sm hover:bg-secondary/90 transition-colors"
+        >
+          Register Now →
+        </a>
+      </div>
+    )}
+
+    <!-- Back -->
+    <a href="/programs" class="text-secondary text-sm hover:underline underline-offset-4">
+      ← Back to Programs
+    </a>
+
+  </main>
+</BaseLayout>
