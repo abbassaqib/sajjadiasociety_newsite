@@ -15,8 +15,8 @@ const SITE_URL =
 export default defineConfig({
   site: SITE_URL ?? "http://localhost:4321",
   redirects: {
-    '/programs/announcements': '/announcements',
-    '/programs/events': '/programs'
+    '/community/announcements': '/announcements',
+    '/community/events': '/programs'
   },
   vite: {
     plugins: [tailwindcss()],
