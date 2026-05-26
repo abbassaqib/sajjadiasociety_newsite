@@ -1,0 +1,250 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import Lightbox from "@/components/Lightbox.astro";
+import { getCampaign } from "@/data/sanityQueries";
+import { urlFor } from "@/lib/sanity";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
+const campaign = await getCampaign();
+
+if (!campaign) return Astro.redirect("/");
+
+const raised = campaign.raisedAmount ?? 0;
+const goal = campaign.goalAmount ?? 60000;
+const pct = Math.min(Math.round((raised / goal) * 100), 100);
+const remaining = goal - raised;
+
+function renderBody(blocks: any[]): string {
+  if (!blocks) return "";
+  return blocks.map((block: any) => {
+    if (block._type === "image") {
+      const imgUrl = urlFor(block).width(900).url();
+      return `<img src="${imgUrl}" alt="" class="rounded-xl my-6 w-full" loading="lazy" />`;
+    }
+    if (block._type !== "block") return "";
+    const text = block.children
+      ?.map((child: any) => {
+        let t = child.text ?? "";
+        if (child.marks?.includes("strong")) t = `<strong>${t}</strong>`;
+        if (child.marks?.includes("em")) t = `<em>${t}</em>`;
+        return t;
+      })
+      .join("") ?? "";
+    if (!text.trim()) return "";
+    if (block.style === "h3") return `<h3 class="text-2xl font-semibold mt-8 mb-3">${text}</h3>`;
+    if (block.style === "h4") return `<h4 class="text-xl font-semibold mt-6 mb-2">${text}</h4>`;
+    return `<p class="mb-5 leading-relaxed text-lg">${text}</p>`;
+  }).join("");
+}
+
+function getYoutubeId(url: string): string | null {
+  const match = url.match(
+    /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
+  );
+  return match ? match[1] : null;
+}
+
+const bodyHtml = renderBody(campaign.story ?? []);
+---
+
+<BaseLayout pageTitle="Donate — New Location Fund">
+  <main>
+
+    <!-- ── HERO SECTION ── -->
+    <section class="bg-sidebar text-sidebar-foreground py-16">
+      <div class="layout-base text-center">
+        <p class="text-accent mb-3 text-sm font-semibold uppercase tracking-widest">
+          Fundraising Campaign
+        </p>
+        <h1 class="mb-3 text-4xl font-bold uppercase tracking-wider sm:text-5xl">
+          {campaign.title}
+        </h1>
+        <p class="text-sidebar-foreground/70 mb-10 text-xl">
+          {campaign.tagline}
+        </p>
+
+        <!-- Progress bar -->
+        <div class="mx-auto max-w-2xl">
+          <div class="bg-sidebar-foreground/10 mb-4 h-4 w-full overflow-hidden rounded-full">
+            <div
+              class="bg-accent h-4 rounded-full transition-all duration-700"
+              style={`width: ${pct}%`}
+              role="progressbar"
+              aria-valuenow={pct}
+              aria-valuemin={0}
+              aria-valuemax={100}
+            />
+          </div>
+          <div class="text-sidebar-foreground/70 mb-2 flex justify-between text-sm">
+            <span>
+              <span class="text-sidebar-foreground text-2xl font-bold">
+                ${raised.toLocaleString()}
+              </span>
+              <span class="ml-1">raised</span>
+            </span>
+            <span class="text-right">
+              <span class="text-sidebar-foreground text-2xl font-bold">{pct}%</span>
+              <span class="ml-1">of ${goal.toLocaleString()} goal</span>
+            </span>
+          </div>
+          <p class="text-sidebar-foreground/50 mb-8 text-sm">
+            ${remaining.toLocaleString()} still needed
+          </p>
+
+          <!-- Milestones -->
+          {campaign.milestones?.length > 0 && (
+            <div class="mb-10 flex flex-wrap justify-center gap-3">
+              {campaign.milestones.map((m: any) => (
+                <div class={cn(
+                  "rounded-full px-4 py-1.5 text-sm font-medium",
+                  m.reached
+                    ? "bg-accent text-accent-foreground"
+                    : "bg-sidebar-foreground/10 text-sidebar-foreground/50"
+                )}>
+                  {m.reached ? "✅" : "⬜"} ${m.amount?.toLocaleString()} — {m.label}
+                </div>
+              ))}
+            </div>
+          )}
+
+          <!-- Donate button -->
+          {campaign.donorboxLink && (
+            <a
+              href={campaign.donorboxLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              class={cn(
+                buttonVariants({ variant: "default" }),
+                "bg-accent text-accent-foreground hover:bg-accent/90 px-10 py-4 text-lg font-bold"
+              )}
+            >
+              💛 Donate Now
+            </a>
+          )}
+        </div>
+      </div>
+    </section>
+
+    <!-- ── STORY SECTION ── -->
+    {bodyHtml && (
+      <section class="layout-full bg-background py-16">
+        <div class="layout-base">
+          <h2 class="text-3xl font-bold uppercase tracking-wider mb-10 text-primary">
+            Our Story
+          </h2>
+          <div
+            class="prose prose-lg max-w-none dark:prose-invert text-foreground"
+            set:html={bodyHtml}
+          />
+        </div>
+      </section>
+    )}
+
+    <!-- ── IMAGES SECTION ── -->
+    {campaign.images?.length > 0 && (
+      <section class="layout-full bg-muted py-16">
+        <div class="layout-base">
+          <h2 class="text-3xl font-bold uppercase tracking-wider mb-10 text-primary">
+            Our Community
+          </h2>
+          <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {campaign.images.map((item: any, i: number) => {
+              if (!item.image) return null;
+              const thumbUrl = urlFor(item.image).width(600).height(400).fit("crop").url();
+              const fullUrl = urlFor(item.image).width(1800).url();
+              return (
+                <div class="flex flex-col gap-2">
+                  <Lightbox
+                    id={`campaign-img-${i}`}
+                    src={fullUrl}
+                    alt={item.caption ?? "Sajjadia Islamic Society"}
+                    thumbnailSrc={thumbUrl}
+                  />
+                  {item.caption && (
+                    <p class="text-muted-foreground text-sm text-center px-1">
+                      {item.caption}
+                    </p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+    )}
+
+    <!-- ── VIDEOS SECTION ── -->
+    {campaign.videos?.length > 0 && (
+      <section class="layout-full bg-background py-16">
+        <div class="layout-base">
+          <h2 class="text-3xl font-bold uppercase tracking-wider mb-10 text-primary">
+            Watch & Learn
+          </h2>
+          <div class="grid gap-8 sm:grid-cols-2">
+            {campaign.videos.map((video: any) => {
+              const ytId = getYoutubeId(video.url ?? "");
+              if (!ytId) return null;
+              return (
+                <div class="flex flex-col gap-3">
+                  <div class="relative w-full overflow-hidden rounded-xl" style="padding-bottom: 56.25%;">
+                    <iframe
+                      src={`https://www.youtube.com/embed/${ytId}`}
+                      title={video.title ?? "Campaign video"}
+                      class="absolute inset-0 h-full w-full"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowfullscreen
+                      loading="lazy"
+                    />
+                  </div>
+                  {video.title && (
+                    <p class="font-semibold">{video.title}</p>
+                  )}
+                  {video.description && (
+                    <p class="text-muted-foreground text-sm">{video.description}</p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+    )}
+
+    <!-- ── BOTTOM CTA ── -->
+    <section class="layout-full bg-sidebar py-16">
+      <div class="layout-base text-center">
+        <h2 class="text-sidebar-foreground mb-4 text-3xl font-bold uppercase tracking-wider">
+          Be Part of Something Lasting
+        </h2>
+        <p class="text-sidebar-foreground/70 mb-4 text-lg max-w-xl mx-auto">
+          Every contribution — large or small — brings us closer to a permanent home
+          for the Sajjadia Islamic Society community.
+        </p>
+        {campaign.thankYouMessage && (
+          <p class="text-sidebar-foreground/50 mb-8 text-sm max-w-xl mx-auto italic">
+            "{campaign.thankYouMessage}"
+          </p>
+        )}
+        {campaign.donorboxLink && (
+          <a
+            href={campaign.donorboxLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            class={cn(
+              buttonVariants({ variant: "default" }),
+              "bg-accent text-accent-foreground hover:bg-accent/90 px-10 py-4 text-lg font-bold"
+            )}
+          >
+            💛 {campaign.callToAction ?? "Donate Now"}
+          </a>
+        )}
+        <p class="text-sidebar-foreground/40 mt-6 text-xs">
+          Sajjadia Islamic Society is a registered 501(c)(3) nonprofit.
+          All donations are tax-deductible.
+        </p>
+      </div>
+    </section>
+
+  </main>
+</BaseLayout>

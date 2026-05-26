@@ -44,7 +44,16 @@ export async function getCampaign() {
       story,
       milestones,
       callToAction,
-      thankYouMessage
+      thankYouMessage,
+      images[] {
+        image,
+        caption
+      },
+      videos[] {
+        url,
+        title,
+        description
+      }
     }
   `)
 }

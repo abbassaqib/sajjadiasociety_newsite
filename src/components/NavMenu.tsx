@@ -43,7 +43,11 @@ const NavMenu: React.FC<React.ComponentProps<"nav"> & { menu: MenuItem[] }> = ({
           <a
             key={label}
             href={`/${path}`}
-            className="hover:bg-accent hover:text-accent-foreground rounded-md px-3 py-2 text-sm font-medium tracking-widest text-nowrap uppercase xl:text-base"
+            className={`rounded-md px-3 py-2 text-sm font-medium tracking-widest text-nowrap uppercase xl:text-base ${
+              label === "Donate"
+                ? "bg-accent text-accent-foreground hover:bg-accent/90"
+                : "hover:bg-accent hover:text-accent-foreground"
+            }`}
           >
             {label}
           </a>
