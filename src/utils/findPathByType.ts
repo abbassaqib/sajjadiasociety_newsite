@@ -3,7 +3,7 @@ import { menu } from "@/utils/getMenuItems";
 
 const findPathByType = (
   menuItems: MenuItem[],
-  targetType: "blog" | "events" | "sermons",
+  targetType: "events" | "sermons",
 ): DynamicPath | undefined => {
   const results: DynamicPath[] = [];
 
@@ -35,7 +35,6 @@ const findPathByType = (
 };
 
 export const paths = {
-  blog: findPathByType(menu, "blog"),
   events: findPathByType(menu, "events"),
   sermons: findPathByType(menu, "sermons"),
 };

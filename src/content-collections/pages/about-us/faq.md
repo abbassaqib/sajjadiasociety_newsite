@@ -1,4 +1,4 @@
 ---
-title: Index
+title: FAQ
 order: 2
 ---
