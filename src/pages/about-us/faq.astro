@@ -1,0 +1,132 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { getFAQ } from "@/data/sanityQueries";
+
+const faqs = await getFAQ();
+
+const categoryLabel: Record<string, string> = {
+  about:     "About Sajjadia",
+  location:  "Location & Programs",
+  donations: "Donations & Campaign",
+  islamic:   "Islamic Information",
+  situation: "Current Situation",
+  future:    "Future Plans",
+};
+
+const categoryEmoji: Record<string, string> = {
+  about:     "🏛",
+  location:  "📍",
+  donations: "💰",
+  islamic:   "☪️",
+  situation: "📋",
+  future:    "🔮",
+};
+
+function renderAnswer(blocks: any[]): string {
+  if (!blocks) return "";
+  return blocks.map((block: any) => {
+    if (block._type !== "block") return "";
+    const text = block.children
+      ?.map((child: any) => {
+        let t = child.text ?? "";
+        if (child.marks?.includes("strong")) t = `<strong>${t}</strong>`;
+        if (child.marks?.includes("em")) t = `<em>${t}</em>`;
+        return t;
+      })
+      .join("") ?? "";
+    if (!text.trim()) return "";
+    return `<p class="mb-2 last:mb-0 leading-relaxed">${text}</p>`;
+  }).join("");
+}
+
+const grouped = faqs?.reduce((acc: any, faq: any) => {
+  const cat = faq.category ?? "about";
+  if (!acc[cat]) acc[cat] = [];
+  acc[cat].push(faq);
+  return acc;
+}, {}) ?? {};
+
+const categoryOrder = ["about", "situation", "location", "donations", "future", "islamic"];
+const sortedCategories = categoryOrder.filter(c => grouped[c]?.length > 0);
+---
+
+<BaseLayout pageTitle="FAQ">
+  <main class="layout-base gap-10 py-10">
+
+    <a href="/about-us" class="text-secondary text-sm hover:underline underline-offset-4">
+      ← Back to About Us
+    </a>
+
+    <div class="border-b border-border pb-6">
+      <h1 class="text-3xl font-bold uppercase tracking-wider mb-2">
+        Frequently Asked Questions
+      </h1>
+      <p class="text-muted-foreground">
+        Common questions about Sajjadia Islamic Society, our programs, and our future plans.
+      </p>
+    </div>
+
+    {faqs && faqs.length > 0 ? (
+      <div class="flex flex-col gap-12">
+        {sortedCategories.map((cat) => (
+          <section>
+            <h2 class="text-lg font-semibold uppercase tracking-wider mb-6 flex items-center gap-2 text-primary">
+              <span>{categoryEmoji[cat] ?? "📌"}</span>
+              <span>{categoryLabel[cat] ?? cat}</span>
+            </h2>
+            <div class="flex flex-col gap-3">
+              {grouped[cat].map((faq: any, i: number) => (
+                <details
+                  class="bg-card border border-border rounded-xl overflow-hidden group"
+                >
+                  <summary class="flex items-center justify-between p-6 cursor-pointer list-none hover:bg-muted/50 transition-colors">
+                    <span class="font-medium pr-4">{faq.question}</span>
+                    <span class="text-muted-foreground flex-shrink-0 text-lg transition-transform group-open:rotate-45">
+                      +
+                    </span>
+                  </summary>
+                  <div class="px-6 pb-6 border-t border-border pt-4">
+                    <div
+                      class="text-muted-foreground"
+                      set:html={renderAnswer(faq.answer)}
+                    />
+                  </div>
+                </details>
+              ))}
+            </div>
+          </section>
+        ))}
+      </div>
+    ) : (
+      <div class="bg-muted rounded-xl p-12 text-center">
+        <p class="text-muted-foreground text-lg mb-2">No FAQ entries yet</p>
+        <p class="text-muted-foreground text-sm">
+          Have a question? Email us at{" "}
+          <a href="mailto:info@sajjadiaislamicsociety.org" class="text-secondary hover:underline">
+            info@sajjadiaislamicsociety.org
+          </a>
+        </p>
+      </div>
+    )}
+
+    <div class="bg-muted rounded-xl p-6 text-center">
+      <p class="text-foreground font-medium mb-2">Still have questions?</p>
+      <p class="text-muted-foreground text-sm mb-4">
+        We're happy to help. Reach out to us directly.
+      </p>
+      <a
+        href="mailto:info@sajjadiaislamicsociety.org"
+        class="inline-block bg-primary text-primary-foreground font-semibold px-6 py-3 rounded-lg text-sm hover:bg-primary/90 transition-colors"
+      >
+        Contact Us
+      </a>
+    </div>
+
+    <div class="border-t border-border pt-6">
+      <a href="/about-us" class="text-secondary text-sm hover:underline underline-offset-4">
+        ← Back to About Us
+      </a>
+    </div>
+
+  </main>
+</BaseLayout>

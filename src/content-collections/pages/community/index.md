@@ -1,4 +1,4 @@
 ---
 title: Community Updates
-order: 2
+order: 1
 ---

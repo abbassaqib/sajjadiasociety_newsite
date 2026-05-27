@@ -1,4 +1,4 @@
 ---
-title: About Us
+title: Who We Are
 order: 1
 ---

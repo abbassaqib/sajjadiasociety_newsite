@@ -1,0 +1,77 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { getOrgInfo } from "@/data/sanityQueries";
+
+const org = await getOrgInfo();
+---
+
+<BaseLayout pageTitle="About Us">
+  <main class="layout-base gap-10 py-10">
+
+    <div class="border-b border-border pb-6">
+      <h1 class="text-3xl font-bold uppercase tracking-wider mb-2">About Us</h1>
+      <p class="text-muted-foreground">
+        Learn about Sajjadia Islamic Society — who we are, what we believe, and where we're headed.
+      </p>
+    </div>
+
+    <div class="grid gap-6 sm:grid-cols-2">
+      <a
+        href="/about-us/mission"
+        class="bg-card border border-border rounded-xl p-8 hover:border-secondary transition-colors group"
+      >
+        <div class="text-4xl mb-4">🕌</div>
+        <h2 class="text-xl font-semibold group-hover:text-secondary transition-colors mb-3">
+          Our Mission & Vision
+        </h2>
+        <p class="text-muted-foreground text-sm leading-relaxed">
+          Understand the values, mission, and vision that guide Sajjadia Islamic Society and our community.
+        </p>
+        <p class="text-secondary text-sm font-medium mt-4">Read more →</p>
+      </a>
+
+      <a
+        href="/about-us/faq"
+        class="bg-card border border-border rounded-xl p-8 hover:border-secondary transition-colors group"
+      >
+        <div class="text-4xl mb-4">❓</div>
+        <h2 class="text-xl font-semibold group-hover:text-secondary transition-colors mb-3">
+          Frequently Asked Questions
+        </h2>
+        <p class="text-muted-foreground text-sm leading-relaxed">
+          Answers to common questions about our organization, current situation, location, and future plans.
+        </p>
+        <p class="text-secondary text-sm font-medium mt-4">View FAQ →</p>
+      </a>
+    </div>
+
+    {org?.currentSituation && (
+      <section class="bg-primary text-primary-foreground rounded-2xl p-8">
+        <h2 class="text-xl font-semibold mb-4">Our Current Situation</h2>
+        <p class="text-primary-foreground/80 leading-relaxed">{org.currentSituation}</p>
+        <a
+          href="/donate"
+          class="inline-block mt-6 bg-accent text-accent-foreground font-semibold px-6 py-3 rounded-lg text-sm hover:bg-accent/90 transition-colors"
+        >
+          💛 Support Our New Location Fund
+        </a>
+      </section>
+    )}
+
+    <section class="grid gap-4 sm:grid-cols-3 text-center">
+      <div class="bg-card border border-border rounded-xl p-6">
+        <p class="text-4xl font-bold text-primary mb-1">2019</p>
+        <p class="text-muted-foreground text-sm">Founded</p>
+      </div>
+      <div class="bg-card border border-border rounded-xl p-6">
+        <p class="text-4xl font-bold text-primary mb-1">501c3</p>
+        <p class="text-muted-foreground text-sm">Registered Nonprofit</p>
+      </div>
+      <div class="bg-card border border-border rounded-xl p-6">
+        <p class="text-4xl font-bold text-primary mb-1">☽</p>
+        <p class="text-muted-foreground text-sm">Shia Ithna Ashari</p>
+      </div>
+    </section>
+
+  </main>
+</BaseLayout>
