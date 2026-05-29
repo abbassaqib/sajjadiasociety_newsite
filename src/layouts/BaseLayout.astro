@@ -63,6 +63,18 @@ const metaDescription =
         min-height: calc(100vh - 6.5rem);
       }
     </style>
+
+    <script is:inline>
+      const getThemePreference = () => {
+        if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
+          return localStorage.getItem('theme');
+        }
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      };
+    
+      const isDark = getThemePreference() === 'dark';
+      document.documentElement.classList.toggle('dark', isDark);
+    </script>
   </head>
   <body>
     <Header />
