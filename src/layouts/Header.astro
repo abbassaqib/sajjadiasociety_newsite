@@ -17,22 +17,22 @@ const currentPath = Astro.url.pathname;
 >
   <div class="flex w-full items-center">
     {
+      siteConfig?.data.header?.displayLogo && siteConfig.data.general.logo && (
+        <Image
+          src={logoImage[`/${siteConfig.data.general.logo}`]()}
+          alt="Sajjadia Islamic Society logo"
+          class={"max-h-24 w-auto"}
+        />
+      )
+    }
+
+    {
       siteConfig?.data.header?.displayTitle ? (
         <StyledText as="h2" variant="displayLG" className="flex-1">
           <a href="/">{siteConfig?.data.general.name}</a>
         </StyledText>
       ) : (
         <h2 class="sr-only">{siteConfig?.data.general.name}</h2>
-      )
-    }
-
-    {
-      siteConfig?.data.header?.displayLogo && siteConfig.data.general.logo && (
-        <Image
-          src={logoImage[`/${siteConfig.data.general.logo}`]()}
-          alt="logo"
-          class={"max-h-18"}
-        />
       )
     }
 
