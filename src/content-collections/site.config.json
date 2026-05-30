@@ -11,7 +11,7 @@
   },
   "body": {
     "hero": {
-      "text": "<span class='text-foreground/60'>Serving as a beacon of</span><span class='text-primary'> Islamic conscience</span><span class='text-foreground/60'> and community service</span>",
+      "text": "<span class='text-primary'>Sajjadia Islamic Society</span>",
       "bgImage": "src/assets/hero-bg.jpg"
     },
     "cta": {
@@ -27,7 +27,7 @@
           "description": "We currently hold programs at various community locations in Riverside County. Check our programs page for current locations and times."
         },
         {
-          "heading": "Contact Us",
+          "heading": "Email Us",
           "description": "<a href='mailto:info@sajjadiaislamicsociety.org'>info@sajjadiaislamicsociety.org</a>"
         }
       ],
@@ -53,7 +53,7 @@
       "isActive": true,
       "heading": "Support Sajjadia",
       "description": "Help us build a permanent home for our community. Every contribution makes a difference.",
-      "link": "https://donorbox.org/sajjadia"
+      "link": "https://donorbox.org/sadaqah-jariyah-help-us-build-the-sajjadia-islamic-center"
     }
   },
   "theme": {
