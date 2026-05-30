@@ -288,12 +288,17 @@ const programTypeLabel: Record<string, string> = {
               ))}
             </div>
           )}
+          {campaign?.isActive && (
           <a
             href="/donate"
-            class={cn(buttonVariants({ variant: "default" }), "bg-accent text-accent-foreground hover:bg-accent/90 px-8 py-3 text-base")}
+            class={cn(
+              buttonVariants({ variant: "default" }),
+              "h-auto bg-accent px-6 py-3 text-sm font-semibold text-accent-foreground hover:bg-accent/90"
+            )}
           >
-            {campaign.callToAction ?? "Donate Now"}
+            💛 Support Generously
           </a>
+        )}
         </div>
       </div>
     </section>
