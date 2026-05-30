@@ -110,17 +110,13 @@ const bodyHtml = renderBody(campaign.story ?? []);
 
           <!-- Donate button -->
           {campaign.donorboxLink && (
-            <a
-              href={campaign.donorboxLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              class={cn(
-                buttonVariants({ variant: "default" }),
-                "bg-accent text-accent-foreground hover:bg-accent/90 px-10 py-4 text-lg font-bold"
-              )}
-            >
-              💛 Donate Now
-            </a>
+            <script type="module" src="https://donorbox.org/widgets.js" async></script>
+          <dbox-widget campaign="sadaqah-jariyah-help-us-build-the-sajjadia-islamic-center"
+                       type="popup" button-label="Donate Now" button-type="regular"
+                       button-color="#6ea3c1" button-size="medium"
+                       regular-position="center" show-icon="">
+
+           </dbox-widget>
           )}
         </div>
       </div>
@@ -226,19 +222,17 @@ const bodyHtml = renderBody(campaign.story ?? []);
             "{campaign.thankYouMessage}"
           </p>
         )}
+
         {campaign.donorboxLink && (
-          <a
-            href={campaign.donorboxLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            class={cn(
-              buttonVariants({ variant: "default" }),
-              "bg-accent text-accent-foreground hover:bg-accent/90 px-10 py-4 text-lg font-bold"
-            )}
-          >
-            💛 {campaign.callToAction ?? "Donate Now"}
-          </a>
+          <script type="module" src="https://donorbox.org/widgets.js" async></script>
+          <dbox-widget campaign="sadaqah-jariyah-help-us-build-the-sajjadia-islamic-center"
+                       type="popup" button-label="Donate Now" button-type="regular"
+                       button-color="#6ea3c1" button-size="medium"
+                       regular-position="center" show-icon="">
+
+           </dbox-widget>
         )}
+        
         <p class="text-sidebar-foreground/40 mt-6 text-xs">
           Sajjadia Islamic Society is a registered 501(c)(3) nonprofit.
           All donations are tax-deductible.

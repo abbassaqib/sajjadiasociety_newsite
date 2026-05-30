@@ -73,15 +73,13 @@ const RESEND_API_KEY = import.meta.env.RESEND_API_KEY;
             <div set:html={give.description} />
           </div>
           {give.link && (
-            <StyledText
-              as={"a"}
-              target="_blank"
-              rel="noopener noreferrer"
-              href={give.link}
-              className={buttonVariants({ variant: "footer-button" })}
-            >
-              Give
-            </StyledText>
+            <script type="module" src="https://donorbox.org/widgets.js" async></script>
+            <dbox-widget campaign="sadaqah-jariyah-help-us-build-the-sajjadia-islamic-center"
+                        type="popup" button-label="Donate Now" button-type="regular"
+                        button-color="#6ea3c1" button-size="medium"
+                        regular-position="left" show-icon="">
+
+            </dbox-widget>
           )}
         </section>
       )
