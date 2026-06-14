@@ -14,7 +14,7 @@ import { buttonVariants } from "./ui/button";
 
 const NAV_ITEMS = [
   { label: "Donate", href: "/donate", sectionId: "", isDonate: true },
-  { label: "News & Events", href: "/announcements", sectionId: "news-events", isDonate: false },
+  { label: "News & Events", href: "/news-events", sectionId: "news-events", isDonate: false },
   { label: "About Us", href: "/about-us", sectionId: "about", isDonate: false },
   { label: "FAQ", href: "/about-us/faq", sectionId: "faq", isDonate: false },
 ];

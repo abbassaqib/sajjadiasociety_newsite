@@ -1,0 +1,226 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import Lightbox from "@/components/Lightbox.astro";
+import { getAnnouncements, getUpcomingPrograms, getPastPrograms } from "@/data/sanityQueries";
+import { urlFor } from "@/lib/sanity";
+
+const [announcements, upcoming, past] = await Promise.all([
+  getAnnouncements(50),
+  getUpcomingPrograms(20),
+  getPastPrograms(20),
+]);
+
+const categoryLabel: Record<string, string> = {
+  general: "General",
+  jummah: "🕌 Jummah",
+  program: "📅 Program",
+  campaign: "💰 Campaign",
+  community: "🤝 Community",
+  islamic_occasion: "☪️ Islamic Occasion",
+};
+
+function formatDate(dateStr: string) {
+  return new Date(dateStr).toLocaleDateString("en-US", {
+    weekday: "long", month: "long", day: "numeric", year: "numeric",
+  });
+}
+
+function formatTime(dateStr: string) {
+  return new Date(dateStr).toLocaleTimeString("en-US", {
+    hour: "numeric", minute: "2-digit",
+  });
+}
+---
+
+<BaseLayout pageTitle="News & Events">
+  <main class="layout-base gap-12 py-10">
+
+    <div class="border-b border-border pb-6">
+      <h1 class="text-3xl font-bold uppercase tracking-wider mb-2">News & Events</h1>
+      <p class="text-muted-foreground">
+        Latest announcements and upcoming programs from Sajjadia Islamic Society.
+      </p>
+    </div>
+
+    <!-- ── ANNOUNCEMENTS ── -->
+    <section id="announcements">
+      <h2 class="text-2xl font-bold uppercase tracking-wider mb-6 text-primary">
+        📢 Announcements
+      </h2>
+
+      {announcements && announcements.length > 0 ? (
+        <div class="flex flex-col gap-4">
+          {announcements.map((item: any) => {
+            const isExpired = item.expiryDate
+              ? new Date(item.expiryDate) < new Date()
+              : false;
+            if (isExpired) return null;
+
+            const thumbUrl = item.image
+              ? urlFor(item.image).width(300).height(300).fit("crop").url()
+              : null;
+            const fullUrl = item.image
+              ? urlFor(item.image).width(1600).url()
+              : null;
+            const date = item.publishDate
+              ? new Date(item.publishDate).toLocaleDateString("en-US", {
+                  weekday: "long", month: "long", day: "numeric", year: "numeric",
+                })
+              : "";
+
+            return (
+              <div class="bg-card border border-border rounded-xl overflow-hidden hover:border-secondary transition-colors group flex flex-col sm:flex-row">
+                {thumbUrl && fullUrl && (
+                  <div class="sm:w-48 flex-shrink-0">
+                    <Lightbox
+                      id={item._id}
+                      src={fullUrl}
+                      alt={item.title}
+                      thumbnailSrc={thumbUrl}
+                    />
+                  </div>
+                )}
+                <div class="flex flex-1 min-w-0 p-6 flex-col gap-2">
+                  <div class="flex flex-wrap items-center gap-2">
+                    {item.category && (
+                      <span class="text-xs font-medium bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                        {categoryLabel[item.category] ?? item.category}
+                      </span>
+                    )}
+                    {item.isPinned && (
+                      <span class="text-xs bg-accent/10 text-accent px-2 py-0.5 rounded-full font-medium">
+                        📌 Pinned
+                      </span>
+                    )}
+                  </div>
+                  <p class="text-lg font-semibold group-hover:text-secondary transition-colors">
+                    {item.title}
+                  </p>
+                  {date && <p class="text-muted-foreground text-sm">{date}</p>}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div class="bg-muted rounded-xl p-10 text-center">
+          <p class="text-muted-foreground text-lg">No announcements yet.</p>
+        </div>
+      )}
+    </section>
+
+    <!-- ── UPCOMING EVENTS ── -->
+    <section id="events">
+      <h2 class="text-2xl font-bold uppercase tracking-wider mb-6 text-primary">
+        📅 Upcoming Events
+      </h2>
+
+      {upcoming && upcoming.length > 0 ? (
+        <div class="flex flex-col gap-4">
+          {upcoming.map((program: any) => {
+            const thumbUrl = program.image
+              ? urlFor(program.image).width(600).height(400).fit("crop").url()
+              : null;
+            const fullUrl = program.image
+              ? urlFor(program.image).width(1600).url()
+              : null;
+
+            return (
+              <div class="bg-card border border-border rounded-xl overflow-hidden hover:border-secondary transition-colors group flex flex-col sm:flex-row">
+                {thumbUrl && fullUrl && (
+                  <div class="sm:w-64 flex-shrink-0">
+                    <Lightbox
+                      id={program._id}
+                      src={fullUrl}
+                      alt={program.title}
+                      thumbnailSrc={thumbUrl}
+                    />
+                  </div>
+                )}
+                <div class="flex flex-col gap-3 p-6 flex-1 min-w-0">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <div class="bg-primary text-primary-foreground rounded-lg px-3 py-1">
+                      <span class="text-xs font-medium uppercase tracking-wider opacity-80">
+                        {new Date(program.startDate).toLocaleDateString("en-US", { month: "short" })}
+                      </span>
+                      <span class="text-xl font-bold ml-1">
+                        {new Date(program.startDate).getDate()}
+                      </span>
+                    </div>
+                    {program.isRecurring && (
+                      <span class="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
+                        🔁 Recurring
+                      </span>
+                    )}
+                  </div>
+                  <p class="text-lg font-semibold group-hover:text-secondary transition-colors">
+                    {program.title}
+                  </p>
+                  <div class="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
+                    <span>📅 {formatDate(program.startDate)}</span>
+                    <span>🕐 {formatTime(program.startDate)}</span>
+                    {program.location && <span>📍 {program.location}</span>}
+                    {program.speaker && <span>🎤 {program.speaker}</span>}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div class="bg-muted rounded-xl p-10 text-center">
+          <p class="text-muted-foreground text-lg">No upcoming events scheduled.</p>
+          <p class="text-muted-foreground text-sm mt-2">
+            Follow us on{" "}
+            <a href="https://www.facebook.com/sajjadiaislamicsociety" class="text-secondary hover:underline" target="_blank" rel="noopener noreferrer">
+              Facebook
+            </a>{" "}
+            for updates.
+          </p>
+        </div>
+      )}
+    </section>
+
+    <!-- ── PAST EVENTS ── -->
+    {past && past.length > 0 && (
+      <section>
+        <h2 class="text-2xl font-bold uppercase tracking-wider mb-6 text-muted-foreground">
+          Past Events
+        </h2>
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {past.map((program: any) => {
+            const thumbUrl = program.image
+              ? urlFor(program.image).width(400).height(260).fit("crop").url()
+              : null;
+            const fullUrl = program.image
+              ? urlFor(program.image).width(1600).url()
+              : null;
+
+            return (
+              <div class="bg-card border border-border rounded-xl overflow-hidden hover:border-secondary transition-colors group">
+                {thumbUrl && fullUrl && (
+                  <Lightbox
+                    id={`past-${program._id}`}
+                    src={fullUrl}
+                    alt={program.title}
+                    thumbnailSrc={thumbUrl}
+                  />
+                )}
+                <div class="p-5">
+                  <p class="font-semibold group-hover:text-secondary transition-colors mb-2">
+                    {program.title}
+                  </p>
+                  <p class="text-muted-foreground text-sm">{formatDate(program.startDate)}</p>
+                  {program.speaker && (
+                    <p class="text-muted-foreground text-sm mt-1 italic">{program.speaker}</p>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+    )}
+
+  </main>
+</BaseLayout>
