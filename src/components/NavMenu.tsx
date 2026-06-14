@@ -34,7 +34,7 @@ const NavMenu = ({ currentPath, ...props }: NavMenuProps) => {
           key={item.label}
           href={
             isHomepage && item.sectionId && !item.isDonate
-              ? `#${item.sectionId}`
+              ? `/`
               : item.href
           }
           onClick={(e) => handleClick(e, item.sectionId, item.isDonate)}

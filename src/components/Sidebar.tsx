@@ -10,7 +10,6 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { cn } from "@/lib/utils";
-import { buttonVariants } from "./ui/button";
 
 const NAV_ITEMS = [
   { label: "Donate", href: "/donate", sectionId: "", isDonate: true },
@@ -32,13 +31,17 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath }) => {
     sectionId: string,
     isDonate: boolean
   ) => {
-    setIsOpen(false);
     if (isHomepage && sectionId && !isDonate) {
       e.preventDefault();
+      setIsOpen(false);
       setTimeout(() => {
         const el = document.getElementById(sectionId);
-        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-      }, 300);
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }, 450);
+    } else {
+      setIsOpen(false);
     }
   };
 
@@ -67,11 +70,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath }) => {
             {NAV_ITEMS.map((item) => (
               <a
                 key={item.label}
-                href={
-                  isHomepage && item.sectionId && !item.isDonate
-                    ? `#${item.sectionId}`
-                    : item.href
-                }
+                href={item.isDonate ? item.href : (isHomepage && item.sectionId ? "/" : item.href)}
                 onClick={(e) => handleClick(e, item.sectionId, item.isDonate)}
                 className={cn(
                   "rounded-md px-4 py-3 text-base font-semibold tracking-widest uppercase transition-colors",
