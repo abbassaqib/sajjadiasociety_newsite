@@ -13,10 +13,6 @@
     "hero": {
       "text": "<span class='text-primary'>Sajjadia Islamic Society</span>",
       "bgImage": "src/assets/hero-bg.jpg"
-    },
-    "cta": {
-      "text": "Upcoming Programs",
-      "link": "/programs"
     }
   },
   "footer": {

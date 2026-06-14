@@ -1,4 +1,4 @@
 ---
 title: FAQ
-order: 2
+order: 5
 ---

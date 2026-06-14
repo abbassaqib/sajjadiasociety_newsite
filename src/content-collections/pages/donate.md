@@ -1,4 +1,4 @@
 ---
-title: Support Us
-order: 4
+title: Donate
+order: 1
 ---

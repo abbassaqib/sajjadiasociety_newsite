@@ -6,21 +6,26 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 import { siteConfig } from "@/data/contentCollectionDataFetching";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { urlFor } from "@/lib/sanity";
 import {
   getCampaign,
   getAnnouncements,
   getUpcomingPrograms,
   getPrayerTimesConfig,
   getSiteSettings,
+  getFAQ,
+  getOrgInfo,
 } from "@/data/sanityQueries";
 
 // ── Fetch Sanity data in parallel ─────────────────────
-const [campaign, announcements, programs, prayerConfig, sanitySettings] = await Promise.all([
+const [campaign, announcements, programs, prayerConfig, sanitySettings, faqs, org] = await Promise.all([
   getCampaign(),
-  getAnnouncements(3),
-  getUpcomingPrograms(4),
+  getAnnouncements(6),
+  getUpcomingPrograms(6),
   getPrayerTimesConfig(),
   getSiteSettings(),
+  getFAQ(),
+  getOrgInfo(),
 ]);
 
 // ── Prayer times from Aladhan API ─────────────────────
@@ -67,7 +72,6 @@ const goal   = campaign?.goalAmount   ?? 60000;
 const pct    = Math.min(Math.round((raised / goal) * 100), 100);
 
 const hero = siteConfig?.data.body?.hero;
-const cta  = siteConfig?.data.body?.cta;
 
 const bgImages = import.meta.glob<{ default: ImageMetadata }>(
   "/src/assets/*.{jpeg,jpg,png,webp,svg}"
@@ -87,6 +91,31 @@ const programTypeLabel: Record<string, string> = {
   community_service: "🤝 Community",
   islamic_occasion:  "☪️ Occasion",
 };
+
+const topAnnouncements = announcements?.slice(0, 3) ?? [];
+const topPrograms = programs?.slice(0, 3) ?? [];
+const hasMoreAnnouncements = (announcements?.length ?? 0) > 3;
+const hasMorePrograms = (programs?.length ?? 0) > 3;
+
+const donorboxCampaign = (campaign?.donorboxLink ?? "").split("/").pop() ?? "";
+
+const storyExcerpt = (campaign?.story ?? [])
+  .filter((b: any) => b._type === "block" && b.style === "normal")
+  .slice(0, 2)
+  .map((b: any) => b.children?.map((c: any) => c.text ?? "").join("") ?? "")
+  .filter(Boolean)
+  .join(" ");
+
+const topFaqs = faqs?.slice(0, 5) ?? [];
+
+function renderAnswer(blocks: any[]): string {
+  if (!blocks) return "";
+  return blocks
+    .map((b: any) => b.children?.map((c: any) => c.text ?? "").join("") ?? "")
+    .filter(Boolean)
+    .join(" ");
+}
+
 ---
 
 <BaseLayout pageTitle="Home">
@@ -130,19 +159,6 @@ const programTypeLabel: Record<string, string> = {
 
       <!-- Buttons -->
       <div class="mb-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
-        {cta?.text && (
-          <a
-            href={cta.link ?? "#"}
-            target={cta.link?.startsWith("http") ? "_blank" : "_self"}
-            rel={cta.link?.startsWith("http") ? "noopener noreferrer" : undefined}
-            class={cn(
-              buttonVariants({ variant: "secondary" }),
-              "h-auto px-6 py-3 text-sm font-semibold"
-            )}
-          >
-            {cta.text}
-          </a>
-        )}
         {campaign?.isActive && (
           <a
             href="/donate"
@@ -208,139 +224,254 @@ const programTypeLabel: Record<string, string> = {
   </section>
 
   <!-- ════════════════════════════════════════════════ -->
-  <!-- UPCOMING PROGRAMS                                -->
+  <!-- ANNOUNCEMENTS + EVENTS                           -->
   <!-- ════════════════════════════════════════════════ -->
-  {programs && programs.length > 0 && (
-    <section class="layout-full bg-background py-12" aria-label="Upcoming Programs">
-      <div class="layout-base">
-        <div class="mb-6 flex items-center justify-between">
-          <h2 class="text-xl font-semibold">Upcoming Programs</h2>
-          <a href="/programs" class="text-secondary text-sm font-medium underline-offset-4 hover:underline">
-            View all →
-          </a>
+  <section id="news-events" class="layout-full bg-background py-14 scroll-mt-24">
+    <div class="layout-base">
+      <div id="announcements" class="grid gap-10 lg:grid-cols-2">
+
+        <!-- ANNOUNCEMENTS -->
+        <div class="flex flex-col gap-4 scroll-mt-24">
+          <div class="flex items-center justify-between">
+            <h2 class="text-xl font-bold uppercase tracking-wider">📢 Announcements</h2>
+            {hasMoreAnnouncements && (
+              <a href="/announcements" class="text-secondary text-sm font-medium hover:underline underline-offset-4">See More →</a>
+            )}
+          </div>
+          {topAnnouncements.length > 0 ? (
+            <div class="flex flex-col gap-3">
+              {topAnnouncements.map((item: any) => {
+                const thumbUrl = item.image ? urlFor(item.image).width(300).height(200).fit("crop").url() : null;
+                const fullUrl = item.image ? urlFor(item.image).width(1600).url() : null;
+                const date = item.publishDate ? new Date(item.publishDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "";
+                const bodyText = item.body?.filter((b: any) => b._type === "block").slice(0, 1).map((b: any) => b.children?.map((c: any) => c.text).join("")).join("") ?? "";
+                return (
+                  <div
+                    class="card-trigger bg-card border border-border rounded-xl overflow-hidden hover:border-secondary transition-colors cursor-pointer flex"
+                    data-title={item.title}
+                    data-date={date}
+                    data-body={bodyText}
+                    data-img={fullUrl ?? ""}
+                  >
+                    {thumbUrl && (
+                      <div class="w-24 flex-shrink-0">
+                        <img src={thumbUrl} alt={item.title} class="w-full h-full object-cover" loading="lazy" />
+                      </div>
+                    )}
+                    <div class="p-4 flex flex-col gap-1 min-w-0">
+                      <p class="font-semibold text-sm leading-snug line-clamp-2">{item.title}</p>
+                      {date && <p class="text-muted-foreground text-xs">{date}</p>}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div class="bg-muted rounded-xl p-8 text-center text-muted-foreground text-sm">No announcements yet.</div>
+          )}
         </div>
-        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {programs.map((program: any) => {
-            const date = new Date(program.startDate);
-            const dateLabel = date.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
-            const timeLabel = date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
-            return (
-              <a
-                href={`/programs/${program.slug?.current ?? "#"}`}
-                class="bg-card border-border hover:border-secondary group block rounded-lg border p-5 transition-colors"
-              >
-                <p class="text-muted-foreground mb-2 text-xs font-medium uppercase tracking-wider">
-                  {programTypeLabel[program.type] ?? "📅 Program"}
-                </p>
-                <p class="text-card-foreground group-hover:text-secondary mb-3 font-semibold transition-colors">
-                  {program.title}
-                </p>
-                <p class="text-muted-foreground text-sm">{dateLabel} · {timeLabel}</p>
-                {program.location && <p class="text-muted-foreground mt-1 text-sm">{program.location}</p>}
-                {program.speaker && <p class="text-muted-foreground mt-1 text-sm italic">{program.speaker}</p>}
-              </a>
-            );
-          })}
+
+        <!-- EVENTS -->
+        <div class="flex flex-col gap-4 scroll-mt-24">
+          <div class="flex items-center justify-between">
+            <h2 class="text-xl font-bold uppercase tracking-wider">📅 Events</h2>
+            {hasMorePrograms && (
+              <a href="/programs" class="text-secondary text-sm font-medium hover:underline underline-offset-4">See More →</a>
+            )}
+          </div>
+          {topPrograms.length > 0 ? (
+            <div class="flex flex-col gap-3">
+              {topPrograms.map((program: any) => {
+                const thumbUrl = program.image ? urlFor(program.image).width(300).height(200).fit("crop").url() : null;
+                const fullUrl = program.image ? urlFor(program.image).width(1600).url() : null;
+                const dateLabel = new Date(program.startDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+                const timeLabel = new Date(program.startDate).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+                const bodyText = [dateLabel, timeLabel, program.location, program.speaker ? `Speaker: ${program.speaker}` : ""].filter(Boolean).join(" · ");
+                return (
+                  <div
+                    class="card-trigger bg-card border border-border rounded-xl overflow-hidden hover:border-secondary transition-colors cursor-pointer flex"
+                    data-title={program.title}
+                    data-date={`${dateLabel} · ${timeLabel}`}
+                    data-body={bodyText}
+                    data-img={fullUrl ?? ""}
+                    data-location={program.location ?? ""}
+                    data-speaker={program.speaker ?? ""}
+                  >
+                    {thumbUrl && (
+                      <div class="w-24 flex-shrink-0">
+                        <img src={thumbUrl} alt={program.title} class="w-full h-full object-cover" loading="lazy" />
+                      </div>
+                    )}
+                    <div class="p-4 flex flex-col gap-1 min-w-0">
+                      <p class="font-semibold text-sm leading-snug line-clamp-2">{program.title}</p>
+                      <p class="text-muted-foreground text-xs">{dateLabel} · {timeLabel}</p>
+                      {program.location && <p class="text-muted-foreground text-xs">📍 {program.location}</p>}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div class="bg-muted rounded-xl p-8 text-center text-muted-foreground text-sm">No upcoming events.</div>
+          )}
         </div>
+
       </div>
-    </section>
-  )}
+    </div>
+  </section>
 
   <!-- ════════════════════════════════════════════════ -->
-  <!-- CAMPAIGN SECTION                                 -->
+  <!-- CAMPAIGN / DONATE                                -->
   <!-- ════════════════════════════════════════════════ -->
   {campaign?.isActive && (
-    <section class="layout-full bg-sidebar py-12" aria-label="Fundraising Campaign">
-      <div class="layout-base">
-        <div class="mx-auto max-w-2xl text-center">
-          <p class="text-accent mb-2 text-sm font-medium uppercase tracking-widest">
-            Fundraising Campaign
+    <section id="donate" class="layout-full bg-sidebar text-sidebar-foreground py-14 scroll-mt-24">
+      <div class="layout-base max-w-3xl mx-auto">
+        <p class="text-accent text-sm font-semibold uppercase tracking-widest mb-2">Fundraising Campaign</p>
+        <h2 class="text-3xl font-bold uppercase tracking-wider mb-3">{campaign.title}</h2>
+        <p class="text-sidebar-foreground/70 mb-6 text-lg">{campaign.tagline}</p>
+        <div class="bg-sidebar-foreground/10 h-3 rounded-full overflow-hidden mb-3">
+          <div class="bg-accent h-3 rounded-full" style={`width: ${pct}%`} role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} />
+        </div>
+        <div class="flex justify-between text-sm text-sidebar-foreground/70 mb-6">
+          <span><span class="text-sidebar-foreground font-bold text-lg">${raised.toLocaleString()}</span> raised</span>
+          <span>{pct}% of ${goal.toLocaleString()}</span>
+        </div>
+        {storyExcerpt && (
+          <p class="text-sidebar-foreground/80 leading-relaxed mb-8">
+            {storyExcerpt.slice(0, 300)}{storyExcerpt.length > 300 ? "..." : ""}
           </p>
-          <h2 class="text-sidebar-foreground mb-2 text-2xl font-semibold">
-            {campaign.title}
-          </h2>
-          <p class="text-sidebar-foreground/70 mb-8">{campaign.tagline}</p>
-          <div class="bg-sidebar-foreground/10 mb-3 h-3 w-full overflow-hidden rounded-full">
-            <div
-              class="bg-accent h-3 rounded-full transition-all duration-500"
-              style={`width: ${pct}%`}
-              role="progressbar"
-              aria-valuenow={pct}
-              aria-valuemin={0}
-              aria-valuemax={100}
-            />
-          </div>
-          <div class="text-sidebar-foreground/70 mb-8 flex justify-between text-sm">
-            <span>
-              <span class="text-sidebar-foreground font-semibold">${raised.toLocaleString()}</span> raised
-            </span>
-            <span>{pct}% of ${goal.toLocaleString()} goal</span>
-          </div>
-          {campaign.milestones?.length > 0 && (
-            <div class="mb-8 flex flex-wrap justify-center gap-3">
-              {campaign.milestones.map((m: any) => (
-                <div class={cn(
-                  "rounded-full px-4 py-1 text-sm",
-                  m.reached ? "bg-accent text-accent-foreground" : "bg-sidebar-foreground/10 text-sidebar-foreground/60"
-                )}>
-                  {m.reached ? "✅" : "⬜"} ${m.amount?.toLocaleString()} — {m.label}
-                </div>
-              ))}
-            </div>
-          )}
-          {campaign?.isActive && (
-          <a
-            href="/donate"
-            class={cn(
-              buttonVariants({ variant: "default" }),
-              "h-auto bg-accent px-6 py-3 text-sm font-semibold text-accent-foreground hover:bg-accent/90"
-            )}
-          >
-            💛 Support Generously
-          </a>
         )}
+        <div class="flex flex-col sm:flex-row gap-4 items-start">
+          {donorboxCampaign && (
+            <dbox-widget campaign={donorboxCampaign} type="popup" button-label="💛 Donate Now" button-type="regular" button-color="#b8860b" button-size="medium" show-icon=""></dbox-widget>
+          )}
+          <a href="/donate" class={cn(buttonVariants({ variant: "ghost" }), "text-sidebar-foreground border border-sidebar-foreground/30 hover:bg-sidebar-foreground/10")}>
+            Learn More →
+          </a>
         </div>
       </div>
     </section>
   )}
 
   <!-- ════════════════════════════════════════════════ -->
-  <!-- LATEST ANNOUNCEMENTS                             -->
+  <!-- ABOUT US                                         -->
   <!-- ════════════════════════════════════════════════ -->
-  {announcements && announcements.length > 0 && (
-    <section class="layout-full bg-background py-12" aria-label="Latest Announcements">
+  <section id="about" class="layout-full bg-background py-14 scroll-mt-24">
+    <div class="layout-base">
+      <h2 class="text-3xl font-bold uppercase tracking-wider mb-8">About Us</h2>
+      <div class="grid gap-4 sm:grid-cols-3 mb-6">
+        <div class="bg-card border border-border rounded-xl p-6 text-center">
+          <p class="text-4xl font-bold text-primary mb-1">2019</p>
+          <p class="text-muted-foreground text-sm">Founded</p>
+        </div>
+        <div class="bg-card border border-border rounded-xl p-6 text-center">
+          <p class="text-4xl font-bold text-primary mb-1">501c3</p>
+          <p class="text-muted-foreground text-sm">Registered Nonprofit</p>
+        </div>
+        <div class="bg-card border border-border rounded-xl p-6 text-center">
+          <p class="text-4xl font-bold text-primary mb-1">☽</p>
+          <p class="text-muted-foreground text-sm">Shia Ithna Ashari</p>
+        </div>
+      </div>
+      {org?.mission && (
+        <div class="bg-card border border-border rounded-xl p-8 mb-4">
+          <h3 class="font-semibold text-lg mb-3 text-primary">Our Mission</h3>
+          <p class="text-foreground leading-relaxed">{org.mission}</p>
+        </div>
+      )}
+      {org?.currentSituation && (
+        <div class="bg-muted rounded-xl p-6 mb-6">
+          <p class="text-foreground leading-relaxed">{org.currentSituation}</p>
+        </div>
+      )}
+      <a href="/about-us" class={cn(buttonVariants({ variant: "outline" }), "w-fit")}>Learn More →</a>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════ -->
+  <!-- FAQ                                              -->
+  <!-- ════════════════════════════════════════════════ -->
+  {topFaqs.length > 0 && (
+    <section id="faq" class="layout-full bg-muted py-14 scroll-mt-24">
       <div class="layout-base">
-        <div class="mb-6 flex items-center justify-between">
-          <h2 class="text-xl font-semibold">Latest Announcements</h2>
-          <a href="/announcements" class="text-secondary text-sm font-medium underline-offset-4 hover:underline">
-            View all →
-          </a>
+        <h2 class="text-3xl font-bold uppercase tracking-wider mb-8">Frequently Asked Questions</h2>
+        <div class="flex flex-col gap-3 mb-8">
+          {topFaqs.map((faq: any) => (
+            <details class="bg-card border border-border rounded-xl overflow-hidden group">
+              <summary class="flex items-center justify-between p-5 cursor-pointer list-none hover:bg-muted/50 transition-colors">
+                <span class="font-medium pr-4">{faq.question}</span>
+                <span class="text-muted-foreground flex-shrink-0 text-lg transition-transform group-open:rotate-45">+</span>
+              </summary>
+              <div class="px-5 pb-5 border-t border-border pt-4">
+                <p class="text-muted-foreground leading-relaxed">{renderAnswer(faq.answer)}</p>
+              </div>
+            </details>
+          ))}
         </div>
-        <div class="grid gap-4 sm:grid-cols-3">
-          {announcements.map((item: any) => {
-            const date = item.publishDate
-              ? new Date(item.publishDate).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })
-              : "";
-            return (
-              <a
-                href={`/announcements/${item.slug?.current ?? "#"}`}
-                class="bg-card border-border hover:border-secondary group block rounded-lg border p-5 transition-colors"
-              >
-                {item.isPinned && (
-                  <span class="bg-accent/10 text-accent mb-2 inline-block rounded-full px-2 py-0.5 text-xs font-medium">
-                    📌 Pinned
-                  </span>
-                )}
-                <p class="text-card-foreground group-hover:text-secondary mb-2 font-semibold transition-colors">
-                  {item.title}
-                </p>
-                {date && <p class="text-muted-foreground text-sm">{date}</p>}
-              </a>
-            );
-          })}
-        </div>
+        <a href="/about-us/faq" class={cn(buttonVariants({ variant: "outline" }), "w-fit")}>View All FAQs →</a>
       </div>
     </section>
   )}
 
 </BaseLayout>
+
+<!-- ════════════════════════════════════════════════ -->
+<!-- CARD OVERLAY                                     -->
+<!-- ════════════════════════════════════════════════ -->
+<dialog id="card-overlay" class="fixed inset-0 z-50 bg-transparent p-4 max-w-none max-h-none w-screen h-screen m-0">
+  <div class="w-full h-full flex items-center justify-center" id="card-overlay-backdrop">
+    <div class="relative bg-background border border-border rounded-2xl shadow-2xl max-w-xl w-full max-h-[85vh] overflow-y-auto" onclick="event.stopPropagation()">
+      <button id="card-overlay-close" class="absolute top-3 right-3 z-10 text-muted-foreground hover:text-foreground bg-background rounded-full p-1.5 border border-border" aria-label="Close">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <img id="card-overlay-img" src="" alt="" class="w-full max-h-96 object-contain bg-black rounded-t-2xl hidden" loading="lazy" />
+      <div class="p-6">
+        <h3 id="card-overlay-title" class="text-xl font-bold mb-2"></h3>
+        <p id="card-overlay-date" class="text-muted-foreground text-sm mb-1"></p>
+        <p id="card-overlay-location" class="text-muted-foreground text-sm mb-4 hidden"></p>
+        <p id="card-overlay-body" class="text-foreground leading-relaxed"></p>
+      </div>
+    </div>
+  </div>
+</dialog>
+
+<style>
+  dialog { border: none; outline: none; background: transparent; padding: 0; margin: 0; }
+  dialog::backdrop { background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); }
+  dialog[open] { display: flex; align-items: center; justify-content: center; }
+  .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+</style>
+
+<script>
+  const overlay = document.getElementById('card-overlay') as HTMLDialogElement;
+  const closeBtn = document.getElementById('card-overlay-close')!;
+  const backdrop = document.getElementById('card-overlay-backdrop')!;
+  const overlayImg = document.getElementById('card-overlay-img') as HTMLImageElement;
+  const overlayTitle = document.getElementById('card-overlay-title')!;
+  const overlayDate = document.getElementById('card-overlay-date')!;
+  const overlayLocation = document.getElementById('card-overlay-location')!;
+  const overlayBody = document.getElementById('card-overlay-body')!;
+
+  function openOverlay(el: HTMLElement) {
+    overlayTitle.textContent = el.dataset.title ?? '';
+    overlayDate.textContent = el.dataset.date ?? '';
+    overlayBody.textContent = el.dataset.body ?? '';
+    const loc = [el.dataset.location, el.dataset.speaker ? `Speaker: ${el.dataset.speaker}` : ''].filter(Boolean).join(' · ');
+    if (loc) { overlayLocation.textContent = loc; overlayLocation.classList.remove('hidden'); }
+    else { overlayLocation.classList.add('hidden'); }
+    const img = el.dataset.img ?? '';
+    if (img) { overlayImg.src = img; overlayImg.alt = el.dataset.title ?? ''; overlayImg.classList.remove('hidden'); }
+    else { overlayImg.classList.add('hidden'); }
+    overlay.showModal();
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeOverlay() { overlay.close(); document.body.style.overflow = ''; }
+
+  closeBtn.addEventListener('click', closeOverlay);
+  backdrop.addEventListener('click', closeOverlay);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeOverlay(); });
+  document.querySelectorAll('.card-trigger').forEach((card) => {
+    card.addEventListener('click', () => openOverlay(card as HTMLElement));
+  });
+</script>

@@ -1,58 +1,53 @@
-import { ChevronDown } from "lucide-react";
 import * as React from "react";
+import { cn } from "@/lib/utils";
 
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import type { MenuItem } from "@/data/types";
+const NAV_ITEMS = [
+  { label: "Donate", href: "/donate", sectionId: "", isDonate: true },
+  { label: "News & Events", href: "/announcements", sectionId: "news-events", isDonate: false },
+  { label: "About Us", href: "/about-us", sectionId: "about", isDonate: false },
+  { label: "FAQ", href: "/about-us/faq", sectionId: "faq", isDonate: false },
+];
 
-const NavMenu: React.FC<React.ComponentProps<"nav"> & { menu: MenuItem[] }> = ({
-  menu,
-  ...props
-}) => {
+interface NavMenuProps extends React.HTMLAttributes<HTMLElement> {
+  currentPath: string;
+}
+
+const NavMenu = ({ currentPath, ...props }: NavMenuProps) => {
+  const isHomepage = currentPath === "/";
+
+  const handleClick = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    sectionId: string,
+    isDonate: boolean
+  ) => {
+    if (isHomepage && sectionId && !isDonate) {
+      e.preventDefault();
+      const el = document.getElementById(sectionId);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
   return (
     <nav {...props}>
-      {menu.map(({ label, submenu, path }) =>
-        submenu.length > 0 ? (
-          <DropdownMenu key={label}>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                className="group flex items-center gap-1 rounded-md px-3 py-2 text-sm tracking-widest uppercase xl:text-base"
-              >
-                {label}
-                <ChevronDown className="h-4 w-4 transition-transform duration-200 ease-out group-data-[state=open]:rotate-180" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="start"
-              className="animate-in fade-in slide-in-from-top-1 w-56"
-            >
-              {submenu.map((subItem) => (
-                <DropdownMenuItem key={subItem.path} asChild>
-                  <a href={`/${subItem.path}`}>{subItem.label}</a>
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        ) : (
-          <a
-            key={label}
-            href={`/${path}`}
-            className={`rounded-md px-3 py-2 text-sm font-medium tracking-widest text-nowrap uppercase xl:text-base ${
-              label === "Donate"
-                ? "bg-accent text-accent-foreground hover:bg-accent/90"
-                : "hover:bg-accent hover:text-accent-foreground"
-            }`}
-          >
-            {label}
-          </a>
-        ),
-      )}
+      {NAV_ITEMS.map((item) => (
+        <a
+          key={item.label}
+          href={
+            isHomepage && item.sectionId && !item.isDonate
+              ? `#${item.sectionId}`
+              : item.href
+          }
+          onClick={(e) => handleClick(e, item.sectionId, item.isDonate)}
+          className={cn(
+            "rounded-md px-3 py-2 text-sm font-medium tracking-widest uppercase xl:text-base transition-colors",
+            item.isDonate
+              ? "bg-accent text-accent-foreground hover:bg-accent/90"
+              : "hover:bg-accent hover:text-accent-foreground"
+          )}
+        >
+          {item.label}
+        </a>
+      ))}
     </nav>
   );
 };

@@ -9,14 +9,38 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import type { MenuItem } from "@/data/types";
 import { cn } from "@/lib/utils";
-
-import StyledText from "./StyledText";
 import { buttonVariants } from "./ui/button";
 
-const Sidebar: React.FC<{ menu: MenuItem[] }> = ({ menu }) => {
+const NAV_ITEMS = [
+  { label: "Donate", href: "/donate", sectionId: "", isDonate: true },
+  { label: "News & Events", href: "/announcements", sectionId: "news-events", isDonate: false },
+  { label: "About Us", href: "/about-us", sectionId: "about", isDonate: false },
+  { label: "FAQ", href: "/about-us/faq", sectionId: "faq", isDonate: false },
+];
+
+interface SidebarProps {
+  currentPath: string;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ currentPath }) => {
   const [isOpen, setIsOpen] = React.useState(false);
+  const isHomepage = currentPath === "/";
+
+  const handleClick = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    sectionId: string,
+    isDonate: boolean
+  ) => {
+    setIsOpen(false);
+    if (isHomepage && sectionId && !isDonate) {
+      e.preventDefault();
+      setTimeout(() => {
+        const el = document.getElementById(sectionId);
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 300);
+    }
+  };
 
   return (
     <>
@@ -27,64 +51,39 @@ const Sidebar: React.FC<{ menu: MenuItem[] }> = ({ menu }) => {
         >
           <Hamburger
             toggled={isOpen}
-            color="var(--muted-foreground)"
+            color="var(--sidebar-foreground)"
+            size={24}
             label="Button to open sidebar menu"
           />
         </DrawerTrigger>
-        <DrawerOverlay className="bg-background" />
-        <DrawerContent className="mt-24 data-[vaul-drawer-direction=right]:w-full data-[vaul-drawer-direction=right]:border-none data-[vaul-drawer-direction=right]:sm:max-w-full">
-          <div className="overflow-y-auto">
-            <DrawerTitle className="sr-only">Menu</DrawerTitle>
-            <DrawerDescription className="sr-only">
-              Navigation Menu
-            </DrawerDescription>
-            <nav className="flex flex-col items-center px-4">
-              <ul className="flex flex-col gap-4">
-                {menu.map(({ label, path, submenu }, index) =>
-                  submenu.length > 0 ? (
-                    <li
-                      key={index}
-                      className="text-primary h-auto text-3xl font-bold whitespace-normal uppercase sm:text-5xl"
-                    >
-                      {label}
 
-                      <ul className="border-muted ml-4 flex flex-col gap-2 border-l-4">
-                        {submenu.map((subMenuItem, index) => (
-                          <li key={index}>
-                            <StyledText
-                              as={"a"}
-                              href={`/${subMenuItem.path}`}
-                              className={cn(
-                                buttonVariants({ variant: "link" }),
-                                "text-muted-foreground font-bold uppercase sm:text-xl",
-                              )}
-                              aria-label={`Link to ${subMenuItem.label}`}
-                            >
-                              {subMenuItem.label}
-                            </StyledText>
-                          </li>
-                        ))}
-                      </ul>
-                    </li>
-                  ) : (
-                    <li key={index}>
-                      <StyledText
-                        as={"a"}
-                        href={`/${path}`}
-                        className={cn(
-                          buttonVariants({ variant: "link" }),
-                          "h-auto px-0 text-3xl font-bold whitespace-normal uppercase sm:text-5xl",
-                        )}
-                        aria-label={`Link to ${label}`}
-                      >
-                        {label}
-                      </StyledText>
-                    </li>
-                  ),
+        <DrawerOverlay className="lg:hidden" />
+
+        <DrawerContent className="lg:hidden h-full w-72 bg-background p-6 flex flex-col gap-6">
+          <DrawerTitle className="sr-only">Navigation Menu</DrawerTitle>
+          <DrawerDescription className="sr-only">Site navigation links</DrawerDescription>
+
+          <nav className="flex flex-col gap-2 mt-8">
+            {NAV_ITEMS.map((item) => (
+              <a
+                key={item.label}
+                href={
+                  isHomepage && item.sectionId && !item.isDonate
+                    ? `#${item.sectionId}`
+                    : item.href
+                }
+                onClick={(e) => handleClick(e, item.sectionId, item.isDonate)}
+                className={cn(
+                  "rounded-md px-4 py-3 text-base font-semibold tracking-widest uppercase transition-colors",
+                  item.isDonate
+                    ? "bg-accent text-accent-foreground hover:bg-accent/90 text-center"
+                    : "text-foreground hover:bg-muted"
                 )}
-              </ul>
-            </nav>
-          </div>
+              >
+                {item.label}
+              </a>
+            ))}
+          </nav>
         </DrawerContent>
       </Drawer>
     </>
