@@ -5,6 +5,9 @@ import StyledText from "@/components/StyledText";
 import { Image } from "astro:assets";
 import { type ImageMetadata } from "astro";
 import { siteConfig } from "@/data/contentCollectionDataFetching";
+import { getSiteSettings } from "@/data/sanityQueries";
+
+const sanitySettings = await getSiteSettings();
 
 const logoImage = import.meta.glob<{ default: ImageMetadata }>(`src/assets/*`);
 
@@ -16,7 +19,7 @@ const currentPath = Astro.url.pathname;
 >
   <div class="flex w-full items-center">
     {
-      siteConfig?.data.header?.displayLogo && siteConfig.data.general.logo && (
+      (sanitySettings?.displayLogo ?? true) && siteConfig?.data.general.logo && (
         <Image
           src={logoImage[`/${siteConfig.data.general.logo}`]()}
           alt="Sajjadia Islamic Society logo"
@@ -26,12 +29,12 @@ const currentPath = Astro.url.pathname;
     }
     &nbsp;&nbsp;
     {
-      siteConfig?.data.header?.displayTitle ? (
+      sanitySettings?.displayTitle ?? true ? (
         <StyledText as="h2" variant="displayLG" className="flex-1">
-          <a href="/">{siteConfig?.data.general.name}</a>
+          <a href="/">{sanitySettings?.name ?? "Sajjadia Islamic Society"}</a>
         </StyledText>
       ) : (
-        <h2 class="sr-only">{siteConfig?.data.general.name}</h2>
+        <h2 class="sr-only">{sanitySettings?.name ?? "Sajjadia Islamic Society"}</h2>
       )
     }
 

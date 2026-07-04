@@ -1,8 +1,6 @@
 {
   "general": {
     "name": "Sajjadia Islamic Society",
-    "description": "In the Name of Allah, the Most Gracious, the Most Merciful",
-    "youtube": "https://www.youtube.com/@SajjadiaSocietyOfficial",
     "logo": "src/assets/sajjadia-logo.png"
   },
   "header": {
@@ -11,45 +9,7 @@
   },
   "body": {
     "hero": {
-      "text": "<span class='text-primary'>Sajjadia Islamic Society</span>",
       "bgImage": "src/assets/hero-bg.jpg"
-    }
-  },
-  "footer": {
-    "left": {
-      "sections": [
-        {
-          "heading": "Programs & Congregations",
-          "description": "We currently hold programs at various community locations in Riverside County. Check our programs page for current locations and times."
-        },
-        {
-          "heading": "Email Us",
-          "description": "<a href='mailto:info@sajjadiaislamicsociety.org'>info@sajjadiaislamicsociety.org</a>"
-        }
-      ],
-      "social": [
-        {
-          "name": "Facebook",
-          "icon": "simple-icons:facebook",
-          "link": "https://www.facebook.com/sajjadiaislamicsociety"
-        },
-        {
-          "name": "Youtube",
-          "icon": "simple-icons:youtube",
-          "link": "https://www.youtube.com/@SajjadiaSocietyOfficial"
-        }
-      ]
-    },
-    "form": {
-      "isActive": true,
-      "heading": "Community Newsletter",
-      "description": "Sign up to stay informed and connected to the Sajjadia Islamic Society community."
-    },
-    "give": {
-      "isActive": true,
-      "heading": "Support Sajjadia",
-      "description": "Help us build a permanent home for our community. Every contribution makes a difference.",
-      "link": "https://donorbox.org/sadaqah-jariyah-help-us-build-the-sajjadia-islamic-center"
     }
   },
   "theme": {

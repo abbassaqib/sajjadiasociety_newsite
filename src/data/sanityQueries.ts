@@ -7,11 +7,16 @@ export async function getSiteSettings() {
       name,
       tagline,
       shortDescription,
+      heroText,
+      displayTitle,
+      displayLogo,
       foundedYear,
       ein,
       contact,
       socialMedia,
-      locations
+      locations,
+      newsletterHeading,
+      newsletterDescription
     }
   `)
 }

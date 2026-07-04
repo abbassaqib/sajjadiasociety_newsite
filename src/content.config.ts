@@ -10,7 +10,7 @@ const siteConfig = defineCollection({
   schema: z.object({
     general: z.object({
       name: z.string(),
-      description: z.string(),
+      description: z.string().optional(),
       logo: z.string().optional(),
       youtube: z.string().optional(),
     }),
@@ -24,7 +24,7 @@ const siteConfig = defineCollection({
       .object({
         hero: z
           .object({
-            text: z.string(),
+            text: z.string().optional(),
             bgImage: z.string().optional(),
           })
           .optional(),

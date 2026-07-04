@@ -1,7 +1,7 @@
 ---
 import { type ImageMetadata } from "astro";
 import { Image } from "astro:assets";
-// import StyledText from "@/components/StyledText";
+import StyledText from "@/components/StyledText";
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import { siteConfig } from "@/data/contentCollectionDataFetching";
 import { buttonVariants } from "@/components/ui/button";
@@ -140,7 +140,7 @@ const storyExcerpt = (campaign?.story ?? [])
       <p class="text-foreground/50 mb-3 text-sm font-medium uppercase tracking-widest">
         <span class='text-secondary'>{sanitySettings?.tagline}</span>
       </p>
-      <!-- <StyledText as="h2" id="hero-heading" variant="displayXL" set:html={hero?.text} className="mb-8" /> -->
+      <StyledText as="h2" id="hero-heading" variant="displayXL" set:html={sanitySettings?.heroText} className="mb-8" />
       <p class="text-foreground/70 mt-2 mb-6 text-lg">
         <span class='text-secondary'>{sanitySettings?.shortDescription}</span>
       </p>
