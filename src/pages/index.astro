@@ -1,7 +1,7 @@
 ---
 import { type ImageMetadata } from "astro";
 import { Image } from "astro:assets";
-import StyledText from "@/components/StyledText";
+// import StyledText from "@/components/StyledText";
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import { siteConfig } from "@/data/contentCollectionDataFetching";
 import { buttonVariants } from "@/components/ui/button";
@@ -13,18 +13,16 @@ import {
   getUpcomingPrograms,
   getPrayerTimesConfig,
   getSiteSettings,
-  getFAQ,
   getOrgInfo,
 } from "@/data/sanityQueries";
 
 // ── Fetch Sanity data in parallel ─────────────────────
-const [campaign, announcements, programs, prayerConfig, sanitySettings, faqs, org] = await Promise.all([
+const [campaign, announcements, programs, prayerConfig, sanitySettings, org] = await Promise.all([
   getCampaign(),
   getAnnouncements(6),
   getUpcomingPrograms(6),
   getPrayerTimesConfig(),
   getSiteSettings(),
-  getFAQ(),
   getOrgInfo(),
 ]);
 
@@ -106,16 +104,6 @@ const storyExcerpt = (campaign?.story ?? [])
   .filter(Boolean)
   .join(" ");
 
-const topFaqs = faqs?.slice(0, 5) ?? [];
-
-function renderAnswer(blocks: any[]): string {
-  if (!blocks) return "";
-  return blocks
-    .map((b: any) => b.children?.map((c: any) => c.text ?? "").join("") ?? "")
-    .filter(Boolean)
-    .join(" ");
-}
-
 ---
 
 <BaseLayout pageTitle="Home">
@@ -150,11 +138,11 @@ function renderAnswer(blocks: any[]): string {
 
       <!-- Tagline -->
       <p class="text-foreground/50 mb-3 text-sm font-medium uppercase tracking-widest">
-        {sanitySettings?.tagline}
+        <span class='text-secondary'>{sanitySettings?.tagline}</span>
       </p>
-      <StyledText as="h2" id="hero-heading" variant="displayXL" set:html={hero?.text} className="mb-8" />
+      <!-- <StyledText as="h2" id="hero-heading" variant="displayXL" set:html={hero?.text} className="mb-8" /> -->
       <p class="text-foreground/70 mt-2 mb-6 text-lg">
-        {sanitySettings?.shortDescription}
+        <span class='text-secondary'>{sanitySettings?.shortDescription}</span>
       </p>
 
       <!-- Buttons -->
@@ -387,31 +375,6 @@ function renderAnswer(blocks: any[]): string {
       <a href="/about-us" class={cn(buttonVariants({ variant: "outline" }), "w-fit")}>Learn More →</a>
     </div>
   </section>
-
-  <!-- ════════════════════════════════════════════════ -->
-  <!-- FAQ                                              -->
-  <!-- ════════════════════════════════════════════════ -->
-  {topFaqs.length > 0 && (
-    <section id="faq" class="layout-full bg-muted py-14 scroll-mt-24">
-      <div class="layout-base">
-        <h2 class="text-3xl font-bold uppercase tracking-wider mb-8">Frequently Asked Questions</h2>
-        <div class="flex flex-col gap-3 mb-8">
-          {topFaqs.map((faq: any) => (
-            <details class="bg-card border border-border rounded-xl overflow-hidden group">
-              <summary class="flex items-center justify-between p-5 cursor-pointer list-none hover:bg-muted/50 transition-colors">
-                <span class="font-medium pr-4">{faq.question}</span>
-                <span class="text-muted-foreground flex-shrink-0 text-lg transition-transform group-open:rotate-45">+</span>
-              </summary>
-              <div class="px-5 pb-5 border-t border-border pt-4">
-                <p class="text-muted-foreground leading-relaxed">{renderAnswer(faq.answer)}</p>
-              </div>
-            </details>
-          ))}
-        </div>
-        <a href="/about-us/faq" class={cn(buttonVariants({ variant: "outline" }), "w-fit")}>View All FAQs →</a>
-      </div>
-    </section>
-  )}
 
 </BaseLayout>
 
