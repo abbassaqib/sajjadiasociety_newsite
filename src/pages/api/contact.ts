@@ -64,8 +64,8 @@ export const POST: APIRoute = async ({ request }) => {
         Authorization: `Bearer ${import.meta.env.RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: 'Sajjadia Website <onboarding@resend.dev>',
-        to: ['info@sajjadiaislamicsociety.org'],
+        from: 'Sajjadia Website Contact Form <no-reply@sajjadiamosque.org>',
+        to: ['info@sajjadiaislamicsociety.org', 'sajjadia786110@gmail.com'],
         subject: `New contact form submission from ${name}`,
         html: `
           <h2>New Contact Form Submission</h2>
