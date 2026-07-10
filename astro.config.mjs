@@ -19,6 +19,7 @@ export default defineConfig({
     '/programs': '/news-events',
     '/programs/announcements': '/news-events',
     '/programs/events': '/news-events',
+    '/about-us/mission': '/about-us',
   },
   vite: {
     plugins: [tailwindcss()],
