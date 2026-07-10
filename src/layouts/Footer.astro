@@ -49,11 +49,12 @@ const donorboxCampaign = donorboxUrl.split('/').pop() ?? ''
       {primaryLocation && (
         <div class="flex flex-col gap-1">
           <StyledText as="h3" variant="heading" className="pb-1">
-            Programs & Congregations
+            Where We Are
           </StyledText>
           <p class="text-sidebar-foreground/70 text-sm leading-relaxed">
-            We currently hold programs at various community locations in Riverside County.
-            Check our programs page for current locations and times.
+            {primaryLocation.name}<br/>
+            {primaryLocation.address}<br/>
+            {primaryLocation.city}, {primaryLocation.state} {primaryLocation.zip}
           </p>
         </div>
       )}
@@ -64,7 +65,8 @@ const donorboxCampaign = donorboxUrl.split('/').pop() ?? ''
             Programs & Congregations
           </StyledText>
           <p class="text-sidebar-foreground/70 text-sm leading-relaxed">
-            We currently hold programs at various community locations in Riverside County.
+            We currently hold programs at various community locations in Corona, CA.<br/>
+            Check our programs page for current locations and times.
           </p>
         </div>
       )}
