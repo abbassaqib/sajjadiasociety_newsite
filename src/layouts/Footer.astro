@@ -8,8 +8,7 @@ import { getCampaign } from "@/data/sanityQueries";
 
 // const form = siteConfig?.data.footer?.form;
 
-const RESEND_SEGMENT_ID = import.meta.env.RESEND_SEGMENT_ID;
-const RESEND_API_KEY = import.meta.env.RESEND_API_KEY;
+
 
 // Pull contact + social from Sanity as single source of truth
 const sanitySettings = await getSiteSettings();
@@ -45,31 +44,6 @@ const donorboxCampaign = donorboxUrl.split('/').pop() ?? ''
     <!-- Left — Contact info -->
     <section class="flex flex-col gap-4">
       <h2 class="sr-only">Contact Info</h2>
-
-      {primaryLocation && (
-        <div class="flex flex-col gap-1">
-          <StyledText as="h3" variant="heading" className="pb-1">
-            Where We Are
-          </StyledText>
-          <p class="text-sidebar-foreground/70 text-sm leading-relaxed">
-            {primaryLocation.name}<br/>
-            {primaryLocation.address}<br/>
-            {primaryLocation.city}, {primaryLocation.state} {primaryLocation.zip}
-          </p>
-        </div>
-      )}
-
-      {!primaryLocation && (
-        <div class="flex flex-col gap-1">
-          <StyledText as="h3" variant="heading" className="pb-1">
-            Programs & Congregations
-          </StyledText>
-          <p class="text-sidebar-foreground/70 text-sm leading-relaxed">
-            We currently hold programs at various community locations in Corona, CA.<br/>
-            Check our programs page for current locations and times.
-          </p>
-        </div>
-      )}
 
       <div class="flex flex-col gap-1">
         <StyledText as="h3" variant="heading" className="pb-1">
@@ -111,55 +85,21 @@ const donorboxCampaign = donorboxUrl.split('/').pop() ?? ''
 
       <!-- Social icons — wrapped to override color -->
       {socialLinks.length > 0 && (
-        <div class="[&_a]:text-sidebar-foreground/60 [&_a:hover]:text-sidebar-foreground [&_a]:transition-colors">
+        <div class="[&_a]:text-sidebar-foreground/60 [&_a:hover]:text-sidebar-foreground">
           <SocialMediaLinks social={socialLinks} client:idle />
         </div>
       )}
     </section>
 
-    <!-- Middle — Newsletter (hidden until Resend is set up) -->
-    {RESEND_SEGMENT_ID && RESEND_API_KEY ? (
-      <section class="flex flex-col gap-4">
-        <div class="flex flex-col gap-2">
-          <StyledText as="h2" variant="heading">
-            {sanitySettings?.newsletterHeading ?? "Community Newsletter"}
-          </StyledText>
-          <p>{sanitySettings?.newsletterDescription}</p>
-        </div>
-        <SubscribeForm client:idle />
-      </section>
-    ) : (
-      <section class="flex flex-col gap-4">
+    <section class="flex flex-col gap-4">
+      <div class="flex flex-col gap-2">
         <StyledText as="h2" variant="heading">
-          Stay Connected
+          {sanitySettings?.newsletterHeading ?? "Community Newsletter"}
         </StyledText>
-        <p class="text-sidebar-foreground/70 text-sm leading-relaxed">
-          Follow us on Facebook and YouTube for the latest announcements, programs, and community updates.
-        </p>
-        <div class="flex flex-col gap-2">
-          {socialMedia?.facebook && (
-            <a
-              href={socialMedia.facebook}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="inline-flex items-center gap-2 text-sidebar-foreground/70 hover:text-sidebar-foreground text-sm transition-colors"
-            >
-              <span>📘</span> Facebook
-            </a>
-          )}
-          {socialMedia?.youtube && (
-            <a
-              href={socialMedia.youtube}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="inline-flex items-center gap-2 text-sidebar-foreground/70 hover:text-sidebar-foreground text-sm transition-colors"
-            >
-              <span>▶️</span> YouTube
-            </a>
-          )}
-        </div>
-      </section>
-    )}
+        <p>{sanitySettings?.newsletterDescription}</p>
+      </div>
+      <SubscribeForm client:idle />
+    </section>
 
     <!-- Right — Donate -->
     <section class="flex flex-col gap-4">

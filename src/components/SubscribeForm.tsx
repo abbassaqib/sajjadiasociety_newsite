@@ -1,140 +1,75 @@
-/* eslint-disable react/no-children-prop */
-import { useForm } from "@tanstack/react-form";
-import { toast } from "sonner";
+import * as React from "react";
 
-import { Button } from "@/components/ui/button";
-import { Field, FieldError, FieldGroup } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-import { Toaster } from "@/components/ui/sonner";
-import subscribeFormSchema from "@/data/subcribeFormSchema";
+const SubscribeForm: React.FC = () => {
+  const [fullName, setFullName] = React.useState("");
+  const [phone, setPhone] = React.useState("");
+  const [status, setStatus] = React.useState<"idle" | "loading" | "success" | "error">("idle");
+  const [errorMsg, setErrorMsg] = React.useState("");
 
-const SubscribeForm = () => {
-  const form = useForm({
-    defaultValues: {
-      firstName: "",
-      lastName: "",
-      email: "",
-    },
-    validators: {
-      onSubmit: subscribeFormSchema,
-    },
-    onSubmit: async ({ value }) => {
-      const response = await fetch(
-        `${import.meta.env.DEV ? "http://localhost:4321" : import.meta.env.SITE}/api/subscribe`,
-        {
-          method: "POST",
-          body: JSON.stringify(value),
-        },
-      );
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!fullName.trim() || !phone.trim()) {
+      setErrorMsg("Please fill in both fields.");
+      return;
+    }
+    setStatus("loading");
+    setErrorMsg("");
 
-      const { code, message } = await response.json();
+    try {
+      const res = await fetch("/api/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fullName: fullName.trim(), phone: phone.trim() }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Something went wrong.");
+      setStatus("success");
+    } catch (err: any) {
+      setErrorMsg(err.message);
+      setStatus("error");
+    }
+  };
 
-      if (code === "BAD_REQUEST") {
-        toast.error(message);
-        return;
-      }
-
-      if (code === "CONFLICT") toast.info(message);
-      if (code === "SUCCESS") toast.success(message);
-
-      form.reset();
-    },
-  });
+  if (status === "success") {
+    return (
+      <div className="rounded-xl bg-sidebar-foreground/10 p-4 text-center">
+        <p className="text-lg mb-1">✅ Request Received!</p>
+        <p className="text-sidebar-foreground/70 text-sm">
+          JazakAllah Khair! We'll add you to the WhatsApp group soon.
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <>
-      <form
-        id="subscribe-form"
-        onSubmit={(e) => {
-          e.preventDefault();
-          form.handleSubmit();
-        }}
-        className="flex flex-col gap-4"
+    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+      <input
+        type="text"
+        placeholder="Full Name"
+        value={fullName}
+        onChange={(e) => setFullName(e.target.value)}
+        required
+        className="rounded-lg bg-sidebar-foreground/10 border border-sidebar-foreground/20 px-3 py-2.5 text-sm text-sidebar-foreground placeholder:text-sidebar-foreground/40 focus:outline-none focus:ring-2 focus:ring-accent"
+      />
+      <input
+        type="tel"
+        placeholder="Phone Number"
+        value={phone}
+        onChange={(e) => setPhone(e.target.value)}
+        required
+        className="rounded-lg bg-sidebar-foreground/10 border border-sidebar-foreground/20 px-3 py-2.5 text-sm text-sidebar-foreground placeholder:text-sidebar-foreground/40 focus:outline-none focus:ring-2 focus:ring-accent"
+      />
+      {errorMsg && (
+        <p className="text-red-400 text-xs">{errorMsg}</p>
+      )}
+      <button
+        type="submit"
+        disabled={status === "loading"}
+        className="rounded-lg bg-accent text-accent-foreground font-semibold py-2.5 text-sm hover:bg-accent/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        <FieldGroup className="gap-4">
-          <form.Field
-            name="firstName"
-            children={(field) => {
-              const isInvalid =
-                field.state.meta.isTouched && !field.state.meta.isValid;
-              return (
-                <Field data-invalid={isInvalid}>
-                  <Input
-                    id={field.name}
-                    name={field.name}
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(e.target.value)}
-                    aria-invalid={isInvalid}
-                    placeholder="First Name"
-                    autoComplete="off"
-                    className="bg-muted text-muted-foreground focus-visible:ring-ring focus-visible:ring-2"
-                  />
-                  {isInvalid && <FieldError errors={field.state.meta.errors} />}
-                </Field>
-              );
-            }}
-          />
-          <form.Field
-            name="lastName"
-            children={(field) => {
-              const isInvalid =
-                field.state.meta.isTouched && !field.state.meta.isValid;
-              return (
-                <Field data-invalid={isInvalid}>
-                  {/*<FieldLabel htmlFor={field.name}>Last Name</FieldLabel>*/}
-                  <Input
-                    id={field.name}
-                    name={field.name}
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(e.target.value)}
-                    aria-invalid={isInvalid}
-                    placeholder="Last Name"
-                    autoComplete="off"
-                    className="bg-muted text-muted-foreground focus-visible:ring-ring focus-visible:ring-2"
-                  />
-                  {isInvalid && <FieldError errors={field.state.meta.errors} />}
-                </Field>
-              );
-            }}
-          />
-          <form.Field
-            name="email"
-            children={(field) => {
-              const isInvalid =
-                field.state.meta.isTouched && !field.state.meta.isValid;
-              return (
-                <Field data-invalid={isInvalid}>
-                  {/*<FieldLabel htmlFor={field.name}>Email</FieldLabel>*/}
-                  <Input
-                    id={field.name}
-                    name={field.name}
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(e.target.value)}
-                    aria-invalid={isInvalid}
-                    placeholder="mail@example.com"
-                    autoComplete="off"
-                    className="bg-muted text-muted-foreground focus-visible:ring-ring focus-visible:ring-2"
-                  />
-                  {isInvalid && <FieldError errors={field.state.meta.errors} />}
-                </Field>
-              );
-            }}
-          />
-        </FieldGroup>
-        <form.Subscribe
-          selector={(state) => [state.canSubmit, state.isSubmitting]}
-          children={([canSubmit, isSubmitting]) => (
-            <Button type="submit" disabled={!canSubmit} variant="footer-button">
-              {isSubmitting ? "..." : "Subscribe"}
-            </Button>
-          )}
-        />
-      </form>
-      <Toaster />
-    </>
+        {status === "loading" ? "Submitting..." : "Join WhatsApp Group"}
+      </button>
+    </form>
   );
 };
 

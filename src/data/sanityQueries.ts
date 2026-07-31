@@ -188,3 +188,30 @@ export async function getOrgInfo() {
     }
   `)
 }
+
+// ── Timeline Events (for chatbot context) ───────────────────
+export async function getTimelineEvents() {
+  return sanityClient.fetch(`
+    *[_type == "timelineEvent"]
+    | order(date asc) {
+      _id,
+      title,
+      date,
+      description,
+      category,
+      status,
+      isFeatured,
+      order,
+      images[] {
+        image,
+        caption
+      },
+      documents[] {
+        file {
+          asset-> { url }
+        },
+        label
+      }
+    }
+  `)
+}

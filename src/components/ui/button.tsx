@@ -21,7 +21,7 @@ const buttonVariants = cva(
           "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent",
         link: "text-primary hover:decoration-primary underline-offset-4 hover:underline",
         "footer-icon":
-          "text-muted hover:text-primary text-xl [&_svg:not([class*='size-'])]:size-5",
+          "text-sidebar-foreground/60 hover:text-sidebar-foreground transition-colors text-xl [&_svg:not([class*='size-'])]:size-5",
         "footer-button":
           "bg-muted hover:bg-primary text-primary hover:text-primary-foreground border-ring border shadow-xsfocus-visible:ring-ring  focus-visible:ring-2",
       },

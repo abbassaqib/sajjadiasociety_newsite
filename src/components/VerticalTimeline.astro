@@ -1,0 +1,245 @@
+---
+import { urlFor } from "@/lib/sanity";
+import Lightbox from "@/components/Lightbox.astro";
+
+interface Props {
+  events: any[];
+}
+
+const { events } = Astro.props;
+
+const categoryConfig: Record<string, { emoji: string; color: string; badge: string }> = {
+  milestone: { emoji: "🏛", color: "bg-purple-500", badge: "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300" },
+  program:   { emoji: "🕌", color: "bg-blue-500",   badge: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300" },
+  location:  { emoji: "📍", color: "bg-green-500",  badge: "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300" },
+  campaign:  { emoji: "💰", color: "bg-yellow-500", badge: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300" },
+  future:    { emoji: "⭐", color: "bg-gray-400",   badge: "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400" },
+};
+
+function formatDate(dateStr: string) {
+  const d = new Date(dateStr);
+  return d.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+}
+---
+
+<div class="relative timeline-container">
+
+  <!-- Center line — desktop only -->
+  <div class="hidden md:block absolute left-1/2 top-0 bottom-0 w-0.5 bg-border -translate-x-1/2" aria-hidden="true" />
+
+  <!-- Left line — mobile only -->
+  <div class="md:hidden absolute left-5 top-0 bottom-0 w-0.5 bg-border" aria-hidden="true" />
+
+  <div class="flex flex-col gap-8">
+    {events.map((event, i) => {
+      const cfg = categoryConfig[event.category] ?? categoryConfig.future;
+      const isLeft = i % 2 === 0;
+      const isFuture = event.status === "upcoming";
+      const hasImages = event.images?.length > 0;
+      const hasDocs = event.documents?.length > 0;
+
+      return (
+        <div class="relative">
+
+          <!-- MOBILE layout — single column with left line -->
+          <div class="md:hidden flex gap-4 pl-3">
+            <!-- Dot -->
+            <div class="flex flex-col items-center flex-shrink-0 pt-1 z-10">
+              <div class={`w-9 h-9 rounded-full ${cfg.color} flex items-center justify-center text-white text-base shadow-md ${isFuture ? 'opacity-50' : ''}`}>
+                {cfg.emoji}
+              </div>
+            </div>
+
+            <!-- Card -->
+            <details class={`flex-1 rounded-xl border bg-card ${isFuture ? 'border-dashed opacity-70' : 'border-border'} overflow-hidden group`}>
+              <summary class="p-4 cursor-pointer list-none">
+                <div class="flex items-start justify-between gap-2 mb-1">
+                  <span class={`text-xs font-semibold px-2 py-0.5 rounded-full ${cfg.badge}`}>
+                    {event.category.charAt(0).toUpperCase() + event.category.slice(1)}
+                  </span>
+                  {event.isFeatured && (
+                    <span class="text-xs bg-accent/20 text-accent px-2 py-0.5 rounded-full font-medium">⭐ Featured</span>
+                  )}
+                </div>
+                <p class="text-xs text-muted-foreground mt-1 mb-1">{formatDate(event.date)}</p>
+                <p class={`font-semibold text-sm leading-snug ${event.isFeatured ? 'text-primary' : 'text-foreground'}`}>
+                  {event.title}
+                </p>
+                <p class="text-xs text-secondary mt-1 group-open:hidden">▼ Show details</p>
+                <p class="text-xs text-secondary mt-1 hidden group-open:block">▲ Hide details</p>
+              </summary>
+
+              <div class="px-4 pb-4 border-t border-border pt-3">
+                {event.description && (
+                  <p class="text-sm text-muted-foreground leading-relaxed mb-3">{event.description}</p>
+                )}
+
+                <!-- Images -->
+                {hasImages && (
+                  <div class="grid grid-cols-2 gap-2 mb-3">
+                    {event.images.slice(0, 4).map((img: any, idx: number) => {
+                      const thumb = urlFor(img.image).width(300).height(200).fit("crop").url();
+                      const full = urlFor(img.image).width(1200).url();
+                      return (
+                        <Lightbox
+                          id={`${event._id}-mob-${idx}`}
+                          src={full}
+                          alt={img.caption ?? event.title}
+                          thumbnailSrc={thumb}
+                        />
+                      );
+                    })}
+                  </div>
+                )}
+
+                <!-- Documents -->
+                {hasDocs && (
+                  <div class="flex flex-col gap-1.5">
+                    {event.documents.map((doc: any, idx: number) => (
+                      <a
+                        href={doc.file?.asset?.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="inline-flex items-center gap-2 text-xs text-secondary hover:underline underline-offset-2"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                        {doc.label ?? "View Document"}
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </details>
+          </div>
+
+          <!-- DESKTOP layout — alternating left/right -->
+          <div class="hidden md:grid md:grid-cols-2 md:gap-8 md:items-start">
+
+            <!-- Left column -->
+            <div class={isLeft ? 'pr-8' : 'pr-8'}>
+              {isLeft && (
+                <details class={`rounded-xl border bg-card text-right ${isFuture ? 'border-dashed opacity-70' : 'border-border'} overflow-hidden group ${event.isFeatured ? 'ring-2 ring-primary/20' : ''}`}>
+                  <summary class="p-5 cursor-pointer list-none">
+                    <div class="flex items-center justify-end gap-2 mb-2">
+                      {event.isFeatured && (
+                        <span class="text-xs bg-accent/20 text-accent px-2 py-0.5 rounded-full font-medium">⭐ Featured</span>
+                      )}
+                      <span class={`text-xs font-semibold px-2 py-0.5 rounded-full ${cfg.badge}`}>
+                        {event.category.charAt(0).toUpperCase() + event.category.slice(1)}
+                      </span>
+                    </div>
+                    <p class="text-xs text-muted-foreground mb-1">{formatDate(event.date)}</p>
+                    <p class={`font-semibold leading-snug ${event.isFeatured ? 'text-primary text-lg' : 'text-foreground'}`}>
+                      {event.title}
+                    </p>
+                    <p class="text-xs text-secondary mt-2 group-open:hidden">▼ Show details</p>
+                    <p class="text-xs text-secondary mt-2 hidden group-open:block">▲ Hide details</p>
+                  </summary>
+                  <div class="px-5 pb-5 border-t border-border pt-4 text-left">
+                    {event.description && (
+                      <p class="text-sm text-muted-foreground leading-relaxed mb-4">{event.description}</p>
+                    )}
+                    {hasImages && (
+                      <div class="grid grid-cols-2 gap-2 mb-3">
+                        {event.images.slice(0, 4).map((img: any, idx: number) => {
+                          const thumb = urlFor(img.image).width(300).height(200).fit("crop").url();
+                          const full = urlFor(img.image).width(1200).url();
+                          return (
+                            <Lightbox id={`${event._id}-l-${idx}`} src={full} alt={img.caption ?? event.title} thumbnailSrc={thumb} />
+                          );
+                        })}
+                      </div>
+                    )}
+                    {hasDocs && (
+                      <div class="flex flex-col gap-1.5">
+                        {event.documents.map((doc: any) => (
+                          <a href={doc.file?.asset?.url} target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 text-xs text-secondary hover:underline underline-offset-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                            {doc.label ?? "View Document"}
+                          </a>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </details>
+              )}
+            </div>
+
+            <!-- Center dot -->
+            <div class="absolute left-1/2 -translate-x-1/2 flex items-center justify-center" style="top: 18px; z-index: 10;">
+              <div class={`w-10 h-10 rounded-full ${cfg.color} flex items-center justify-center text-white text-lg shadow-md ${isFuture ? 'opacity-50' : ''}`}>
+                {cfg.emoji}
+              </div>
+            </div>
+
+            <!-- Right column -->
+            <div class="pl-8">
+              {!isLeft && (
+                <details class={`rounded-xl border bg-card ${isFuture ? 'border-dashed opacity-70' : 'border-border'} overflow-hidden group ${event.isFeatured ? 'ring-2 ring-primary/20' : ''}`}>
+                  <summary class="p-5 cursor-pointer list-none">
+                    <div class="flex items-center gap-2 mb-2">
+                      <span class={`text-xs font-semibold px-2 py-0.5 rounded-full ${cfg.badge}`}>
+                        {event.category.charAt(0).toUpperCase() + event.category.slice(1)}
+                      </span>
+                      {event.isFeatured && (
+                        <span class="text-xs bg-accent/20 text-accent px-2 py-0.5 rounded-full font-medium">⭐ Featured</span>
+                      )}
+                    </div>
+                    <p class="text-xs text-muted-foreground mb-1">{formatDate(event.date)}</p>
+                    <p class={`font-semibold leading-snug ${event.isFeatured ? 'text-primary text-lg' : 'text-foreground'}`}>
+                      {event.title}
+                    </p>
+                    <p class="text-xs text-secondary mt-2 group-open:hidden">▼ Show details</p>
+                    <p class="text-xs text-secondary mt-2 hidden group-open:block">▲ Hide details</p>
+                  </summary>
+                  <div class="px-5 pb-5 border-t border-border pt-4">
+                    {event.description && (
+                      <p class="text-sm text-muted-foreground leading-relaxed mb-4">{event.description}</p>
+                    )}
+                    {hasImages && (
+                      <div class="grid grid-cols-2 gap-2 mb-3">
+                        {event.images.slice(0, 4).map((img: any, idx: number) => {
+                          const thumb = urlFor(img.image).width(300).height(200).fit("crop").url();
+                          const full = urlFor(img.image).width(1200).url();
+                          return (
+                            <Lightbox id={`${event._id}-r-${idx}`} src={full} alt={img.caption ?? event.title} thumbnailSrc={thumb} />
+                          );
+                        })}
+                      </div>
+                    )}
+                    {hasDocs && (
+                      <div class="flex flex-col gap-1.5">
+                        {event.documents.map((doc: any) => (
+                          <a href={doc.file?.asset?.url} target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 text-xs text-secondary hover:underline underline-offset-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                            {doc.label ?? "View Document"}
+                          </a>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </details>
+              )}
+            </div>
+
+          </div>
+        </div>
+      );
+    })}
+  </div>
+
+  <!-- Legend -->
+  <div class="mt-10 flex flex-wrap gap-3 justify-center pt-6 border-t border-border">
+    {Object.entries(categoryConfig).map(([cat, cfg]) => (
+      <span class="flex items-center gap-1.5 text-xs text-muted-foreground">
+        <span class={`w-2.5 h-2.5 rounded-full ${cfg.color}`}></span>
+        {cat.charAt(0).toUpperCase() + cat.slice(1)}
+      </span>
+    ))}
+    <span class="flex items-center gap-1.5 text-xs text-muted-foreground">
+      <span class="border border-dashed border-muted-foreground rounded px-1">- -</span>
+      Upcoming
+    </span>
+  </div>
+
+</div>

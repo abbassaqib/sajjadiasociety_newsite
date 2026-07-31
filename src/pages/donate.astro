@@ -1,10 +1,9 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import Lightbox from "@/components/Lightbox.astro";
+import MilestoneTracker from "@/components/MilestoneTracker.astro";
 import { getCampaign } from "@/data/sanityQueries";
 import { urlFor } from "@/lib/sanity";
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 
 const campaign = await getCampaign();
 
@@ -64,49 +63,13 @@ const bodyHtml = renderBody(campaign.story ?? []);
           {campaign.tagline}
         </p>
 
-        <!-- Progress bar -->
+        <!-- Milestone Tracker -->
         <div class="mx-auto max-w-2xl">
-          <div class="bg-sidebar-foreground/10 mb-4 h-4 w-full overflow-hidden rounded-full">
-            <div
-              class="bg-accent h-4 rounded-full transition-all duration-700"
-              style={`width: ${pct}%`}
-              role="progressbar"
-              aria-valuenow={pct}
-              aria-valuemin={0}
-              aria-valuemax={100}
-            />
-          </div>
-          <div class="text-sidebar-foreground/70 mb-2 flex justify-between text-sm">
-            <span>
-              <span class="text-sidebar-foreground text-2xl font-bold">
-                ${raised.toLocaleString()}
-              </span>
-              <span class="ml-1">raised</span>
-            </span>
-            <span class="text-right">
-              <span class="text-sidebar-foreground text-2xl font-bold">{pct}%</span>
-              <span class="ml-1">of ${goal.toLocaleString()} goal</span>
-            </span>
-          </div>
-          <p class="text-sidebar-foreground/50 mb-8 text-sm">
-            ${remaining.toLocaleString()} still needed
-          </p>
-
-          <!-- Milestones -->
-          {campaign.milestones?.length > 0 && (
-            <div class="mb-10 flex flex-wrap justify-center gap-3">
-              {campaign.milestones.map((m: any) => (
-                <div class={cn(
-                  "rounded-full px-4 py-1.5 text-sm font-medium",
-                  m.reached
-                    ? "bg-accent text-accent-foreground"
-                    : "bg-sidebar-foreground/10 text-sidebar-foreground/50"
-                )}>
-                  {m.reached ? "✅" : "⬜"} ${m.amount?.toLocaleString()} — {m.label}
-                </div>
-              ))}
-            </div>
-          )}
+          <MilestoneTracker
+            raised={raised}
+            goal={goal}
+            milestones={campaign.milestones ?? []}
+          />
 
           <!-- Donate button -->
           {campaign.donorboxLink && (

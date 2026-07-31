@@ -1,0 +1,143 @@
+---
+interface Milestone {
+  amount: number;
+  label: string;
+  reached: boolean;
+}
+
+interface Props {
+  raised: number;
+  goal: number;
+  milestones: Milestone[];
+}
+
+const { raised, goal, milestones } = Astro.props;
+const pct = Math.min(Math.round((raised / goal) * 100), 100);
+
+// Sort milestones by amount
+const sorted = [...(milestones ?? [])].sort((a, b) => a.amount - b.amount);
+---
+
+<div class="milestone-tracker">
+
+  <!-- Raised vs Goal header -->
+  <div class="flex justify-between items-end mb-3">
+    <div>
+      <span class="text-3xl font-bold text-sidebar-foreground">${raised.toLocaleString()}</span>
+      <span class="text-sidebar-foreground/60 text-sm ml-1">raised</span>
+    </div>
+    <div class="text-right">
+      <span class="text-sidebar-foreground/60 text-sm">Goal: </span>
+      <span class="text-sidebar-foreground font-semibold">${goal.toLocaleString()}</span>
+    </div>
+  </div>
+
+  <!-- Progress bar with milestone markers -->
+  <div class="relative h-4 bg-sidebar-foreground/10 rounded-full overflow-hidden mb-1">
+    <div
+      class="h-4 bg-accent rounded-full transition-all duration-700"
+      style={`width: ${pct}%`}
+      role="progressbar"
+      aria-valuenow={pct}
+      aria-valuemin={0}
+      aria-valuemax={100}
+    />
+    <!-- Milestone tick marks on bar -->
+    {sorted.map((m) => {
+      const pos = Math.min(Math.round((m.amount / goal) * 100), 100);
+      return (
+        <div
+          class="absolute top-0 bottom-0 w-0.5 bg-white/40"
+          style={`left: ${pos}%`}
+          aria-hidden="true"
+        />
+      );
+    })}
+  </div>
+
+  <p class="text-sidebar-foreground/50 text-xs text-right mb-8">{pct}% funded</p>
+
+  <!-- Milestone stops -->
+  {sorted.length > 0 && (
+    <div class="relative">
+      <!-- Connector line -->
+      <div class="absolute top-5 left-5 right-5 h-0.5 bg-sidebar-foreground/15" aria-hidden="true" />
+      <!-- Reached fill -->
+      {(() => {
+        const lastReachedIdx = sorted.reduce((acc, m, i) => m.reached ? i : acc, -1);
+        if (lastReachedIdx < 0) return null;
+        const fillPct = ((lastReachedIdx + 1) / sorted.length) * 100;
+        return (
+          <div
+            class="absolute top-5 left-5 h-0.5 bg-accent"
+            style={`width: calc(${fillPct}% - 2.5rem)`}
+            aria-hidden="true"
+          />
+        );
+      })()}
+
+      <div class="grid gap-2" style={`grid-template-columns: repeat(${sorted.length}, 1fr)`}>
+        {sorted.map((m, i) => (
+          <div class="flex flex-col items-center gap-2 cursor-pointer milestone-item" data-index={i}>
+            <!-- Dot -->
+            <div class={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold z-10 border-2 transition-all
+              ${m.reached
+                ? 'bg-accent border-accent text-accent-foreground shadow-md'
+                : 'bg-sidebar border-sidebar-foreground/20 text-sidebar-foreground/40'
+              }`}
+            >
+              {m.reached ? (
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              ) : (
+                <span>{i + 1}</span>
+              )}
+            </div>
+            <!-- Label -->
+            <div class="text-center">
+              <p class={`text-xs font-bold ${m.reached ? 'text-accent' : 'text-sidebar-foreground/50'}`}>
+                ${m.amount.toLocaleString()}
+              </p>
+              <p class="text-xs text-sidebar-foreground/50 leading-tight mt-0.5 max-w-16 mx-auto">
+                {m.label}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )}
+
+  <!-- Detail popup on click -->
+  <div id="milestone-detail" class="hidden mt-6 bg-sidebar-foreground/10 rounded-xl p-4 text-center transition-all">
+    <p id="milestone-detail-title" class="font-semibold text-sidebar-foreground"></p>
+    <p id="milestone-detail-status" class="text-sm text-sidebar-foreground/60 mt-1"></p>
+  </div>
+
+</div>
+
+<script>
+  const items = document.querySelectorAll('.milestone-item');
+  const detail = document.getElementById('milestone-detail')!;
+  const detailTitle = document.getElementById('milestone-detail-title')!;
+  const detailStatus = document.getElementById('milestone-detail-status')!;
+
+  const milestones = JSON.parse(
+    document.querySelector('.milestone-tracker')?.getAttribute('data-milestones') ?? '[]'
+  );
+
+  items.forEach((item, i) => {
+    item.addEventListener('click', () => {
+      const dot = item.querySelector('div');
+      const isReached = dot?.classList.contains('bg-accent');
+      const amountEl = item.querySelector('p');
+      const labelEl = item.querySelectorAll('p')[1];
+
+      detailTitle.textContent = `${amountEl?.textContent} — ${labelEl?.textContent}`;
+      detailStatus.textContent = isReached ? '✅ Milestone reached' : '⏳ Not yet reached — your donation helps get us here';
+      detail.classList.remove('hidden');
+
+      items.forEach(el => el.querySelector('div')?.classList.remove('scale-110'));
+      dot?.classList.add('scale-110');
+    });
+  });
+</script>

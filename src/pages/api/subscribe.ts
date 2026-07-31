@@ -1,112 +1,65 @@
-import type { APIRoute } from "astro";
-import { Resend } from "resend";
-import * as z from "zod";
+import type { APIRoute } from 'astro'
+import { createClient } from '@sanity/client'
 
-import subscribeFormSchema from "@/data/subcribeFormSchema";
+export const prerender = false
 
-// TODO: Better error handling
-
-export const prerender = false;
-
-const RESEND_SEGMENT_ID = process.env["RESEND_SEGMENT_ID"];
-const RESEND_API_KEY = process.env["RESEND_API_KEY"];
-
-const resend = new Resend(RESEND_API_KEY);
-
-// Util pause function to space out calls to resend api
-const pause = (ms: number) => {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-};
-
-function validate<T extends z.ZodTypeAny>(
-  schema: T,
-  data: unknown,
-): z.infer<T> {
-  const result = schema.safeParse(data);
-  if (!result.success) {
-    throw new Response(JSON.stringify(result.error.flatten()), { status: 400 });
-  }
-  return result.data;
-}
+const sanityClient = createClient({
+  projectId: import.meta.env.SANITY_PROJECT_ID,
+  dataset: import.meta.env.SANITY_DATASET ?? 'production',
+  apiVersion: '2026-01-01',
+  token: import.meta.env.SANITY_WRITE_TOKEN,
+  useCdn: false,
+})
 
 export const POST: APIRoute = async ({ request }) => {
-  // Zod Validation
-  const { email, firstName, lastName } = validate(
-    subscribeFormSchema,
-    await request.json(),
-  );
-
-  // Check if contact already exists
   try {
-    const { data: getContact } = await resend.contacts.get({
-      email,
-    });
+    const { fullName, phone } = await request.json()
 
-    // Handle if contact already exists
-    if (getContact) {
-      if (!getContact.unsubscribed)
-        return new Response(
-          JSON.stringify({
-            message: "You are already subscribed!",
-            code: "CONFLICT",
-          }),
-          { status: 200 },
-        );
-      // Resusbscribe if necessary
-      const { error: resubscribeError } = await resend.contacts.update({
-        email,
-        unsubscribed: false,
-      });
-      if (resubscribeError) throw new Error(resubscribeError.message);
-
-      return new Response(
-        JSON.stringify({
-          message: "You have been resubscribed!",
-          code: "SUCCESS",
-        }),
-        { status: 200 },
-      );
+    if (!fullName || !phone) {
+      return new Response(JSON.stringify({ error: 'Name and phone are required.' }), {
+        status: 400, headers: { 'Content-Type': 'application/json' },
+      })
     }
 
-    // Resend limits requests to 2 per second
-    await pause(1000);
+    await sanityClient.create({
+      _type: 'subscriber',
+      fullName,
+      phone,
+      submittedAt: new Date().toISOString(),
+      status: 'new',
+    })
 
-    // Create new contact
-    const { error: createError } = await resend.contacts.create({
-      email,
-      firstName,
-      lastName,
-      unsubscribed: false,
-    });
-
-    if (createError) throw new Error(createError.message);
-
-    // Add contact to general segment
-    const { error: addToSegmentError } = await resend.contacts.segments.add({
-      email,
-      segmentId: RESEND_SEGMENT_ID,
-    });
-
-    if (addToSegmentError) throw new Error(addToSegmentError.message);
-
-    // All good
-    return new Response(
-      JSON.stringify({
-        message: "You have successfully subscribed!",
-        code: "SUCCESS",
-      }),
-      { status: 200 },
-    );
-  } catch (error) {
-    console.error(error);
-    return new Response(
-      JSON.stringify({
-        message: "Unknown Failure! Please try again.",
-        code: "BAD_REQUEST",
-      }),
-      {
-        status: 400,
+    await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${import.meta.env.RESEND_API_KEY}`,
       },
-    );
+      body: JSON.stringify({
+        from: 'Sajjadia Website <no-reply@sajjadiamosque.org>',
+        to: ['info@sajjadiaislamicsociety.org'],
+        subject: `New WhatsApp subscriber: ${fullName}`,
+        html: `
+          <h2>New WhatsApp Group Request</h2>
+          <p><strong>Name:</strong> ${fullName}</p>
+          <p><strong>Phone:</strong> ${phone}</p>
+          <p>Please add this person to the Sajjadia WhatsApp group.</p>
+          <hr/>
+          <p style="color:#666;font-size:12px">
+            View all subscribers at <a href="https://sajjadia-cms.sanity.studio">sajjadia-cms.sanity.studio</a>
+            → WhatsApp Subscribers. Mark as "Added" once done.
+          </p>
+        `,
+      }),
+    })
+
+    return new Response(JSON.stringify({ success: true }), {
+      status: 200, headers: { 'Content-Type': 'application/json' },
+    })
+  } catch (err) {
+    console.error('Subscribe error:', err)
+    return new Response(JSON.stringify({ error: 'Something went wrong.' }), {
+      status: 500, headers: { 'Content-Type': 'application/json' },
+    })
   }
-};
+}

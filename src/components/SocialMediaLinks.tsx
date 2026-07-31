@@ -1,92 +1,53 @@
 import { Icon } from "@iconify/react";
+import * as React from "react";
 
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-
-import StyledText from "./StyledText";
-import { buttonVariants } from "./ui/button";
+interface SocialLink {
+  name?: string;
+  link?: string;
+  icon?: string;
+  hint?: string;
+}
 
 interface SocialMediaLinksProps {
-  social: {
-    name?: string | undefined;
-    link?: string | undefined;
-    icon?: string | undefined;
-    hint?: string | undefined;
-  }[];
+  social: SocialLink[];
+  showLabels?: boolean;
 }
 
-interface SocialButtonProps {
-  name: string;
-  href: string;
-  icon: string;
-}
-
-interface SocialButtonWithTooltipProps extends SocialButtonProps {
-  hint: string;
-}
-
-const SocialMediaLinks: React.FC<SocialMediaLinksProps> = ({ social }) => {
-  return (
-    <div className="flex">
-      {social.map(({ name = "", link = "", icon = "", hint }) =>
-        hint ? (
-          <SocialButtonWithTooltip
-            key={name}
-            name={name}
-            href={link}
-            icon={icon}
-            hint={hint}
-          />
-        ) : (
-          <SocialButton key={name} name={name} href={link} icon={icon} />
-        ),
-      )}
-    </div>
-  );
+const iconSizeMap: Record<string, string> = {
+  "simple-icons:facebook": "text-[#1877F2]",
+  "simple-icons:youtube":  "text-[#FF0000]",
+  "simple-icons:instagram": "text-[#E1306C]",
+  "simple-icons:x":        "text-foreground",
+  "simple-icons:whatsapp": "text-[#25D366]",
 };
 
-const SocialButton: React.FC<SocialButtonProps> = ({ name, href, icon }) => {
-  return (
-    <StyledText
-      as={"a"}
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label={`click link for ${name}`}
-      className={buttonVariants({ variant: "footer-icon" })}
-    >
-      <Icon icon={icon} />
-    </StyledText>
-  );
-};
-
-const SocialButtonWithTooltip: React.FC<SocialButtonWithTooltipProps> = ({
-  name,
-  href,
-  icon,
-  hint,
+const SocialMediaLinks: React.FC<SocialMediaLinksProps> = ({
+  social,
+  showLabels = false,
 }) => {
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <StyledText
-          as={"a"}
-          href={href}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label={`click link for ${name}`}
-          className={buttonVariants({ variant: "footer-icon" })}
-        >
-          <Icon icon={icon} />
-        </StyledText>
-      </TooltipTrigger>
-      <TooltipContent>
-        <p>{hint}</p>
-      </TooltipContent>
-    </Tooltip>
+    <div className="flex flex-wrap gap-3">
+      {social.map(({ name = "", link = "", icon = "" }) => {
+        const brandColor = iconSizeMap[icon] ?? "text-sidebar-foreground";
+        return (
+          <a
+            key={name}
+            href={link}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`Visit our ${name} page`}
+            className="group flex items-center gap-2 rounded-xl bg-sidebar-foreground/10 hover:bg-sidebar-foreground/20 px-4 py-2.5 transition-all duration-200"
+          >
+            <span className={`text-2xl ${brandColor} transition-transform duration-200 group-hover:scale-110`}>
+              <Icon icon={icon} />
+            </span>
+            <span className="text-sm font-medium text-sidebar-foreground/80 group-hover:text-sidebar-foreground transition-colors">
+              {name}
+            </span>
+          </a>
+        );
+      })}
+    </div>
   );
 };
 

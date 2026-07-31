@@ -72,11 +72,10 @@ const currentPath = Astro.url.pathname;
     &nbsp;
     <NavMenu
       className="hidden gap-2 lg:inline-flex items-center flex-wrap"
-      currentPath={currentPath}
       client:load
     />
 
-    <Sidebar currentPath={currentPath} client:load />
+    <Sidebar client:load />
   </div>
 
   <script>
