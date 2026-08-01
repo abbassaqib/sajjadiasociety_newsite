@@ -18,7 +18,8 @@ function renderBody(blocks: any[]): string {
   if (!blocks) return "";
   return blocks.map((block: any) => {
     if (block._type === "image") {
-      const imgUrl = urlFor(block).width(900).url();
+      const imgUrl = block ? urlFor(block).width(900).url() : null;
+      if (!imgUrl) return "";
       return `<img src="${imgUrl}" alt="" class="rounded-xl my-6 w-full" loading="lazy" />`;
     }
     if (block._type !== "block") return "";
@@ -116,15 +117,12 @@ const bodyHtml = renderBody(campaign.story ?? []);
           <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {campaign.images.map((item: any, i: number) => {
               if (!item.image) return null;
-              const thumbUrl = urlFor(item.image).width(600).height(400).fit("crop").url();
-              const fullUrl = urlFor(item.image).width(1800).url();
+              const thumbUrl = item.image ? urlFor(item.image).width(600).height(400).fit("crop").url() : null;
+              const fullUrl = item.image ? urlFor(item.image).width(1800).url() : null;
+              if (!thumbUrl || !fullUrl) return null;
               return (
                 <div class="flex flex-col gap-2">
-                  <Lightbox
-                    id={`campaign-img-${i}`}
-                    src={fullUrl}
-                    alt={item.caption ?? "Sajjadia Islamic Society"}
-                    thumbnailSrc={thumbUrl}
+                  <Lightbox id={`campaign-img-${i}`} src={fullUrl} alt={item.caption ?? "Sajjadia Islamic Society"} thumbnailSrc={thumbUrl}
                   />
                   {item.caption && (
                     <p class="text-muted-foreground text-sm text-center px-1">

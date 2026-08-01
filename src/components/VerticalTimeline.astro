@@ -78,15 +78,11 @@ function formatDate(dateStr: string) {
                 {hasImages && (
                   <div class="grid grid-cols-2 gap-2 mb-3">
                     {event.images.slice(0, 4).map((img: any, idx: number) => {
-                      const thumb = urlFor(img.image).width(300).height(200).fit("crop").url();
-                      const full = urlFor(img.image).width(1200).url();
+                      const thumb = img.image ? urlFor(img.image).width(300).height(200).fit("crop").url() : null;
+                      const full = img.image ? urlFor(img.image).width(1200).url() : null;
+                      if (!thumb || !full) return null;
                       return (
-                        <Lightbox
-                          id={`${event._id}-mob-${idx}`}
-                          src={full}
-                          alt={img.caption ?? event.title}
-                          thumbnailSrc={thumb}
-                        />
+                        <Lightbox id={`${event._id}-mob-${idx}`} src={full} alt={img.caption ?? event.title} thumbnailSrc={thumb} />
                       );
                     })}
                   </div>
@@ -142,8 +138,9 @@ function formatDate(dateStr: string) {
                     {hasImages && (
                       <div class="grid grid-cols-2 gap-2 mb-3">
                         {event.images.slice(0, 4).map((img: any, idx: number) => {
-                          const thumb = urlFor(img.image).width(300).height(200).fit("crop").url();
-                          const full = urlFor(img.image).width(1200).url();
+                          const thumb = img.image ? urlFor(img.image).width(300).height(200).fit("crop").url() : null;
+                          const full = img.image ? urlFor(img.image).width(1200).url() : null;
+                          if (!thumb || !full) return null;
                           return (
                             <Lightbox id={`${event._id}-l-${idx}`} src={full} alt={img.caption ?? event.title} thumbnailSrc={thumb} />
                           );
@@ -199,8 +196,9 @@ function formatDate(dateStr: string) {
                     {hasImages && (
                       <div class="grid grid-cols-2 gap-2 mb-3">
                         {event.images.slice(0, 4).map((img: any, idx: number) => {
-                          const thumb = urlFor(img.image).width(300).height(200).fit("crop").url();
-                          const full = urlFor(img.image).width(1200).url();
+                          const thumb = img.image ? urlFor(img.image).width(300).height(200).fit("crop").url() : null;
+                          const full = img.image ? urlFor(img.image).width(1200).url() : null;
+                          if (!thumb || !full) return null;
                           return (
                             <Lightbox id={`${event._id}-r-${idx}`} src={full} alt={img.caption ?? event.title} thumbnailSrc={thumb} />
                           );
