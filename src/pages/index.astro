@@ -150,21 +150,6 @@ const storyExcerpt = (campaign?.story ?? [])
         {sanitySettings?.shortDescription}
       </p>
 
-      <!-- Buttons -->
-      <!-- <div class="mb-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
-        {campaign?.isActive && (
-          <a
-            href="/donate"
-            class={cn(
-              buttonVariants({ variant: "default" }),
-              "h-auto bg-accent px-6 py-3 text-sm font-semibold text-accent-foreground hover:bg-accent/90"
-            )}
-          >
-            💛 Donate to New Location Fund
-          </a>
-        )}
-      </div> -->
-
       <!-- Prayer times card — rounded, centered, inline width -->
       <div class="mx-auto inline-block w-full max-w-2xl rounded-2xl bg-black/50 px-6 py-5 text-left backdrop-blur-md">
 
@@ -310,70 +295,6 @@ const storyExcerpt = (campaign?.story ?? [])
         </div>
 
       </div>
-    </div>
-  </section>
-
-  <!-- ════════════════════════════════════════════════ -->
-  <!-- CAMPAIGN / DONATE                                -->
-  <!-- ════════════════════════════════════════════════ -->
-  {campaign?.isActive && (
-    <section id="donate" class="layout-full bg-sidebar text-sidebar-foreground py-14 scroll-mt-24">
-      <div class="layout-base max-w-3xl mx-auto">
-        <p class="text-accent text-sm font-semibold uppercase tracking-widest mb-2">Fundraising Campaign</p>
-        <h2 class="text-3xl font-bold uppercase tracking-wider mb-3">{campaign.title}</h2>
-        <p class="text-sidebar-foreground/70 mb-6 text-lg">{campaign.tagline}</p>
-        <div class="bg-sidebar-foreground/10 h-3 rounded-full overflow-hidden mb-3">
-          <div class="bg-accent h-3 rounded-full" style={`width: ${pct}%`} role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} />
-        </div>
-        <div class="flex justify-between text-sm text-sidebar-foreground/70 mb-6">
-          <span><span class="text-sidebar-foreground font-bold text-lg">${raised.toLocaleString()}</span> raised</span>
-          <span>{pct}% of ${goal.toLocaleString()}</span>
-        </div>
-        {storyExcerpt && (
-          <p class="text-sidebar-foreground/80 leading-relaxed mb-8">
-            {storyExcerpt.slice(0, 300)}{storyExcerpt.length > 300 ? "..." : ""}
-          </p>
-        )}
-        <div class="flex flex-col sm:flex-row gap-4 items-start">
-          <a href="/donate" class={cn(buttonVariants({ variant: "ghost" }), "text-sidebar-foreground border border-sidebar-foreground/30 hover:bg-sidebar-foreground/10")}>
-            Learn More →
-          </a>
-        </div>
-      </div>
-    </section>
-  )}
-
-  <!-- ════════════════════════════════════════════════ -->
-  <!-- ABOUT US                                         -->
-  <!-- ════════════════════════════════════════════════ -->
-  <section id="about" class="layout-full bg-background py-14 scroll-mt-24">
-    <div class="layout-base">
-      <h2 class="text-3xl font-bold uppercase tracking-wider mb-8">About Us</h2>
-      <div class="grid gap-4 sm:grid-cols-3 mb-6">
-        <div class="bg-card border border-muted-foreground rounded-xl p-6 text-center">
-          <p class="text-4xl font-bold text-primary mb-1">2019</p>
-          <p class="text-foreground text-sm">Founded</p>
-        </div>
-        <div class="bg-card border border-muted-foreground rounded-xl p-6 text-center">
-          <p class="text-4xl font-bold text-primary mb-1">501c3</p>
-          <p class="text-foreground text-sm">Registered Nonprofit</p>
-        </div>
-        <div class="bg-card border border-muted-foreground rounded-xl p-6 text-center">
-          <p class="text-4xl font-bold text-primary mb-1">☽</p>
-          <p class="text-foreground text-sm">Shia Ithna Ashari</p>
-        </div>
-      </div>
-      {org?.mission && (
-        <a
-          href="/about-us"
-          class="bg-card border border-muted-foreground rounded-xl p-8 hover:border-secondary transition-colors group block"
-        >
-          <div class="text-4xl mb-4"></div>
-          <h2 class="text-xl text-primary font-semibold group-hover:text-secondary transition-colors mb-3">🕌 Our Mission & Vision</h2>
-          <p class="text-foreground leading-relaxed mb-4">{org.mission}</p>
-          <p class="text-secondary text-sm font-medium">Read more →</p>
-        </a>
-      )}
     </div>
   </section>
 
