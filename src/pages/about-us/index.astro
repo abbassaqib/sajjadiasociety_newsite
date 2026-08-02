@@ -1,13 +1,10 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import { getOrgInfo } from "@/data/sanityQueries";
-import VerticalTimeline from "@/components/VerticalTimeline.astro";
-import { getTimelineEvents } from "@/data/sanityQueries";
 
 // const org = await getOrgInfo();
-const [org, timelineEvents] = await Promise.all([
+const [org] = await Promise.all([
   getOrgInfo(),
-  getTimelineEvents(),
 ]);
 
 ---
@@ -86,16 +83,9 @@ const [org, timelineEvents] = await Promise.all([
       </section>
     )}
 
-    {timelineEvents?.length > 0 && (
-      <section class="mt-4">
-        <h2 class="text-2xl font-bold uppercase tracking-wider mb-2">Our Journey</h2>
-        <p class="text-muted-foreground mb-8 text-sm">
-          The history of Sajjadia Islamic Society — from founding to our permanent home.
-          Click any event to expand details, photos, and documents.
-        </p>
-        <VerticalTimeline events={timelineEvents} />
-      </section>
-    )}
+    <a href="/our-story" class="inline-flex items-center gap-2 text-secondary font-medium hover:underline underline-offset-4">
+      Read our full story and timeline →
+    </a>
 
   </main>
 </BaseLayout>

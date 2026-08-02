@@ -1,0 +1,139 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import VerticalTimeline from "@/components/VerticalTimeline.astro";
+import { getTimelineEvents, getOrgInfo } from "@/data/sanityQueries";
+
+const [timelineEvents, org] = await Promise.all([
+  getTimelineEvents(),
+  getOrgInfo(),
+]);
+
+function renderBlocks(blocks: any[]): string {
+  if (!blocks?.length) return "";
+  return blocks.map((block: any) => {
+    if (block._type !== "block") return "";
+    const text = block.children
+      ?.map((c: any) => {
+        let t = c.text ?? "";
+        if (c.marks?.includes("strong")) t = `<strong>${t}</strong>`;
+        if (c.marks?.includes("em")) t = `<em>${t}</em>`;
+        return t;
+      })
+      .join("") ?? "";
+    if (!text.trim()) return "";
+    if (block.style === "h3") return `<h3 class="text-lg font-semibold mt-5 mb-2">${text}</h3>`;
+    return `<p class="mb-4 leading-relaxed">${text}</p>`;
+  }).join("");
+}
+
+const aboutHtml = renderBlocks(org?.about ?? []);
+---
+
+<BaseLayout pageTitle="Our Story">
+  <main class="layout-base py-10">
+
+    <!-- Page header -->
+    <div class="border-b border-border pb-6 mb-10">
+      <h1 class="text-3xl font-bold uppercase tracking-wider mb-2">Our Story</h1>
+      <p class="text-muted-foreground">
+        The journey of Sajjadia Islamic Society — from our founding to building
+        a permanent home for the Muslim community of Riverside County.
+      </p>
+    </div>
+
+    <!-- Two column layout -->
+    <div class="flex flex-col lg:flex-row gap-12">
+
+      <!-- LEFT — Story (sticky on desktop) -->
+      <div class="lg:w-2/5 flex-shrink-0">
+        <div class="lg:sticky lg:top-8 flex flex-col gap-8">
+
+          <!-- Past -->
+          {(aboutHtml || org?.about?.length > 0) && (
+            <div>
+              <div class="flex items-center gap-3 mb-4">
+                <div class="w-8 h-8 rounded-full bg-purple-500 flex items-center justify-center text-white text-sm flex-shrink-0">🏛</div>
+                <h2 class="text-xl font-bold uppercase tracking-wider">The Beginning</h2>
+              </div>
+              <div class="border-l-2 border-purple-500/30 pl-5">
+                {aboutHtml ? (
+                  <div class="text-muted-foreground text-sm prose prose-sm max-w-none dark:prose-invert" set:html={aboutHtml} />
+                ) : (
+                  <p class="text-muted-foreground text-sm italic">Add our history in Sanity → Org Info → About Us (Full)</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          <!-- Present -->
+          {org?.currentSituation && (
+            <div>
+              <div class="flex items-center gap-3 mb-4">
+                <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-sm flex-shrink-0">🔄</div>
+                <h2 class="text-xl font-bold uppercase tracking-wider">Where We Are Today</h2>
+              </div>
+              <div class="border-l-2 border-blue-500/30 pl-5">
+                <p class="text-muted-foreground text-sm leading-relaxed">{org.currentSituation}</p>
+              </div>
+            </div>
+          )}
+
+          <!-- Future -->
+          {org?.futurePlans && (
+            <div>
+              <div class="flex items-center gap-3 mb-4">
+                <div class="w-8 h-8 rounded-full bg-yellow-500 flex items-center justify-center text-white text-sm flex-shrink-0">⭐</div>
+                <h2 class="text-xl font-bold uppercase tracking-wider">Looking Ahead</h2>
+              </div>
+              <div class="border-l-2 border-yellow-500/30 pl-5">
+                <p class="text-muted-foreground text-sm leading-relaxed mb-5">{org.futurePlans}</p>
+                <a
+                  href="/donate"
+                  style="background-color: #b8860b; color: #ffffff;"
+                  class="inline-flex items-center gap-2 font-semibold px-5 py-2.5 rounded-lg text-sm hover:opacity-90 transition-opacity"
+                >
+                  Support Our Campaign
+                  <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M7 17L17 7"/><path d="M7 7h10v10"/>
+                  </svg>
+                </a>
+              </div>
+            </div>
+          )}
+
+          <!-- Placeholder if no story content yet -->
+          {!aboutHtml && !org?.currentSituation && !org?.futurePlans && (
+            <div class="bg-muted rounded-xl p-6 text-center">
+              <p class="text-muted-foreground text-sm">
+                Add your story in Sanity Studio → Org Info & Chatbot Context
+              </p>
+            </div>
+          )}
+
+        </div>
+      </div>
+
+      <!-- RIGHT — Timeline -->
+      <div class="lg:w-3/5 min-w-0">
+        <div class="flex items-center gap-3 mb-8">
+          <h2 class="text-xl font-bold uppercase tracking-wider">Timeline</h2>
+          <span class="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">
+            Click any event to expand
+          </span>
+        </div>
+
+        {timelineEvents?.length > 0 ? (
+          <VerticalTimeline events={timelineEvents} />
+        ) : (
+          <div class="bg-muted rounded-xl p-12 text-center">
+            <p class="text-muted-foreground text-lg">Timeline coming soon.</p>
+            <p class="text-muted-foreground text-sm mt-2">
+              Add events in Sanity Studio → Timeline Events.
+            </p>
+          </div>
+        )}
+      </div>
+
+    </div>
+  </main>
+</BaseLayout>

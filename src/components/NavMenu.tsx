@@ -1,9 +1,11 @@
 import * as React from "react";
 
 const NAV_ITEMS = [
-  { label: "Donate", href: "/donate" },
-  { label: "News & Events", href: "/news-events" },
+  { label: "Home", href: "/" },
   { label: "About Us", href: "/about-us" },
+  { label: "Our Story", href: "/our-story" },
+  { label: "News & Events", href: "/news-events" },
+  { label: "Support Us", href: "/donate" },
 ];
 
 interface NavMenuProps extends React.HTMLAttributes<HTMLElement> {
