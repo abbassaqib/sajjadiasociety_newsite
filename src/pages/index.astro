@@ -245,7 +245,16 @@ const storyExcerpt = (campaign?.story ?? [])
               })}
             </div>
           ) : (
-            <div class="bg-muted rounded-xl p-8 text-center text-muted-foreground text-sm">No announcements yet.</div>
+            <div class="bg-muted rounded-xl p-8 text-center">
+              {/* <p class="text-muted-foreground text-sm">No announcements yet.</p> */}
+              <p class="text-muted-foreground text-md mt-2">
+                Follow us on{" "}
+                <a href="https://www.facebook.com/sajjadiaislamicsociety" class="text-secondary hover:underline" target="_blank" rel="noopener noreferrer">
+                  Facebook
+                </a>{" "}
+                for updates.
+              </p>
+            </div>
           )}
         </div>
 
@@ -290,7 +299,16 @@ const storyExcerpt = (campaign?.story ?? [])
               })}
             </div>
           ) : (
-            <div class="bg-muted rounded-xl p-8 text-center text-muted-foreground text-sm">No upcoming events.</div>
+            <div class="bg-muted rounded-xl p-8 text-center">
+              {/* <p class="text-muted-foreground text-sm">No upcoming events.</p> */}
+              <p class="text-muted-foreground text-md mt-2">
+                Follow us on{" "}
+                <a href="https://www.facebook.com/sajjadiaislamicsociety" class="text-secondary hover:underline" target="_blank" rel="noopener noreferrer">
+                  Facebook
+                </a>{" "}
+                for updates.
+              </p>
+            </div>
           )}
         </div>
 

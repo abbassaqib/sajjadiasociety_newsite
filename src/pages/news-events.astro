@@ -1,13 +1,12 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import Lightbox from "@/components/Lightbox.astro";
-import { getAnnouncements, getUpcomingPrograms, getPastPrograms } from "@/data/sanityQueries";
+import { getAnnouncements, getUpcomingPrograms } from "@/data/sanityQueries";
 import { urlFor } from "@/lib/sanity";
 
-const [announcements, upcoming, past] = await Promise.all([
+const [announcements, upcoming] = await Promise.all([
   getAnnouncements(50),
   getUpcomingPrograms(20),
-  getPastPrograms(20),
 ]);
 
 const categoryLabel: Record<string, string> = {
@@ -180,47 +179,6 @@ function formatTime(dateStr: string) {
         </div>
       )}
     </section>
-
-    <!-- ── PAST EVENTS ── -->
-    <!-- {past && past.length > 0 && (
-      <section>
-        <h2 class="text-2xl font-bold uppercase tracking-wider mb-6 text-muted-foreground">
-          Past Events
-        </h2>
-        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {past.map((program: any) => {
-            const thumbUrl = program.image
-              ? urlFor(program.image).width(400).height(260).fit("crop").url()
-              : null;
-            const fullUrl = program.image
-              ? urlFor(program.image).width(1600).url()
-              : null;
-
-            return (
-              <div class="bg-card border border-border rounded-xl overflow-hidden hover:border-secondary transition-colors group">
-                {thumbUrl && fullUrl && (
-                  <Lightbox
-                    id={`past-${program._id}`}
-                    src={fullUrl}
-                    alt={program.title}
-                    thumbnailSrc={thumbUrl}
-                  />
-                )}
-                <div class="p-5">
-                  <p class="font-semibold group-hover:text-secondary transition-colors mb-2">
-                    {program.title}
-                  </p>
-                  <p class="text-muted-foreground text-sm">{formatDate(program.startDate)}</p>
-                  {program.speaker && (
-                    <p class="text-muted-foreground text-sm mt-1 italic">{program.speaker}</p>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </section>
-    )} -->
 
   </main>
 </BaseLayout>
