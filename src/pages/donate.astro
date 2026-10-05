@@ -108,7 +108,7 @@ const bodyHtml = renderBody(campaign.story ?? []);
     )}
 
     <!-- ── IMAGES SECTION ── -->
-    {campaign.images?.length > 0 && (
+    {campaign.images?.some((i: any) => i.image) && (
       <section class="layout-full bg-muted py-16">
         <div class="layout-base">
           <h2 class="text-3xl font-bold uppercase tracking-wider mb-10 text-primary">
@@ -138,7 +138,7 @@ const bodyHtml = renderBody(campaign.story ?? []);
     )}
 
     <!-- ── VIDEOS SECTION ── -->
-    {campaign.videos?.length > 0 && (
+    {campaign.videos?.some((v: any) => v.url) && (
       <section class="layout-full bg-background py-16">
         <div class="layout-base">
           <h2 class="text-3xl font-bold uppercase tracking-wider mb-10 text-primary">

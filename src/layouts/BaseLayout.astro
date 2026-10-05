@@ -8,6 +8,7 @@ import Header from "@/layouts/Header.astro";
 import Footer from "@/layouts/Footer.astro";
 import ContactModal from "@/components/ContactModal.astro";
 import { siteConfig } from "@/data/contentCollectionDataFetching";
+import { getSiteSettings } from "@/data/sanityQueries";
 
 interface Props {
   pageTitle: string;
@@ -15,11 +16,15 @@ interface Props {
 
 const { pageTitle } = Astro.props;
 
-const siteName = siteConfig?.data.general.name ?? "Church Website";
+const sanitySettings = await getSiteSettings();
+const siteName = sanitySettings?.name ?? "Sajjadia Islamic Society";
 const colorScheme = siteConfig?.data.theme?.colorScheme ?? "auto";
 const metaTitle = pageTitle ? `${pageTitle} | ${siteName}` : siteName;
 const metaDescription =
-  siteConfig?.data.general.description ?? "Church website built with Astro.";
+  sanitySettings?.shortDescription ??
+  "A Shia Muslim community organization serving Corona and Inland Empire, CA.";
+const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
+const ogImage = new URL("/og-image.jpg", Astro.site);
 ---
 
 <script is:inline define:vars={{ colorScheme }}>
@@ -39,9 +44,19 @@ const metaDescription =
   <head>
     <!-- META -->
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
     <meta name="description" content={metaDescription} />
+    <link rel="canonical" href={canonicalUrl} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={siteName} />
+    <meta property="og:title" content={metaTitle} />
+    <meta property="og:description" content={metaDescription} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
     <link rel="sitemap" href="/sitemap-index.xml" />
 
     <!-- FAVICON -->
