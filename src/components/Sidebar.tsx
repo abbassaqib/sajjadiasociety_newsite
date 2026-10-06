@@ -34,7 +34,7 @@ const Sidebar: React.FC<SidebarProps> = () => {
         >
           <Hamburger
             toggled={isOpen}
-            color="var(--sidebar-foreground)"
+            color="var(--foreground)"
             size={24}
             label="Button to open sidebar menu"
           />
@@ -51,7 +51,7 @@ const Sidebar: React.FC<SidebarProps> = () => {
               <a
                 key={item.label}
                 href={item.href}
-                className="rounded-md px-4 py-3 text-base font-semibold tracking-widest uppercase transition-colors text-foreground hover:bg-muted"
+                className="rounded-md px-4 py-3 text-base font-semibold   transition-colors text-foreground hover:bg-muted"
               >
                 {item.label}
               </a>

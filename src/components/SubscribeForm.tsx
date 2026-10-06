@@ -1,4 +1,5 @@
 import * as React from "react";
+import { CircleCheck } from "lucide-react";
 
 const SubscribeForm: React.FC = () => {
   const [fullName, setFullName] = React.useState("");
@@ -33,7 +34,10 @@ const SubscribeForm: React.FC = () => {
   if (status === "success") {
     return (
       <div className="rounded-xl bg-sidebar-foreground/10 p-4 text-center">
-        <p className="text-lg mb-1">✅ Request Received!</p>
+        <p className="mb-1 flex items-center justify-center gap-2 text-lg font-semibold">
+          <CircleCheck size={20} aria-hidden="true" />
+          Request received
+        </p>
         <p className="text-sidebar-foreground/70 text-sm">
           JazakAllah Khair! We'll add you to the WhatsApp group soon.
         </p>
@@ -49,7 +53,7 @@ const SubscribeForm: React.FC = () => {
         value={fullName}
         onChange={(e) => setFullName(e.target.value)}
         required
-        className="rounded-lg bg-sidebar-foreground/10 border border-sidebar-foreground/20 px-3 py-2.5 text-sm text-sidebar-foreground placeholder:text-sidebar-foreground/40 focus:outline-none focus:ring-2 focus:ring-accent"
+        className="rounded-lg bg-sidebar-foreground/10 border border-sidebar-foreground/20 px-3 py-2.5 text-sm text-sidebar-foreground placeholder:text-sidebar-foreground/40 focus:outline-none focus:ring-2 focus:ring-sidebar-foreground/60"
       />
       <input
         type="tel"
@@ -57,7 +61,7 @@ const SubscribeForm: React.FC = () => {
         value={phone}
         onChange={(e) => setPhone(e.target.value)}
         required
-        className="rounded-lg bg-sidebar-foreground/10 border border-sidebar-foreground/20 px-3 py-2.5 text-sm text-sidebar-foreground placeholder:text-sidebar-foreground/40 focus:outline-none focus:ring-2 focus:ring-accent"
+        className="rounded-lg bg-sidebar-foreground/10 border border-sidebar-foreground/20 px-3 py-2.5 text-sm text-sidebar-foreground placeholder:text-sidebar-foreground/40 focus:outline-none focus:ring-2 focus:ring-sidebar-foreground/60"
       />
       {errorMsg && (
         <p className="text-red-400 text-xs">{errorMsg}</p>
@@ -65,7 +69,7 @@ const SubscribeForm: React.FC = () => {
       <button
         type="submit"
         disabled={status === "loading"}
-        className="rounded-lg bg-accent text-accent-foreground font-semibold py-2.5 text-sm hover:bg-accent/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="rounded-lg font-semibold py-2.5 text-sm bg-sidebar-foreground text-sidebar hover:bg-sidebar-foreground/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {status === "loading" ? "Submitting..." : "Join WhatsApp Group"}
       </button>

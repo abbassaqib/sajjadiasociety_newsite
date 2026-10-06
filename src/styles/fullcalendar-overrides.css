@@ -10,11 +10,11 @@
   /* -------------- */
   /* Title (Month YYYY) */
   .fc .fc-toolbar-title {
-    @apply text-xl font-bold uppercase md:text-3xl;
+    @apply text-xl font-bold  md:text-3xl;
   }
   /* Today Button */
   .fc .fc-today-button {
-    @apply font-medium uppercase;
+    @apply font-medium ;
   }
   /* Buttons */
   .fc .fc-button-primary:focus {
@@ -49,7 +49,7 @@
   /* Day Heading */
   .fc-list-day-text,
   .fc-list-day-side-text {
-    @apply text-muted-foreground font-medium uppercase;
+    @apply text-muted-foreground font-medium ;
   }
   --fc-neutral-bg-color: var(--color-muted);
   /* Highlight "Today" text */

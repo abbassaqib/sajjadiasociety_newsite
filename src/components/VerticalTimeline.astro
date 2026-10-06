@@ -1,6 +1,7 @@
 ---
 import { urlFor } from "@/lib/sanity";
 import Lightbox from "@/components/Lightbox.astro";
+import { Landmark, CalendarDays, MapPin, HandCoins, Flag, FileText, Star } from "lucide-react";
 
 interface Props {
   events: any[];
@@ -8,142 +9,148 @@ interface Props {
 
 const { events } = Astro.props;
 
-const categoryConfig: Record<string, { emoji: string; color: string; badge: string }> = {
-  milestone: { emoji: "🏛", color: "bg-purple-500", badge: "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300" },
-  program:   { emoji: "🕌", color: "bg-blue-500",   badge: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300" },
-  location:  { emoji: "📍", color: "bg-green-500",  badge: "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300" },
-  campaign:  { emoji: "💰", color: "bg-yellow-500", badge: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300" },
-  future:    { emoji: "⭐", color: "bg-gray-400",   badge: "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400" },
+// One color for everything — categories are told apart by icon, not hue
+const categoryConfig: Record<string, { label: string; Icon: any }> = {
+  milestone: { label: "Milestone", Icon: Landmark },
+  program:   { label: "Program",   Icon: CalendarDays },
+  location:  { label: "Location",  Icon: MapPin },
+  campaign:  { label: "Campaign",  Icon: HandCoins },
+  future:    { label: "Future",    Icon: Flag },
 };
 
+// timeZone UTC so a "2019-01-01" date never shows as December 2018
 function formatDate(dateStr: string) {
-  const d = new Date(dateStr);
-  return d.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+  return new Date(dateStr).toLocaleDateString("en-US", {
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  });
 }
 ---
 
 <div class="relative">
 
-  <!-- Vertical line — left side -->
-  <div class="absolute left-4 top-0 bottom-0 w-0.5 bg-border" aria-hidden="true" />
+  <!-- Vertical line through the center of the icons -->
+  <div class="absolute left-5 top-4 bottom-4 w-px -translate-x-1/2 bg-border" aria-hidden="true"></div>
 
-  <div class="flex flex-col gap-6">
+  <ol class="flex flex-col gap-5">
     {events.map((event) => {
       const cfg = categoryConfig[event.category] ?? categoryConfig.future;
-      const isFuture = event.status === "upcoming";
-      const hasImages = event.images?.length > 0;
-      const hasDocs = event.documents?.length > 0;
+      const CatIcon = cfg.Icon;
+      const isUpcoming = event.status === "upcoming";
+      const isCurrent = event.status === "current";
+      const images = (event.images ?? []).filter((img: any) => img?.image);
+      const docs = (event.documents ?? []).filter((d: any) => d?.file?.asset?.url);
 
       return (
-        <div class="flex gap-4">
+        <li class="flex gap-4">
 
-          <!-- Dot on the line -->
-          <div class="flex flex-col items-center flex-shrink-0 z-10" style="margin-top: 18px;">
-            <div class={`w-9 h-9 rounded-full ${cfg.color} flex items-center justify-center text-white text-base shadow-md ${isFuture ? 'opacity-50' : ''}`}>
-              {cfg.emoji}
-            </div>
+          <!-- Icon on the line: filled = past/current, outlined = upcoming -->
+          <div
+            class={`relative z-10 mt-4 flex h-10 w-10 flex-none items-center justify-center rounded-full ${
+              isUpcoming
+                ? "border-2 border-primary bg-card text-primary"
+                : "bg-primary text-primary-foreground"
+            }`}
+          >
+            <CatIcon size={18} strokeWidth={1.75} aria-hidden="true" />
           </div>
 
-          <!-- Card — always on the right -->
-          <div class="flex-1 min-w-0 pb-2">
-            <details class={`rounded-xl border bg-card overflow-hidden group ${isFuture ? 'border-dashed opacity-75' : 'border-border'} ${event.isFeatured ? 'ring-2 ring-primary/20' : ''}`}>
-              <summary class="p-4 cursor-pointer list-none">
+          <!-- Card -->
+          <details
+            class={`group min-w-0 flex-1 overflow-hidden rounded-xl border bg-card ${
+              isUpcoming ? "border-dashed border-border" : "border-border"
+            } ${event.isFeatured ? "shadow-md" : ""}`}
+          >
+            <summary class="cursor-pointer list-none p-4 [&::-webkit-details-marker]:hidden">
 
-                <div class="flex flex-wrap items-center gap-2 mb-1.5">
-                  <span class={`text-xs font-semibold px-2 py-0.5 rounded-full ${cfg.badge}`}>
-                    {event.category.charAt(0).toUpperCase() + event.category.slice(1)}
+              <div class="mb-1.5 flex flex-wrap items-center gap-2">
+                <span class="rounded-full bg-muted px-2.5 py-0.5 text-xs font-semibold text-foreground">
+                  {cfg.label}
+                </span>
+                {isCurrent && (
+                  <span class="inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-0.5 text-xs font-semibold text-foreground">
+                    <span class="h-2 w-2 animate-pulse rounded-full bg-primary"></span>
+                    In progress
                   </span>
-                  {event.isFeatured && (
-                    <span class="text-xs bg-accent/20 text-accent px-2 py-0.5 rounded-full font-medium">
-                      ⭐ Featured
-                    </span>
-                  )}
-                  {event.status === "current" && (
-                    <span class="text-xs bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 px-2 py-0.5 rounded-full font-medium animate-pulse">
-                      🔄 In Progress
-                    </span>
-                  )}
-                </div>
-
-                <p class="text-xs text-muted-foreground mb-1">{formatDate(event.date)}</p>
-
-                <p class={`font-semibold leading-snug text-sm ${event.isFeatured ? 'text-primary' : 'text-foreground'}`}>
-                  {event.title}
-                </p>
-
-                <p class="text-xs text-secondary mt-2 group-open:hidden">▼ Show details</p>
-                <p class="text-xs text-secondary mt-2 hidden group-open:block">▲ Hide details</p>
-
-              </summary>
-
-              <!-- Expanded content -->
-              <div class="px-4 pb-4 border-t border-border pt-3">
-
-                {event.description && (
-                  <p class="text-sm text-muted-foreground leading-relaxed mb-4">{event.description}</p>
                 )}
-
-                <!-- Images -->
-                {hasImages && (
-                  <div class="grid grid-cols-2 gap-2 mb-3">
-                    {event.images.slice(0, 4).map((img: any, idx: number) => {
-                      const thumb = img.image ? urlFor(img.image).width(300).height(200).fit("crop").url() : null;
-                      const full = img.image ? urlFor(img.image).width(1200).url() : null;
-                      if (!thumb || !full) return null;
-                      return (
-                        <Lightbox
-                          id={`${event._id}-${idx}`}
-                          src={full}
-                          alt={img.caption ?? event.title}
-                          thumbnailSrc={thumb}
-                        />
-                      );
-                    })}
-                  </div>
+                {isUpcoming && (
+                  <span class="rounded-full border border-border px-2.5 py-0.5 text-xs font-semibold text-muted-foreground">
+                    Upcoming
+                  </span>
                 )}
-
-                <!-- Documents -->
-                {hasDocs && (
-                  <div class="flex flex-col gap-1.5">
-                    {event.documents.map((doc: any) => {
-                      if (!doc.file?.asset?.url) return null;
-                      return (
-                        <a
-                          href={doc.file.asset.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          class="inline-flex items-center gap-2 text-xs text-secondary hover:underline underline-offset-2"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                            <polyline points="14 2 14 8 20 8"/>
-                          </svg>
-                          {doc.label ?? "View Document"}
-                        </a>
-                      );
-                    })}
-                  </div>
+                {event.isFeatured && (
+                  <Star size={14} aria-label="Featured" className="fill-current text-muted-foreground" />
                 )}
-
               </div>
-            </details>
-          </div>
 
-        </div>
+              <p class="mb-1 text-sm text-muted-foreground">{formatDate(event.date)}</p>
+
+              <p class={`font-semibold leading-snug text-foreground ${event.isFeatured ? "text-lg" : ""}`}>
+                {event.title}
+              </p>
+
+              <p class="mt-2 text-sm font-semibold text-secondary group-open:hidden">Show details</p>
+              <p class="mt-2 hidden text-sm font-semibold text-secondary group-open:block">Hide details</p>
+            </summary>
+
+            <div class="border-t border-border px-4 pb-4 pt-3">
+              {event.description && (
+                <p class="mb-4 text-[15px] leading-relaxed text-muted-foreground">{event.description}</p>
+              )}
+
+              {images.length > 0 && (
+                <div class="mb-3 grid grid-cols-2 gap-2">
+                  {images.slice(0, 4).map((img: any, idx: number) => {
+                    const thumb = urlFor(img.image).width(300).height(200).fit("crop").url();
+                    const full = urlFor(img.image).width(1200).url();
+                    return (
+                      <Lightbox
+                        id={`${event._id}-${idx}`}
+                        src={full}
+                        alt={img.caption ?? event.title}
+                        thumbnailSrc={thumb}
+                      />
+                    );
+                  })}
+                </div>
+              )}
+
+              {docs.length > 0 && (
+                <ul class="flex flex-col gap-1.5">
+                  {docs.map((doc: any) => (
+                    <li>
+                      <a
+                        href={doc.file.asset.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="inline-flex items-center gap-2 text-sm font-semibold text-secondary underline-offset-2 hover:underline"
+                      >
+                        <FileText size={16} aria-hidden="true" />
+                        {doc.label ?? "View document"}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </details>
+
+        </li>
       );
     })}
-  </div>
+  </ol>
 
   <!-- Legend -->
-  <div class="mt-8 flex flex-wrap gap-3 pt-6 border-t border-border">
-    {Object.entries(categoryConfig).map(([cat, cfg]) => (
+  <div class="mt-8 flex flex-wrap gap-x-5 gap-y-2 border-t border-border pt-6">
+    {Object.values(categoryConfig).map(({ label, Icon }) => (
       <span class="flex items-center gap-1.5 text-xs text-muted-foreground">
-        <span class={`w-2.5 h-2.5 rounded-full ${cfg.color}`}></span>
-        {cat.charAt(0).toUpperCase() + cat.slice(1)}
+        <Icon size={14} aria-hidden="true" />
+        {label}
       </span>
     ))}
     <span class="flex items-center gap-1.5 text-xs text-muted-foreground">
-      <span class="border border-dashed border-muted-foreground w-4"></span>
+      <span class="h-3.5 w-3.5 rounded-full border-2 border-primary" aria-hidden="true"></span>
       Upcoming
     </span>
   </div>

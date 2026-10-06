@@ -21,9 +21,20 @@ export default defineConfig({
   },
   fonts: [
     {
-      name: "Poppins",
-      cssVariable: "--font-poppins",
+      name: "Source Sans 3",
+      cssVariable: "--font-source-sans",
       provider: fontProviders.google(),
+      weights: [400, 600, 700],
+      styles: ["normal", "italic"],
+      subsets: ["latin"],
+    },
+    {
+      name: "Marcellus",
+      cssVariable: "--font-marcellus",
+      provider: fontProviders.google(),
+      weights: [400],
+      styles: ["normal"],
+      subsets: ["latin"],
     },
   ],
   integrations: [

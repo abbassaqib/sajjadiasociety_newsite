@@ -5,6 +5,7 @@ import SocialMediaLinks from "@/components/SocialMediaLinks";
 // import { siteConfig } from "@/data/contentCollectionDataFetching";
 import { getSiteSettings } from "@/data/sanityQueries";
 import { getCampaign } from "@/data/sanityQueries";
+import { Mail } from "lucide-react";
 
 // const form = siteConfig?.data.footer?.form;
 
@@ -78,9 +79,9 @@ const donorboxCampaign = donorboxUrl.split('/').pop() ?? ''
       <!-- Contact Us button -->
       <button
         data-contact-trigger
-        class="w-fit inline-flex items-center gap-2 bg-accent text-accent-foreground font-semibold px-5 py-2.5 rounded-lg text-sm hover:bg-accent/90 transition-colors"
+        class="w-fit inline-flex items-center gap-2 font-semibold px-5 py-2.5 rounded-lg text-sm bg-sidebar-foreground text-sidebar hover:bg-sidebar-foreground/90 transition-colors"
       >
-        ✉ Contact Us
+        <Mail size={16} aria-hidden="true" /> Contact Us
       </button>
 
       <!-- Social icons — wrapped to override color -->
@@ -117,7 +118,7 @@ const donorboxCampaign = donorboxUrl.split('/').pop() ?? ''
         type="popup"
         button-label="Quick Donate"
         button-type="regular"
-        button-color="#b8860b"
+        button-color="var(--give)"
         button-size="medium"
         show-icon="">
       </dbox-widget>

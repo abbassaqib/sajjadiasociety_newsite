@@ -54,10 +54,10 @@ const bodyHtml = renderBody(campaign.story ?? []);
     <!-- ── HERO SECTION ── -->
     <section class="bg-sidebar text-sidebar-foreground py-16">
       <div class="layout-base text-center">
-        <p class="text-accent mb-3 text-sm font-semibold uppercase tracking-widest">
+        <p class="text-give mb-3 text-sm font-semibold  ">
           Fundraising Campaign
         </p>
-        <h1 class="mb-3 text-4xl font-bold uppercase tracking-wider sm:text-5xl">
+        <h1 class="mb-3 text-4xl font-bold   sm:text-5xl">
           {campaign.title}
         </h1>
         <p class="text-sidebar-foreground/70 mb-10 text-xl">
@@ -78,7 +78,7 @@ const bodyHtml = renderBody(campaign.story ?? []);
               <a href={campaign.donorboxLink}
                 target="_blank"
                 rel="noopener noreferrer"
-                style="background-color: #b8860b; color: #ffffff;"
+                style="background-color: var(--give); color: var(--give-foreground);"
                 class="inline-flex items-center gap-2 font-semibold px-8 py-4 rounded-lg text-base transition-opacity hover:opacity-90"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
@@ -96,7 +96,7 @@ const bodyHtml = renderBody(campaign.story ?? []);
     {bodyHtml && (
       <section class="layout-full bg-background py-16">
         <div class="layout-base">
-          <h2 class="text-3xl font-bold uppercase tracking-wider mb-10 text-primary">
+          <h2 class="text-3xl font-bold   mb-10 text-primary">
             Our Story
           </h2>
           <div
@@ -111,7 +111,7 @@ const bodyHtml = renderBody(campaign.story ?? []);
     {campaign.images?.some((i: any) => i.image) && (
       <section class="layout-full bg-muted py-16">
         <div class="layout-base">
-          <h2 class="text-3xl font-bold uppercase tracking-wider mb-10 text-primary">
+          <h2 class="text-3xl font-bold   mb-10 text-primary">
             Our Community
           </h2>
           <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -141,7 +141,7 @@ const bodyHtml = renderBody(campaign.story ?? []);
     {campaign.videos?.some((v: any) => v.url) && (
       <section class="layout-full bg-background py-16">
         <div class="layout-base">
-          <h2 class="text-3xl font-bold uppercase tracking-wider mb-10 text-primary">
+          <h2 class="text-3xl font-bold   mb-10 text-primary">
             Watch & Learn
           </h2>
           <div class="grid gap-8 sm:grid-cols-2">
@@ -177,7 +177,7 @@ const bodyHtml = renderBody(campaign.story ?? []);
     <!-- ── BOTTOM CTA ── -->
     <section class="layout-full bg-sidebar py-16">
       <div class="layout-base text-center">
-        <h2 class="text-sidebar-foreground mb-4 text-3xl font-bold uppercase tracking-wider">
+        <h2 class="text-sidebar-foreground mb-4 text-3xl font-bold  ">
           Be Part of Something Lasting
         </h2>
         <p class="text-sidebar-foreground/70 mb-4 text-lg max-w-xl mx-auto">
@@ -195,7 +195,7 @@ const bodyHtml = renderBody(campaign.story ?? []);
             <a href={campaign.donorboxLink}
               target="_blank"
               rel="noopener noreferrer"
-              style="background-color: #b8860b; color: #ffffff;"
+              style="background-color: var(--give); color: var(--give-foreground);"
               class="inline-flex items-center gap-2 font-semibold px-8 py-4 rounded-lg text-base transition-opacity hover:opacity-90"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">

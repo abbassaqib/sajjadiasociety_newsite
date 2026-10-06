@@ -13,7 +13,7 @@ const [org] = await Promise.all([
   <main class="layout-base gap-10 py-10">
 
     <div class="border-b border-border pb-6">
-      <h1 class="text-3xl font-bold uppercase tracking-wider mb-2">About Us</h1>
+      <h1 class="text-3xl font-bold   mb-2">About Us</h1>
       <p class="text-muted-foreground">
         Learn about Sajjadia Islamic Society — who we are, what we believe, and where we're headed.
       </p>
@@ -30,24 +30,10 @@ const [org] = await Promise.all([
           <p class="text-foreground text-sm">Registered Nonprofit</p>
         </div>
         <div class="bg-card border border-muted-foreground rounded-xl p-6 text-center">
-          <p class="text-4xl font-bold text-primary mb-1">☽</p>
-          <p class="text-foreground text-sm">Shia Ithna Ashari</p>
+          <p class="text-4xl font-bold text-primary mb-1">Shia</p>
+          <p class="text-foreground text-sm">Ithna Ashari (Twelver)</p>
         </div>
     </section>
-
-    <!-- Current Situation -->
-    <!-- {org?.currentSituation && (
-      <section class="bg-primary border border-muted-foreground text-primary-foreground rounded-2xl p-8">
-        <h2 class="text-xl font-semibold mb-4">Our Current Situation</h2>
-        <p class="text-primary-foreground/80 leading-relaxed">{org.currentSituation}</p>
-        <a
-          href="/donate"
-          class="inline-block mt-6 bg-accent text-accent-foreground font-semibold px-6 py-3 rounded-lg text-sm hover:bg-accent/90 transition-colors"
-        >
-          Help Us Build The New Mosque →
-        </a>
-      </section>
-    )} -->
 
     <!-- Mission card -->
     {org?.mission && (

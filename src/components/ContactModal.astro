@@ -1,4 +1,6 @@
 ---
+import { CircleCheck } from "lucide-react";
+
 const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY
 ---
 
@@ -109,7 +111,7 @@ const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY
         id="contact-submit"
         type="submit"
         disabled
-        class="w-full bg-accent text-accent-foreground font-semibold py-3 rounded-lg text-sm hover:bg-accent/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        class="w-full font-semibold py-3 rounded-lg text-sm bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         Send Message
       </button>
@@ -118,7 +120,7 @@ const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY
 
     <!-- Success state -->
     <div id="contact-success" class="hidden px-6 py-12 text-center">
-      <div class="text-5xl mb-4">✅</div>
+      <CircleCheck size={48} strokeWidth={1.5} aria-hidden="true" className="mx-auto mb-4 text-primary" />
       <h3 class="text-xl font-semibold mb-2">Message Sent!</h3>
       <p class="text-muted-foreground text-sm mb-6">
         JazakAllah Khair for reaching out. We'll get back to you as soon as possible.

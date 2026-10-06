@@ -35,7 +35,7 @@ const sorted = [...(milestones ?? [])].sort((a, b) => a.amount - b.amount);
   <!-- Progress bar with milestone markers -->
   <div class="relative h-4 bg-sidebar-foreground/10 rounded-full overflow-hidden mb-1">
     <div
-      class="h-4 bg-accent rounded-full transition-all duration-700"
+      class="h-4 bg-give rounded-full transition-all duration-700"
       style={`width: ${pct}%`}
       role="progressbar"
       aria-valuenow={pct}
@@ -69,7 +69,7 @@ const sorted = [...(milestones ?? [])].sort((a, b) => a.amount - b.amount);
         const fillPct = ((lastReachedIdx + 1) / sorted.length) * 100;
         return (
           <div
-            class="absolute top-5 left-5 h-0.5 bg-accent"
+            class="absolute top-5 left-5 h-0.5 bg-give"
             style={`width: calc(${fillPct}% - 2.5rem)`}
             aria-hidden="true"
           />
@@ -82,7 +82,7 @@ const sorted = [...(milestones ?? [])].sort((a, b) => a.amount - b.amount);
             <!-- Dot -->
             <div class={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold z-10 border-2 transition-all
               ${m.reached
-                ? 'bg-accent border-accent text-accent-foreground shadow-md'
+                ? 'bg-give border-give text-give-foreground shadow-md'
                 : 'bg-sidebar border-sidebar-foreground/20 text-sidebar-foreground/40'
               }`}
             >
@@ -94,7 +94,7 @@ const sorted = [...(milestones ?? [])].sort((a, b) => a.amount - b.amount);
             </div>
             <!-- Label -->
             <div class="text-center">
-              <p class={`text-xs font-bold ${m.reached ? 'text-accent' : 'text-sidebar-foreground/50'}`}>
+              <p class={`text-xs font-bold ${m.reached ? 'text-give' : 'text-sidebar-foreground/50'}`}>
                 ${m.amount.toLocaleString()}
               </p>
               <p class="text-xs text-sidebar-foreground/50 leading-tight mt-0.5 max-w-16 mx-auto">
@@ -128,12 +128,12 @@ const sorted = [...(milestones ?? [])].sort((a, b) => a.amount - b.amount);
   items.forEach((item, i) => {
     item.addEventListener('click', () => {
       const dot = item.querySelector('div');
-      const isReached = dot?.classList.contains('bg-accent');
+      const isReached = dot?.classList.contains('bg-give');
       const amountEl = item.querySelector('p');
       const labelEl = item.querySelectorAll('p')[1];
 
       detailTitle.textContent = `${amountEl?.textContent} — ${labelEl?.textContent}`;
-      detailStatus.textContent = isReached ? '✅ Milestone reached' : '⏳ Not yet reached — your donation helps get us here';
+      isReached ? 'Milestone reached' : 'Not reached yet. Your donation helps get us here.';
       detail.classList.remove('hidden');
 
       items.forEach(el => el.querySelector('div')?.classList.remove('scale-110'));
