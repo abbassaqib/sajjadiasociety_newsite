@@ -112,16 +112,9 @@ const donorboxCampaign = donorboxUrl.split('/').pop() ?? ''
         Every contribution makes a difference.
       </p>
 
-      <script type="module" src="https://donorbox.org/widgets.js" async></script>
-      <dbox-widget
-        campaign={donorboxCampaign}
-        type="popup"
-        button-label="Quick Donate"
-        button-type="regular"
-        button-color="var(--give)"
-        button-size="medium"
-        show-icon="">
-      </dbox-widget>
+      <a href="/donate" class="inline-flex min-h-12 items-center justify-center rounded-lg bg-give px-5 font-semibold text-give-foreground hover:bg-give/90">
+        Ways to give
+      </a>
     </section>
 
   </div>

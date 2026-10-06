@@ -64,6 +64,18 @@ export async function getCampaign() {
   `)
 }
 
+// ── Giving Options ─────────────────────────────────────
+export async function getGivingOptions() {
+  return sanityClient.fetch(`
+    *[_type == "givingOptions"][0]{
+      mosqueDescription, generalTitle, generalDescription, generalDonorboxUrl,
+      khumsDescription, khumsOrgName, khumsValidThrough, khumsUrl,
+      khumsGuideImage,
+      "ijazaUrl": ijazaPdf.asset->url
+    }
+  `)
+}
+
 // ── Announcements ─────────────────────────────────────
 export async function getAnnouncements(limit = 10) {
   return sanityClient.fetch(`
