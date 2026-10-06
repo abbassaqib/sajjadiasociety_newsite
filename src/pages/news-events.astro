@@ -1,184 +1,152 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
-import Lightbox from "@/components/Lightbox.astro";
-import { getAnnouncements, getUpcomingPrograms } from "@/data/sanityQueries";
-import { urlFor } from "@/lib/sanity";
+import DetailDialog from "@/components/DetailDialog";
+import { getAnnouncements, getUpcomingPrograms, getPastPrograms } from "@/data/sanityQueries";
+import { announcementToItem, eventToItem } from "@/lib/detailItems";
+import { Megaphone, Pin, Repeat } from "lucide-react";
 
-const [announcements, upcoming] = await Promise.all([
+const [announcementDocs, upcomingDocs, pastDocs] = await Promise.all([
   getAnnouncements(50),
-  getUpcomingPrograms(20),
+  getUpcomingPrograms(30),
+  getPastPrograms(12),
 ]);
 
-const categoryLabel: Record<string, string> = {
-  general: "General",
-  jummah: "🕌 Jummah",
-  program: "📅 Program",
-  campaign: "💰 Campaign",
-  community: "🤝 Community",
-  islamic_occasion: "☪️ Islamic Occasion",
-};
+const announcements = (announcementDocs ?? []).map(announcementToItem);
+const upcoming = (upcomingDocs ?? []).map(eventToItem);
+const past = (pastDocs ?? []).map(eventToItem);
+const allItems = [...announcements, ...upcoming, ...past];
 
-function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString("en-US", {
-    weekday: "long", month: "long", day: "numeric", year: "numeric",
-  });
-}
-
-function formatTime(dateStr: string) {
-  return new Date(dateStr).toLocaleTimeString("en-US", {
-    hour: "numeric", minute: "2-digit",
-  });
-}
+const ROW =
+  "group flex items-center gap-4 rounded-2xl border border-border bg-card p-3 pr-4 transition-colors " +
+  "hover:border-foreground/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 ---
 
-<BaseLayout pageTitle="News & Events">
-  <main class="layout-base gap-12 py-10">
+<BaseLayout pageTitle="News & events">
+  <main class="layout-base gap-14 py-10">
 
-    <div class="border-b border-border pb-6">
-      <h1 class="text-3xl font-bold   mb-2">News & Events</h1>
-      <p class="text-muted-foreground">
-        Latest announcements and upcoming programs from Sajjadia Islamic Society.
+    <header class="border-b border-border pb-6">
+      <h1 class="mb-2 text-4xl text-foreground">News &amp; events</h1>
+      <p class="max-w-2xl text-lg text-muted-foreground">
+        Announcements and upcoming programs from Sajjadia Islamic Society. Select any item to see the full details and flyer.
       </p>
-    </div>
+    </header>
 
-    <!-- ── ANNOUNCEMENTS ── -->
-    <section id="announcements">
-      <h2 class="text-2xl font-bold   mb-6 text-primary">
-        📢 Announcements
-      </h2>
+    <!-- ── Announcements ── -->
+    <section id="announcements" aria-labelledby="ann-title" class="scroll-mt-24">
+      <h2 id="ann-title" class="mb-5 text-3xl text-foreground">Announcements</h2>
 
-      {announcements && announcements.length > 0 ? (
-        <div class="flex flex-col gap-4">
-          {announcements.map((item: any) => {
-            const isExpired = item.expiryDate
-              ? new Date(item.expiryDate) < new Date()
-              : false;
-            if (isExpired) return null;
-
-            const thumbUrl = item.image
-              ? urlFor(item.image).width(300).height(300).fit("crop").url()
-              : null;
-            const fullUrl = item.image
-              ? urlFor(item.image).width(1600).url()
-              : null;
-            const date = item.publishDate
-              ? new Date(item.publishDate).toLocaleDateString("en-US", {
-                  weekday: "long", month: "long", day: "numeric", year: "numeric",
-                })
-              : "";
-
-            return (
-              <div class="bg-card border border-border rounded-xl overflow-hidden hover:border-secondary transition-colors group flex flex-col sm:flex-row">
-                {thumbUrl && fullUrl && (
-                  <div class="sm:w-48 flex-shrink-0">
-                    <Lightbox
-                      id={item._id}
-                      src={fullUrl}
-                      alt={item.title}
-                      thumbnailSrc={thumbUrl}
-                    />
-                  </div>
+      {announcements.length > 0 ? (
+        <ul class="grid gap-3 lg:grid-cols-2">
+          {announcements.map((item) => (
+            <li>
+              <a href={item.path} data-detail-id={item.id} class={ROW}>
+                {item.imageThumb ? (
+                  <img src={item.imageThumb} alt="" width="80" height="80" loading="lazy" class="h-20 w-20 flex-none rounded-xl bg-muted object-cover" />
+                ) : (
+                  <span class="flex h-20 w-20 flex-none items-center justify-center rounded-xl bg-muted text-muted-foreground">
+                    <Megaphone size={26} strokeWidth={1.5} aria-hidden="true" />
+                  </span>
                 )}
-                <div class="flex flex-1 min-w-0 p-6 flex-col gap-2">
-                  <div class="flex flex-wrap items-center gap-2">
-                    {item.category && (
-                      <span class="text-xs font-medium bg-primary/10 text-primary px-2 py-0.5 rounded-full">
-                        {categoryLabel[item.category] ?? item.category}
-                      </span>
-                    )}
+                <span class="min-w-0 flex-1">
+                  <span class="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-sm text-muted-foreground">
+                    {item.category}
                     {item.isPinned && (
-                      <span class="text-xs bg-accent/10 text-accent px-2 py-0.5 rounded-full font-medium">
-                        📌 Pinned
+                      <span class="inline-flex items-center gap-1 font-semibold text-foreground">
+                        <Pin size={13} aria-hidden="true" />
+                        Pinned
                       </span>
                     )}
-                  </div>
-                  <p class="text-lg font-semibold group-hover:text-secondary transition-colors">
+                  </span>
+                  <span class="mt-0.5 block text-lg font-semibold leading-snug text-foreground underline-offset-2 group-hover:underline">
                     {item.title}
-                  </p>
-                  {date && <p class="text-muted-foreground text-sm">{date}</p>}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+                  </span>
+                  <span class="mt-0.5 block truncate text-[15px] text-muted-foreground">
+                    {item.postedLabel ? `Posted ${item.postedLabel}` : item.summary}
+                  </span>
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
       ) : (
-        <div class="bg-muted rounded-xl p-10 text-center">
-          <p class="text-muted-foreground text-lg">No announcements yet.</p>
-        </div>
+        <p class="rounded-2xl border border-dashed border-border p-8 text-center text-muted-foreground">
+          Nothing new right now. Join our WhatsApp group at the bottom of the page to hear about updates first.
+        </p>
       )}
     </section>
 
-    <!-- ── UPCOMING EVENTS ── -->
-    <section id="events">
-      <h2 class="text-2xl font-bold   mb-6 text-primary">
-        📅 Upcoming Events
-      </h2>
+    <!-- ── Upcoming events ── -->
+    <section id="events" aria-labelledby="events-title" class="scroll-mt-24">
+      <h2 id="events-title" class="mb-5 text-3xl text-foreground">Upcoming events</h2>
 
-      {upcoming && upcoming.length > 0 ? (
-        <div class="flex flex-col gap-4">
-          {upcoming.map((program: any) => {
-            const thumbUrl = program.image
-              ? urlFor(program.image).width(600).height(400).fit("crop").url()
-              : null;
-            const fullUrl = program.image
-              ? urlFor(program.image).width(1600).url()
-              : null;
-
-            return (
-              <div class="bg-card border border-border rounded-xl overflow-hidden hover:border-secondary transition-colors group flex flex-col sm:flex-row">
-                {thumbUrl && fullUrl && (
-                  <div class="sm:w-64 flex-shrink-0">
-                    <Lightbox
-                      id={program._id}
-                      src={fullUrl}
-                      alt={program.title}
-                      thumbnailSrc={thumbUrl}
-                    />
-                  </div>
-                )}
-                <div class="flex flex-col gap-3 p-6 flex-1 min-w-0">
-                  <div class="flex flex-wrap items-center gap-2">
-                    <div class="bg-primary text-primary-foreground rounded-lg px-3 py-1">
-                      <span class="text-xs font-medium   opacity-80">
-                        {new Date(program.startDate).toLocaleDateString("en-US", { month: "short" })}
-                      </span>
-                      <span class="text-xl font-bold ml-1">
-                        {new Date(program.startDate).getDate()}
-                      </span>
-                    </div>
-                    {program.isRecurring && (
-                      <span class="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
-                        🔁 Recurring
+      {upcoming.length > 0 ? (
+        <ul class="grid gap-3 lg:grid-cols-2">
+          {upcoming.map((item) => (
+            <li>
+              <a href={item.path} data-detail-id={item.id} class={ROW}>
+                <span class="flex h-20 w-20 flex-none flex-col items-center justify-center rounded-xl bg-muted" aria-hidden="true">
+                  <span class="text-sm font-semibold text-muted-foreground">{item.shortDate?.dow}</span>
+                  <span class="font-serif text-3xl leading-none text-foreground">{item.shortDate?.day}</span>
+                  <span class="text-sm text-muted-foreground">{item.shortDate?.month}</span>
+                </span>
+                <span class="min-w-0 flex-1">
+                  <span class="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-sm text-muted-foreground">
+                    {item.category}
+                    {item.recurrence && (
+                      <span class="inline-flex items-center gap-1">
+                        <Repeat size={13} aria-hidden="true" />
+                        Recurring
                       </span>
                     )}
-                  </div>
-                  <p class="text-lg font-semibold group-hover:text-secondary transition-colors">
-                    {program.title}
-                  </p>
-                  <div class="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
-                    <span>📅 {formatDate(program.startDate)}</span>
-                    <span>🕐 {formatTime(program.startDate)}</span>
-                    {program.location && <span>📍 {program.location}</span>}
-                    {program.speaker && <span>🎤 {program.speaker}</span>}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+                  </span>
+                  <span class="mt-0.5 block text-lg font-semibold leading-snug text-foreground underline-offset-2 group-hover:underline">
+                    {item.title}
+                  </span>
+                  <span class="mt-0.5 block truncate text-[15px] text-muted-foreground">
+                    <span class="sr-only">{item.dateLabel}, </span>{item.summary}
+                  </span>
+                </span>
+                {item.imageThumb && (
+                  <img src={item.imageThumb} alt="" width="64" height="80" loading="lazy" class="hidden h-20 w-16 flex-none rounded-lg bg-muted object-cover sm:block" />
+                )}
+              </a>
+            </li>
+          ))}
+        </ul>
       ) : (
-        <div class="bg-muted rounded-xl p-10 text-center">
-          <p class="text-muted-foreground text-lg">No upcoming events scheduled.</p>
-          <p class="text-muted-foreground text-sm mt-2">
-            Follow us on{" "}
-            <a href="https://www.facebook.com/sajjadiaislamicsociety" class="text-secondary hover:underline" target="_blank" rel="noopener noreferrer">
-              Facebook
-            </a>{" "}
-            for updates.
-          </p>
-        </div>
+        <p class="rounded-2xl border border-dashed border-border p-8 text-center text-muted-foreground">
+          No upcoming events are scheduled yet. Weekly programs continue as usual; join our WhatsApp group for venue updates.
+        </p>
       )}
     </section>
 
+    <!-- ── Past events ── -->
+    {past.length > 0 && (
+      <section aria-labelledby="past-title">
+        <h2 id="past-title" class="mb-5 text-2xl text-muted-foreground">Past events</h2>
+        <ul class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {past.map((item) => (
+            <li>
+              <a href={item.path} data-detail-id={item.id} class={ROW}>
+                {item.imageThumb ? (
+                  <img src={item.imageThumb} alt="" width="56" height="56" loading="lazy" class="h-14 w-14 flex-none rounded-lg bg-muted object-cover" />
+                ) : (
+                  <span class="flex h-14 w-14 flex-none flex-col items-center justify-center rounded-lg bg-muted" aria-hidden="true">
+                    <span class="font-serif text-xl leading-none text-foreground">{item.shortDate?.day}</span>
+                    <span class="text-xs text-muted-foreground">{item.shortDate?.month}</span>
+                  </span>
+                )}
+                <span class="min-w-0 flex-1">
+                  <span class="block font-semibold leading-snug text-foreground underline-offset-2 group-hover:underline">{item.title}</span>
+                  <span class="block truncate text-sm text-muted-foreground">{item.dateLabel}</span>
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+
+    <DetailDialog items={allItems} client:load />
   </main>
 </BaseLayout>

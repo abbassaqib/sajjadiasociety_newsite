@@ -12,19 +12,22 @@ import { getSiteSettings } from "@/data/sanityQueries";
 
 interface Props {
   pageTitle: string;
+  description?: string;
+  ogImage?: string;
 }
 
-const { pageTitle } = Astro.props;
+const { pageTitle, description, ogImage: ogImageProp } = Astro.props;
 
 const sanitySettings = await getSiteSettings();
 const siteName = sanitySettings?.name ?? "Sajjadia Islamic Society";
 const colorScheme = siteConfig?.data.theme?.colorScheme ?? "auto";
 const metaTitle = pageTitle ? `${pageTitle} | ${siteName}` : siteName;
 const metaDescription =
+  description ??
   sanitySettings?.shortDescription ??
   "A Shia Muslim community organization serving Corona and Inland Empire, CA.";
 const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
-const ogImage = new URL("/og-image.jpg", Astro.site);
+const ogImage = ogImageProp ?? new URL("/og-image.jpg", Astro.site).toString();
 ---
 
 <script is:inline define:vars={{ colorScheme }}>

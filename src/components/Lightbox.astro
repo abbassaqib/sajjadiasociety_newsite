@@ -1,4 +1,6 @@
 ---
+import { Maximize2, X } from "lucide-react";
+
 interface Props {
   id: string;
   src: string;
@@ -23,7 +25,7 @@ const dialogId = `lightbox-${id}`;
   />
   <div class="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
     <span class="opacity-0 group-hover:opacity-100 transition-opacity text-white text-sm font-medium bg-black/60 px-3 py-1.5 rounded-full">
-      🔍 View full size
+      <Maximize2 size={14} aria-hidden="true" className="inline -mt-0.5 mr-1" />View full size
     </span>
   </div>
 </button>
@@ -50,7 +52,7 @@ const dialogId = `lightbox-${id}`;
           class="flex items-center gap-1.5 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 transition-colors px-3 py-1.5 rounded-full text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
           aria-label="Close image"
         >
-          <span aria-hidden="true">✕</span>
+          <X size={16} aria-hidden="true" />
           <span>Close</span>
         </button>
       </div>

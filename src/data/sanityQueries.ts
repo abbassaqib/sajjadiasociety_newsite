@@ -1,4 +1,5 @@
 import { sanityClient } from '@/lib/sanity'
+import { ANNOUNCEMENT_FIELDS, EVENT_FIELDS } from '@/lib/detailItems'
 
 // ── Site Settings ────────────────────────────────────
 export async function getSiteSettings() {
@@ -66,19 +67,9 @@ export async function getCampaign() {
 // ── Announcements ─────────────────────────────────────
 export async function getAnnouncements(limit = 10) {
   return sanityClient.fetch(`
-    *[_type == "announcement" && status == "approved"]
-    | order(isPinned desc, publishDate desc)
-    [0...$limit] {
-      _id,
-      title,
-      slug,
-      category,
-      publishDate,
-      expiryDate,
-      isPinned,
-      body,
-      image
-    }
+    *[_type == "announcement" && status == "approved" && defined(slug.current)
+      && (!defined(expiryDate) || expiryDate > now())]
+    | order(isPinned desc, publishDate desc) [0...$limit] { ${ANNOUNCEMENT_FIELDS} }
   `, { limit })
 }
 
@@ -100,48 +91,18 @@ export async function getAnnouncementBySlug(slug: string) {
 
 // ── Programs ──────────────────────────────────────────
 export async function getUpcomingPrograms(limit = 10) {
-  const now = new Date().toISOString()
   return sanityClient.fetch(`
-    *[_type == "program"
-      && isPublished == true
-      && startDate > $now]
-    | order(startDate asc)
-    [0...$limit] {
-      _id,
-      title,
-      slug,
-      type,
-      isRecurring,
-      recurrencePattern,
-      startDate,
-      endDate,
-      location,
-      speaker,
-      description,
-      image
-    }
-  `, { now, limit })
+    *[_type == "program" && isPublished == true && defined(slug.current)
+      && coalesce(endDate, startDate) > now()]
+    | order(startDate asc) [0...$limit] { ${EVENT_FIELDS} }
+  `, { limit })
 }
-
 export async function getPastPrograms(limit = 20) {
-  const now = new Date().toISOString()
   return sanityClient.fetch(`
-    *[_type == "program"
-      && isPublished == true
-      && startDate <= $now]
-    | order(startDate desc)
-    [0...$limit] {
-      _id,
-      title,
-      slug,
-      type,
-      startDate,
-      location,
-      speaker,
-      description,
-      image
-    }
-  `, { now, limit })
+    *[_type == "program" && isPublished == true && defined(slug.current)
+      && coalesce(endDate, startDate) <= now()]
+    | order(startDate desc) [0...$limit] { ${EVENT_FIELDS} }
+  `, { limit })
 }
 
 // ── FAQ ───────────────────────────────────────────────
