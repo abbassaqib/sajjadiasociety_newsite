@@ -1,0 +1,18 @@
+name: Daily rebuild
+
+# Rebuilds the site every night so today's prayer times and the
+# upcoming / past event lists are always current, even on days
+# when nobody publishes anything in Sanity.
+
+on:
+  schedule:
+    # 08:15 UTC = 1:15 AM Pacific in summer, 12:15 AM in winter
+    - cron: "15 8 * * *"
+  workflow_dispatch: # adds a "Run workflow" button for manual rebuilds
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Vercel deploy hook
+        run: curl -fsS -X POST "${{ secrets.VERCEL_DEPLOY_HOOK }}"

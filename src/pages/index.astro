@@ -4,27 +4,22 @@ import { Image } from "astro:assets";
 import StyledText from "@/components/StyledText";
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import { siteConfig } from "@/data/contentCollectionDataFetching";
+import HomeNewsEvents from "@/components/HomeNewsEvents.astro";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { urlFor } from "@/lib/sanity";
 import { Clock } from "lucide-react";
 import {
   getCampaign,
-  getAnnouncements,
-  getUpcomingPrograms,
   getPrayerTimesConfig,
   getSiteSettings,
-  getOrgInfo,
 } from "@/data/sanityQueries";
 
 // ── Fetch Sanity data in parallel ─────────────────────
-const [campaign, announcements, programs, prayerConfig, sanitySettings, org] = await Promise.all([
+const [campaign, prayerConfig, sanitySettings] = await Promise.all([
   getCampaign(),
-  getAnnouncements(6),
-  getUpcomingPrograms(6),
   getPrayerTimesConfig(),
   getSiteSettings(),
-  getOrgInfo(),
 ]);
 
 // ── Prayer times from Aladhan API ─────────────────────
@@ -33,8 +28,10 @@ if (prayerConfig?.useAladhanApi) {
   try {
     const { latitude, longitude } = prayerConfig.location;
     const method = prayerConfig.calculationMethod ?? "0";
-    const today = new Date();
-    const dateStr = `${today.getDate()}-${today.getMonth() + 1}-${today.getFullYear()}`;
+    const [yy, mm, dd] = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "America/Los_Angeles", year: "numeric", month: "2-digit", day: "2-digit",
+    }).format(new Date()).split("-");
+    const dateStr = `${dd}-${mm}-${yy}`;
     const res = await fetch(
       `https://api.aladhan.com/v1/timings/${dateStr}?latitude=${latitude}&longitude=${longitude}&method=${method}`
     );
@@ -47,7 +44,7 @@ if (prayerConfig?.useAladhanApi) {
 
 const manualTimes = prayerConfig?.manualOverride;
 const jummah = prayerConfig?.jummahDetails;
-const isFriday = new Date().getDay() === 5;
+const isFriday = new Intl.DateTimeFormat("en-US", { timeZone: "America/Los_Angeles", weekday: "short" }).format(new Date()) === "Fri";
 
 function formatTime(time: string | undefined): string {
   if (!time) return "—";
@@ -66,10 +63,6 @@ const displayTimes = [
   { name: "Isha",    time: prayerTimes?.Isha     ?? manualTimes?.isha },
 ];
 
-const raised = campaign?.raisedAmount ?? 0;
-const goal   = campaign?.goalAmount   ?? 60000;
-const pct    = Math.min(Math.round((raised / goal) * 100), 100);
-
 const hero = siteConfig?.data.body?.hero;
 
 const bgImages = import.meta.glob<{ default: ImageMetadata }>(
@@ -79,31 +72,8 @@ const selectedImage = hero?.bgImage ? bgImages[`/${hero.bgImage}`] : null;
 
 const todayLabel = new Date().toLocaleDateString("en-US", {
   weekday: "long", month: "long", day: "numeric",
+  timeZone: "America/Los_Angeles",
 });
-
-const programTypeLabel: Record<string, string> = {
-  jummah:            "🕌 Jummah",
-  lecture:           "📖 Lecture",
-  special_event:     "⭐ Special Event",
-  quran_class:       "📚 Quran Class",
-  youth:             "👥 Youth",
-  community_service: "🤝 Community",
-  islamic_occasion:  "☪️ Occasion",
-};
-
-const topAnnouncements = announcements?.slice(0, 3) ?? [];
-const topPrograms = programs?.slice(0, 3) ?? [];
-const hasMoreAnnouncements = (announcements?.length ?? 0) > 3;
-const hasMorePrograms = (programs?.length ?? 0) > 3;
-
-const donorboxCampaign = (campaign?.donorboxLink ?? "").split("/").pop() ?? "";
-
-const storyExcerpt = (campaign?.story ?? [])
-  .filter((b: any) => b._type === "block" && b.style === "normal")
-  .slice(0, 2)
-  .map((b: any) => b.children?.map((c: any) => c.text ?? "").join("") ?? "")
-  .filter(Boolean)
-  .join(" ");
 
 ---
 
@@ -205,177 +175,6 @@ const storyExcerpt = (campaign?.story ?? [])
   <!-- ════════════════════════════════════════════════ -->
   <!-- ANNOUNCEMENTS + EVENTS                           -->
   <!-- ════════════════════════════════════════════════ -->
-  <section id="news-events" class="layout-full bg-background py-14 scroll-mt-24">
-    <div class="layout-base">
-      <div id="announcements" class="grid gap-10 lg:grid-cols-2">
-
-        <!-- ANNOUNCEMENTS -->
-        <div class="flex flex-col gap-4 scroll-mt-24">
-          <div class="flex items-center justify-between">
-            <h2 class="text-xl font-bold  ">📢 Announcements</h2>
-            {hasMoreAnnouncements && (
-              <a href="/news-events" class="text-secondary text-sm font-medium hover:underline underline-offset-4">See More →</a>
-            )}
-          </div>
-          {topAnnouncements.length > 0 ? (
-            <div class="flex flex-col gap-3">
-              {topAnnouncements.map((item: any) => {
-                const thumbUrl = item.image ? urlFor(item.image).width(300).height(200).fit("crop").url() : null;
-                const fullUrl = item.image ? urlFor(item.image).width(1600).url() : null;
-                const date = item.publishDate ? new Date(item.publishDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "";
-                const bodyText = item.body?.filter((b: any) => b._type === "block").slice(0, 1).map((b: any) => b.children?.map((c: any) => c.text).join("")).join("") ?? "";
-                return (
-                  <div
-                    class="card-trigger bg-card border border-border rounded-xl overflow-hidden hover:border-secondary transition-colors cursor-pointer flex"
-                    data-title={item.title}
-                    data-date={date}
-                    data-body={bodyText}
-                    data-img={fullUrl ?? ""}
-                  >
-                    {thumbUrl && (
-                      <div class="w-24 flex-shrink-0">
-                        <img src={thumbUrl} alt={item.title} class="w-full h-full object-cover" loading="lazy" />
-                      </div>
-                    )}
-                    <div class="p-4 flex flex-col gap-1 min-w-0">
-                      <p class="font-semibold text-sm leading-snug line-clamp-2">{item.title}</p>
-                      {date && <p class="text-muted-foreground text-xs">{date}</p>}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div class="bg-muted rounded-xl p-8 text-center">
-              {/* <p class="text-muted-foreground text-sm">No announcements yet.</p> */}
-              <p class="text-muted-foreground text-md mt-2">
-                Follow us on{" "}
-                <a href="https://www.facebook.com/sajjadiaislamicsociety" class="text-secondary hover:underline" target="_blank" rel="noopener noreferrer">
-                  Facebook
-                </a>{" "}
-                for updates.
-              </p>
-            </div>
-          )}
-        </div>
-
-        <!-- EVENTS -->
-        <div class="flex flex-col gap-4 scroll-mt-24">
-          <div class="flex items-center justify-between">
-            <h2 class="text-xl font-bold  ">📅 Events</h2>
-            {hasMorePrograms && (
-              <a href="/news-events" class="text-secondary text-sm font-medium hover:underline underline-offset-4">See More →</a>
-            )}
-          </div>
-          {topPrograms.length > 0 ? (
-            <div class="flex flex-col gap-3">
-              {topPrograms.map((program: any) => {
-                const thumbUrl = program.image ? urlFor(program.image).width(300).height(200).fit("crop").url() : null;
-                const fullUrl = program.image ? urlFor(program.image).width(1600).url() : null;
-                const dateLabel = new Date(program.startDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
-                const timeLabel = new Date(program.startDate).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
-                const bodyText = [dateLabel, timeLabel, program.location, program.speaker ? `Speaker: ${program.speaker}` : ""].filter(Boolean).join(" · ");
-                return (
-                  <div
-                    class="card-trigger bg-card border border-border rounded-xl overflow-hidden hover:border-secondary transition-colors cursor-pointer flex"
-                    data-title={program.title}
-                    data-date={`${dateLabel} · ${timeLabel}`}
-                    data-body={bodyText}
-                    data-img={fullUrl ?? ""}
-                    data-location={program.location ?? ""}
-                    data-speaker={program.speaker ?? ""}
-                  >
-                    {thumbUrl && (
-                      <div class="w-24 flex-shrink-0">
-                        <img src={thumbUrl} alt={program.title} class="w-full h-full object-cover" loading="lazy" />
-                      </div>
-                    )}
-                    <div class="p-4 flex flex-col gap-1 min-w-0">
-                      <p class="font-semibold text-sm leading-snug line-clamp-2">{program.title}</p>
-                      <p class="text-muted-foreground text-xs">{dateLabel} · {timeLabel}</p>
-                      {program.location && <p class="text-muted-foreground text-xs">📍 {program.location}</p>}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div class="bg-muted rounded-xl p-8 text-center">
-              {/* <p class="text-muted-foreground text-sm">No upcoming events.</p> */}
-              <p class="text-muted-foreground text-md mt-2">
-                Follow us on{" "}
-                <a href="https://www.facebook.com/sajjadiaislamicsociety" class="text-secondary hover:underline" target="_blank" rel="noopener noreferrer">
-                  Facebook
-                </a>{" "}
-                for updates.
-              </p>
-            </div>
-          )}
-        </div>
-
-      </div>
-    </div>
-  </section>
+  <HomeNewsEvents />
 
 </BaseLayout>
-
-<!-- ════════════════════════════════════════════════ -->
-<!-- CARD OVERLAY                                     -->
-<!-- ════════════════════════════════════════════════ -->
-<dialog id="card-overlay" class="fixed inset-0 z-50 bg-transparent p-4 max-w-none max-h-none w-screen h-screen m-0">
-  <div class="w-full h-full flex items-center justify-center" id="card-overlay-backdrop">
-    <div class="relative bg-background border border-border rounded-2xl shadow-2xl max-w-xl w-full max-h-[85vh] overflow-y-auto" onclick="event.stopPropagation()">
-      <button id="card-overlay-close" class="absolute top-3 right-3 z-10 text-muted-foreground hover:text-foreground bg-background rounded-full p-1.5 border border-border" aria-label="Close">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-      <img id="card-overlay-img" src="" alt="" class="w-full max-h-96 object-contain bg-black rounded-t-2xl hidden" loading="lazy" />
-      <div class="p-6">
-        <h3 id="card-overlay-title" class="text-xl font-bold mb-2"></h3>
-        <p id="card-overlay-date" class="text-muted-foreground text-sm mb-1"></p>
-        <p id="card-overlay-location" class="text-muted-foreground text-sm mb-4 hidden"></p>
-        <p id="card-overlay-body" class="text-foreground leading-relaxed"></p>
-      </div>
-    </div>
-  </div>
-</dialog>
-
-<style>
-  dialog { border: none; outline: none; background: transparent; padding: 0; margin: 0; }
-  dialog::backdrop { background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); }
-  dialog[open] { display: flex; align-items: center; justify-content: center; }
-  .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-</style>
-
-<script>
-  const overlay = document.getElementById('card-overlay') as HTMLDialogElement;
-  const closeBtn = document.getElementById('card-overlay-close')!;
-  const backdrop = document.getElementById('card-overlay-backdrop')!;
-  const overlayImg = document.getElementById('card-overlay-img') as HTMLImageElement;
-  const overlayTitle = document.getElementById('card-overlay-title')!;
-  const overlayDate = document.getElementById('card-overlay-date')!;
-  const overlayLocation = document.getElementById('card-overlay-location')!;
-  const overlayBody = document.getElementById('card-overlay-body')!;
-
-  function openOverlay(el: HTMLElement) {
-    overlayTitle.textContent = el.dataset.title ?? '';
-    overlayDate.textContent = el.dataset.date ?? '';
-    overlayBody.textContent = el.dataset.body ?? '';
-    const loc = [el.dataset.location, el.dataset.speaker ? `Speaker: ${el.dataset.speaker}` : ''].filter(Boolean).join(' · ');
-    if (loc) { overlayLocation.textContent = loc; overlayLocation.classList.remove('hidden'); }
-    else { overlayLocation.classList.add('hidden'); }
-    const img = el.dataset.img ?? '';
-    if (img) { overlayImg.src = img; overlayImg.alt = el.dataset.title ?? ''; overlayImg.classList.remove('hidden'); }
-    else { overlayImg.classList.add('hidden'); }
-    overlay.showModal();
-    document.body.style.overflow = 'hidden';
-  }
-
-  function closeOverlay() { overlay.close(); document.body.style.overflow = ''; }
-
-  closeBtn.addEventListener('click', closeOverlay);
-  backdrop.addEventListener('click', closeOverlay);
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeOverlay(); });
-  document.querySelectorAll('.card-trigger').forEach((card) => {
-    card.addEventListener('click', () => openOverlay(card as HTMLElement));
-  });
-</script>
