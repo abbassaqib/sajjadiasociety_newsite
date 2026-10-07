@@ -2,7 +2,6 @@
 import { Font } from "astro:assets";
 
 import "@/styles/global.css";
-import "@/styles/theme.css";
 
 import Header from "@/layouts/Header.astro";
 import Footer from "@/layouts/Footer.astro";
@@ -63,8 +62,8 @@ const ogImage = ogImageProp ?? new URL("/og-image.jpg", Astro.site).toString();
     <link rel="sitemap" href="/sitemap-index.xml" />
 
     <!-- FAVICON -->
-    <link rel="icon" type="image/png" href={"/sajjadia-logo.png"} />
-    <link rel="apple-touch-icon" href={"/sajjadia-logo.png"} />
+    <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
     <!-- TITLE -->
     <title>{metaTitle}</title>

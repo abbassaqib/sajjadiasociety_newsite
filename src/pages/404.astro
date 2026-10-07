@@ -1,31 +1,60 @@
 ---
-import StyledText from "@/components/StyledText";
 import BaseLayout from "@/layouts/BaseLayout.astro";
-import { CircleX, ArrowLeft } from "lucide-react";
-import { buttonVariants } from "@/components/ui/button";
+import { Home, CalendarDays, HandHeart, Mail } from "lucide-react";
+
+const CARD =
+  "group flex items-start gap-4 rounded-2xl border border-border bg-card p-5 text-left transition-colors " +
+  "hover:border-foreground/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
+const ICON = "flex h-11 w-11 flex-none items-center justify-center rounded-xl bg-muted text-foreground";
 ---
 
-<BaseLayout pageTitle="Not Found">
-  <main class="layout-base gap-8 py-8 min-h-[calc(100vh-6.5rem)]">
-    <StyledText
-      as="h1"
-      variant="displayXL"
-      className="text-primary flex items-center gap-4"
-    >
-      <CircleX className="sm:w-18 sm:h-18 w-12 h-12" aria-hidden="true" />
-      404: Oops!
-    </StyledText>
-    <p>
-      Sorry, we couldn't find the page you were looking for. It might have been
-      moved or deleted.
-    </p>
-    <StyledText
-      as={"a"}
-      href="/"
-      className={buttonVariants({ variant: "secondary" })}
-    >
-      <ArrowLeft aria-hidden="true" />
-      Go back to homepage.
-    </StyledText>
+<BaseLayout pageTitle="Page not found" description="The page you were looking for could not be found.">
+  <main class="layout-base py-16 md:py-24">
+    <div class="mx-auto w-full max-w-2xl text-center">
+      <p class="text-sm font-semibold text-muted-foreground">Error 404</p>
+      <h1 class="mt-2 text-4xl text-foreground md:text-5xl">We couldn't find that page</h1>
+      <p class="mx-auto mt-4 max-w-xl text-lg text-muted-foreground">
+        The link may be out of date, or the page may have moved when we updated our website. One of these should help.
+      </p>
+
+      <ul class="mt-10 grid gap-3 sm:grid-cols-2">
+        <li>
+          <a href="/" class={CARD}>
+            <span class={ICON}><Home size={22} aria-hidden="true" /></span>
+            <span>
+              <span class="block font-semibold text-foreground underline-offset-2 group-hover:underline">Home</span>
+              <span class="block text-[15px] text-muted-foreground">Today's prayer times and this week's programs</span>
+            </span>
+          </a>
+        </li>
+        <li>
+          <a href="/news-events" class={CARD}>
+            <span class={ICON}><CalendarDays size={22} aria-hidden="true" /></span>
+            <span>
+              <span class="block font-semibold text-foreground underline-offset-2 group-hover:underline">News &amp; events</span>
+              <span class="block text-[15px] text-muted-foreground">Announcements and upcoming programs</span>
+            </span>
+          </a>
+        </li>
+        <li>
+          <a href="/donate" class={CARD}>
+            <span class={ICON}><HandHeart size={22} aria-hidden="true" /></span>
+            <span>
+              <span class="block font-semibold text-foreground underline-offset-2 group-hover:underline">Support Sajjadia</span>
+              <span class="block text-[15px] text-muted-foreground">Ways to give, including Khums</span>
+            </span>
+          </a>
+        </li>
+        <li>
+          <button type="button" data-contact-trigger class={`${CARD} w-full cursor-pointer`}>
+            <span class={ICON}><Mail size={22} aria-hidden="true" /></span>
+            <span>
+              <span class="block font-semibold text-foreground underline-offset-2 group-hover:underline">Contact us</span>
+              <span class="block text-[15px] text-muted-foreground">Tell us what you were looking for</span>
+            </span>
+          </button>
+        </li>
+      </ul>
+    </div>
   </main>
 </BaseLayout>

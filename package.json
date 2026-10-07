@@ -4,9 +4,7 @@
   "type": "module",
   "scripts": {
     "astro": "astro",
-    "prebuild": "node scripts/generate-theme-css.js",
     "build": "astro build",
-    "predev": "node scripts/generate-theme-css.js",
     "dev": "astro dev",
     "knip": "knip",
     "preview": "astro preview"

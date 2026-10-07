@@ -31,7 +31,6 @@ pnpm-debug.log*
 .netlify
 
 # Auto-generated theme file
-theme.css
 .env.local
 
 # Vercel build output
