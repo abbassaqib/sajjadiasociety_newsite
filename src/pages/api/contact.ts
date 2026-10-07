@@ -11,17 +11,64 @@ const sanityClient = createClient({
   useCdn: false,
 })
 
+// Same limits as the maxlength attributes on the contact form
+const LIMITS = { name: 100, email: 254, phone: 30, message: 5000 }
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+function json(body: unknown, status: number) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { 'Content-Type': 'application/json' },
+  })
+}
+
+// Accepts only strings; anything else becomes an empty string
+function field(value: unknown): string {
+  return typeof value === 'string' ? value.trim() : ''
+}
+
+// Visitor input is placed inside the notification email's HTML. Escaping it
+// stops anyone from injecting links or markup into the board's inbox.
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
 export const POST: APIRoute = async ({ request }) => {
   try {
-    const body = await request.json()
-    const { name, email, phone, message, turnstileToken } = body
+    const body = (await request.json()) ?? {}
 
-    // ── Validate required fields ──
+    const name = field(body.name)
+    const email = field(body.email)
+    const phone = field(body.phone)
+    const message = field(body.message)
+    const turnstileToken = field(body.turnstileToken)
+
+    // ── Validate fields ──
     if (!name || !email || !message) {
-      return new Response(JSON.stringify({ error: 'Name, email and message are required.' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      })
+      return json({ error: 'Name, email and message are required.' }, 400)
+    }
+
+    if (
+      name.length > LIMITS.name ||
+      email.length > LIMITS.email ||
+      phone.length > LIMITS.phone ||
+      message.length > LIMITS.message
+    ) {
+      return json({ error: 'One of the fields is too long. Messages can be up to 5,000 characters.' }, 400)
+    }
+
+    if (!EMAIL_PATTERN.test(email)) {
+      return json({ error: 'Please enter a valid email address.' }, 400)
+    }
+
+    if (!turnstileToken) {
+      return json({ error: 'Please complete the human verification.' }, 400)
     }
 
     // ── Verify Turnstile token ──
@@ -39,10 +86,7 @@ export const POST: APIRoute = async ({ request }) => {
     const turnstileData = await turnstileRes.json()
 
     if (!turnstileData.success) {
-      return new Response(JSON.stringify({ error: 'Human verification failed. Please try again.' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      })
+      return json({ error: 'Human verification failed. Please try again.' }, 400)
     }
 
     // ── Save to Sanity ──
@@ -50,13 +94,18 @@ export const POST: APIRoute = async ({ request }) => {
       _type: 'contactSubmission',
       name,
       email,
-      phone: phone || '',
+      phone,
       message,
       submittedAt: new Date().toISOString(),
       status: 'new',
     })
 
     // ── Send email notification via Resend ──
+    const safeName = escapeHtml(name)
+    const safeEmail = escapeHtml(email)
+    const safePhone = escapeHtml(phone)
+    const safeMessage = escapeHtml(message).replace(/\n/g, '<br/>')
+
     const resendRes = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
@@ -66,14 +115,16 @@ export const POST: APIRoute = async ({ request }) => {
       body: JSON.stringify({
         from: 'no-reply@sajjadiamosque.org',
         to: ['info@sajjadiaislamicsociety.org', 'sajjadia786110@gmail.com'],
-        subject: `New contact form submission from ${name}`,
+        // "Reply" in the inbox goes straight to the visitor
+        reply_to: email,
+        subject: `New contact form submission from ${name.replace(/[\r\n]+/g, ' ')}`,
         html: `
           <h2>New Contact Form Submission</h2>
-          <p><strong>Name:</strong> ${name}</p>
-          <p><strong>Email:</strong> ${email}</p>
-          ${phone ? `<p><strong>Phone:</strong> ${phone}</p>` : ''}
+          <p><strong>Name:</strong> ${safeName}</p>
+          <p><strong>Email:</strong> ${safeEmail}</p>
+          ${phone ? `<p><strong>Phone:</strong> ${safePhone}</p>` : ''}
           <p><strong>Message:</strong></p>
-          <p>${message.replace(/\n/g, '<br/>')}</p>
+          <p>${safeMessage}</p>
           <hr/>
           <p style="color:#666;font-size:12px">View all submissions at <a href="https://sajjadia-cms.sanity.studio">sajjadia-cms.sanity.studio</a></p>
         `,
@@ -84,15 +135,9 @@ export const POST: APIRoute = async ({ request }) => {
       console.error('Resend error:', await resendRes.text())
     }
 
-    return new Response(JSON.stringify({ success: true }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    })
+    return json({ success: true }, 200)
   } catch (err) {
     console.error('Contact form error:', err)
-    return new Response(JSON.stringify({ error: 'Something went wrong. Please try again.' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    })
+    return json({ error: 'Something went wrong. Please try again.' }, 500)
   }
 }

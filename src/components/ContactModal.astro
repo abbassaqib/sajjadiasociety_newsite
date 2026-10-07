@@ -46,6 +46,8 @@ const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY
           name="name"
           type="text"
           required
+          maxlength="100"
+          autocomplete="name"
           placeholder="Your full name"
           class="w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition"
         />
@@ -61,6 +63,8 @@ const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY
           name="email"
           type="email"
           required
+          maxlength="254"
+          autocomplete="email"
           placeholder="your@email.com"
           class="w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition"
         />
@@ -75,6 +79,8 @@ const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY
           id="contact-phone"
           name="phone"
           type="tel"
+          maxlength="30"
+          autocomplete="tel"
           placeholder="(123) 456-7899"
           class="w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition"
         />
@@ -89,22 +95,22 @@ const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY
           id="contact-message"
           name="message"
           required
+          maxlength="5000"
           rows="4"
           placeholder="How can we help you?"
           class="w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition resize-none"
         ></textarea>
       </div>
 
-      <!-- Turnstile -->
+      <!-- Human verification. Turnstile is loaded only when someone opens this form. -->
       <div
-        class="cf-turnstile"
+        id="turnstile-container"
         data-sitekey={siteKey}
-        data-theme="auto"
-        data-callback="onTurnstileSuccess"
+        class="min-h-[65px]"
       ></div>
 
       <!-- Error message -->
-      <p id="contact-error" class="hidden text-destructive text-sm font-medium"></p>
+      <p id="contact-error" class="hidden text-destructive text-sm font-medium" role="alert"></p>
 
       <!-- Submit -->
       <button
@@ -136,36 +142,108 @@ const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY
   </div>
 </div>
 
-<!-- Turnstile script -->
-<script
-  src="https://challenges.cloudflare.com/turnstile/v0/api.js"
-  async
-  defer
-></script>
-
 <script>
+  // Turnstile is not loaded with the page. It is downloaded the first time a
+  // visitor reaches for a "Contact Us" button (hover, touch, or keyboard focus)
+  // and rendered when the form opens. This keeps it off every page view.
+  const TURNSTILE_SRC =
+    'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=onTurnstileLoad'
+
+  const w = window as any
+
   let turnstileToken = ''
+  let widgetId: string | null = null
+  let turnstileLoading: Promise<void> | null = null
 
-  // Turnstile callback
-  ;(window as any).onTurnstileSuccess = (token: string) => {
-    turnstileToken = token
-    const btn = document.getElementById('contact-submit') as HTMLButtonElement
-    if (btn) btn.disabled = false
-  }
-
-  const modal    = document.getElementById('contact-modal')!
-  const backdrop = document.getElementById('contact-backdrop')!
-  const closeBtn = document.getElementById('contact-close')!
-  const doneBtn  = document.getElementById('contact-done')!
-  const form     = document.getElementById('contact-form') as HTMLFormElement
-  const errorEl  = document.getElementById('contact-error')!
+  const modal     = document.getElementById('contact-modal')!
+  const backdrop  = document.getElementById('contact-backdrop')!
+  const closeBtn  = document.getElementById('contact-close')!
+  const doneBtn   = document.getElementById('contact-done')!
+  const form      = document.getElementById('contact-form') as HTMLFormElement
+  const errorEl   = document.getElementById('contact-error')!
   const successEl = document.getElementById('contact-success')!
   const submitBtn = document.getElementById('contact-submit') as HTMLButtonElement
+  const container = document.getElementById('turnstile-container') as HTMLElement
+
+  function isOpen() {
+    return !modal.classList.contains('hidden')
+  }
+
+  function showError(text: string) {
+    errorEl.textContent = text
+    errorEl.classList.remove('hidden')
+  }
+
+  function clearToken() {
+    turnstileToken = ''
+    submitBtn.disabled = true
+  }
+
+  // Downloads the Turnstile script once. If the download fails, the next
+  // attempt tries again.
+  function loadTurnstile(): Promise<void> {
+    if (w.turnstile) return Promise.resolve()
+    if (turnstileLoading) return turnstileLoading
+
+    turnstileLoading = new Promise<void>((resolve, reject) => {
+      w.onTurnstileLoad = () => resolve()
+
+      const script = document.createElement('script')
+      script.src = TURNSTILE_SRC
+      script.async = true
+      script.onerror = () => {
+        script.remove()
+        turnstileLoading = null
+        reject(new Error('Turnstile failed to load'))
+      }
+      document.head.appendChild(script)
+    })
+
+    return turnstileLoading
+  }
+
+  function preloadTurnstile() {
+    loadTurnstile().catch(() => {
+      // Ignored here. Opening the form retries and shows an error if needed.
+    })
+  }
+
+  async function showVerification() {
+    try {
+      await loadTurnstile()
+    } catch {
+      showError("The verification check couldn't load. Check your connection, then close and reopen this form.")
+      return
+    }
+
+    // The visitor may have closed the form while the script was loading.
+    if (!isOpen() || widgetId !== null) return
+
+    widgetId = w.turnstile.render(container, {
+      sitekey: container.dataset.sitekey,
+      theme: 'auto',
+      callback: (token: string) => {
+        turnstileToken = token
+        submitBtn.disabled = false
+      },
+      // Tokens expire after a few minutes. Turnstile fetches a new one
+      // automatically; until then the button stays disabled.
+      'expired-callback': clearToken,
+    })
+  }
+
+  function resetVerification() {
+    clearToken()
+    if (widgetId !== null && w.turnstile) {
+      w.turnstile.reset(widgetId)
+    }
+  }
 
   function openModal() {
     modal.classList.remove('hidden')
     modal.classList.add('flex')
     document.body.style.overflow = 'hidden'
+    showVerification()
   }
 
   function closeModal() {
@@ -176,12 +254,8 @@ const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY
     errorEl.classList.add('hidden')
     successEl.classList.add('hidden')
     form.classList.remove('hidden')
-    submitBtn.disabled = true
-    turnstileToken = ''
-    // Reset Turnstile widget
-    if ((window as any).turnstile) {
-      (window as any).turnstile.reset()
-    }
+    submitBtn.textContent = 'Send Message'
+    resetVerification()
   }
 
   closeBtn.addEventListener('click', closeModal)
@@ -189,12 +263,15 @@ const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY
   backdrop.addEventListener('click', closeModal)
 
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeModal()
+    if (e.key === 'Escape' && isOpen()) closeModal()
   })
 
   // Wire all "Contact Us" trigger buttons
-  document.querySelectorAll('[data-contact-trigger]').forEach((btn) => {
+  document.querySelectorAll<HTMLElement>('[data-contact-trigger]').forEach((btn) => {
     btn.addEventListener('click', openModal)
+    btn.addEventListener('pointerenter', preloadTurnstile, { once: true })
+    btn.addEventListener('touchstart', preloadTurnstile, { once: true, passive: true })
+    btn.addEventListener('focus', preloadTurnstile, { once: true })
   })
 
   form.addEventListener('submit', async (e) => {
@@ -207,14 +284,12 @@ const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY
     const message = (document.getElementById('contact-message') as HTMLTextAreaElement).value.trim()
 
     if (!name || !email || !message) {
-      errorEl.textContent = 'Please fill in all required fields.'
-      errorEl.classList.remove('hidden')
+      showError('Please fill in all required fields.')
       return
     }
 
     if (!turnstileToken) {
-      errorEl.textContent = 'Please complete the human verification.'
-      errorEl.classList.remove('hidden')
+      showError('Please complete the human verification.')
       return
     }
 
@@ -237,10 +312,11 @@ const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY
       form.classList.add('hidden')
       successEl.classList.remove('hidden')
     } catch (err: any) {
-      errorEl.textContent = err.message || 'Something went wrong. Please try again.'
-      errorEl.classList.remove('hidden')
-      submitBtn.disabled = false
+      showError(err.message || 'Something went wrong. Please try again.')
       submitBtn.textContent = 'Send Message'
+      // A verification token works only once, and the server may already have
+      // used it. Get a fresh one; the button turns back on when it arrives.
+      resetVerification()
     }
   })
 </script>

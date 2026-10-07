@@ -1,7 +1,7 @@
 ---
 import StyledText from "@/components/StyledText";
 import SubscribeForm from "@/components/SubscribeForm";
-import SocialMediaLinks from "@/components/SocialMediaLinks";
+import SocialMediaLinks from "@/components/SocialMediaLinks.astro";
 // import { siteConfig } from "@/data/contentCollectionDataFetching";
 import { getSiteSettings } from "@/data/sanityQueries";
 import { getCampaign } from "@/data/sanityQueries";
@@ -60,7 +60,7 @@ const donorboxCampaign = donorboxUrl.split('/').pop() ?? ''
         )}
         {contact?.phone1 && (
           <p class="text-sidebar-foreground/70 text-sm">
-            {contact.phone1Label && <span class="text-sidebar-foreground/50 text-xs">{contact.phone1Label}: </span>}
+            {contact.phone1Label && <span class="text-sidebar-foreground/60 text-xs">{contact.phone1Label}: </span>}
             <a href={`tel:${contact.phone1}`} class="hover:text-sidebar-foreground transition-colors">
               {contact.phone1}
             </a>
@@ -68,7 +68,7 @@ const donorboxCampaign = donorboxUrl.split('/').pop() ?? ''
         )}
         {contact?.phone2 && (
           <p class="text-sidebar-foreground/70 text-sm">
-            {contact.phone2Label && <span class="text-sidebar-foreground/50 text-xs">{contact.phone2Label}: </span>}
+            {contact.phone2Label && <span class="text-sidebar-foreground/60 text-xs">{contact.phone2Label}: </span>}
             <a href={`tel:${contact.phone2}`} class="hover:text-sidebar-foreground transition-colors">
               {contact.phone2}
             </a>
@@ -87,7 +87,7 @@ const donorboxCampaign = donorboxUrl.split('/').pop() ?? ''
       <!-- Social icons — wrapped to override color -->
       {socialLinks.length > 0 && (
         <div class="[&_a]:text-sidebar-foreground/60 [&_a:hover]:text-sidebar-foreground">
-          <SocialMediaLinks social={socialLinks} client:idle />
+          <SocialMediaLinks social={socialLinks} />
         </div>
       )}
     </section>
@@ -99,7 +99,7 @@ const donorboxCampaign = donorboxUrl.split('/').pop() ?? ''
         </StyledText>
         <p>{sanitySettings?.newsletterDescription}</p>
       </div>
-      <SubscribeForm client:idle />
+      <SubscribeForm client:visible />
     </section>
 
     <!-- Right — Donate -->
@@ -120,7 +120,7 @@ const donorboxCampaign = donorboxUrl.split('/').pop() ?? ''
   </div>
 
   <!-- Bottom bar -->
-  <div class="mt-8 pt-6 border-t border-sidebar-border flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between text-xs text-sidebar-foreground/40">
+  <div class="mt-8 pt-6 border-t border-sidebar-border flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between text-xs text-sidebar-foreground/60">
     <p>© {new Date().getFullYear()} Sajjadia Islamic Society. All rights reserved.</p>
     <p>Registered 501(c)(3) Nonprofit Organization</p>
   </div>
