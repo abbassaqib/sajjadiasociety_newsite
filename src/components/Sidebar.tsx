@@ -10,25 +10,15 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { cn } from "@/lib/utils";
-
-const NAV_ITEMS = [
-  { label: "Home", href: "/" },
-  { label: "About Us", href: "/about-us" },
-  { label: "Our Story", href: "/our-story" },
-  { label: "News & Events", href: "/news-events" },
-  { label: "Support Us", href: "/donate" },
-];
+import { NAV_ITEMS, isCurrentPath } from "@/data/navigation";
 
 interface SidebarProps {
-  /** Optional: pass Astro.url.pathname from Header.astro to highlight the current page */
+  /** Astro.url.pathname, passed from Header.astro */
   currentPath?: string;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ currentPath }) => {
   const [isOpen, setIsOpen] = React.useState(false);
-
-  const isCurrent = (href: string) =>
-    !!currentPath && (href === "/" ? currentPath === "/" : currentPath.startsWith(href));
 
   return (
     <Drawer open={isOpen} onOpenChange={setIsOpen} direction="right">
@@ -59,10 +49,10 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath }) => {
 
         <nav aria-label="Main" className="flex flex-col gap-1">
           {NAV_ITEMS.map((item) => {
-            const current = isCurrent(item.href);
+            const current = isCurrentPath(item, currentPath);
             return (
               <a
-                key={item.label}
+                key={item.href}
                 href={item.href}
                 aria-current={current ? "page" : undefined}
                 onClick={() => setIsOpen(false)}

@@ -34,7 +34,6 @@ const currentPath = Astro.url.pathname;
     }
 
     <!-- Modern Animated Toggle Button -->
-    <!-- Modern Animated Toggle Button -->
     <button
       id="theme-toggle"
       aria-label="Toggle light/dark mode"
@@ -63,10 +62,7 @@ const currentPath = Astro.url.pathname;
       </svg>
     </button>
     &nbsp;
-    <NavMenu
-      className="hidden gap-2 lg:inline-flex items-center flex-wrap"
-      client:load
-    />
+    <NavMenu className="hidden gap-2 lg:inline-flex items-center flex-wrap" currentPath={currentPath} />
 
     <Sidebar currentPath={currentPath} client:load />
   </div>
