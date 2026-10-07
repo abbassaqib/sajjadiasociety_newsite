@@ -9,11 +9,21 @@ import { defineConfig, fontProviders } from "astro/config";
 export default defineConfig({
   site: "https://sajjadiamosque.org",
   redirects: {
+    // Template routes folded into other pages
     '/announcements': '/news-events',
     '/programs': '/news-events',
     '/programs/announcements': '/news-events',
     '/programs/events': '/news-events',
     '/about-us/mission': '/about-us',
+    '/about-us/faq': '/about-us',
+
+    // Old WordPress site (sajjadiaislamicsociety.org) pages.
+    // Phase 6: point the three campaign pages at the Sajjadia Mosque page.
+    '/give/new-location-campaign': '/donate',
+    '/new-location-fundraising-campaign': '/donate',
+    '/new-location-renovation-campaign': '/donate',
+    '/recurring-donations': '/donate',
+    '/thank-you': '/',
   },
   vite: {
     plugins: [tailwindcss()],
