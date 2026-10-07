@@ -1,4 +1,0 @@
----
-title: Events
-order: 3
----

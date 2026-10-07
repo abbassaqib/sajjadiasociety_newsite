@@ -68,7 +68,7 @@ const currentPath = Astro.url.pathname;
       client:load
     />
 
-    <Sidebar client:load />
+    <Sidebar currentPath={currentPath} client:load />
   </div>
 
   <script>

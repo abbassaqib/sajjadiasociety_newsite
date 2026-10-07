@@ -86,16 +86,6 @@ const siteConfig = defineCollection({
   }),
 });
 
-const pagesCollection = defineCollection({
-  loader: glob({ pattern: "**/*.md", base: "./src/content-collections/pages" }),
-  schema: z.object({
-    title: z.string(),
-    order: z.number().optional(),
-    type: z.enum(["blog", "events", "sermons"]).optional(),
-  }),
-});
-
 export const collections = {
   config: siteConfig,
-  pages: pagesCollection,
 };

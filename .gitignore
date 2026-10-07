@@ -33,3 +33,6 @@ pnpm-debug.log*
 # Auto-generated theme file
 theme.css
 .env.local
+
+# Vercel build output
+.vercel/

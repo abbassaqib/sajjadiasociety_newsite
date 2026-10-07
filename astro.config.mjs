@@ -5,7 +5,6 @@ import react from "@astrojs/react";
 import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig, fontProviders } from "astro/config";
-import reactCompilerPlugin from "babel-plugin-react-compiler";
 
 export default defineConfig({
   site: "https://sajjadiamosque.org",
@@ -38,11 +37,7 @@ export default defineConfig({
     },
   ],
   integrations: [
-    react({
-      babel: {
-        plugins: [reactCompilerPlugin],
-      },
-    }),
+    react(),
     sitemap(),
   ],
   adapter: vercel(),

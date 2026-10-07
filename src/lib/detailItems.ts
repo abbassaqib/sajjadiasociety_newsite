@@ -13,7 +13,7 @@ export const EVENT_FIELDS = `_id, title, slug, type, isRecurring, recurrencePatt
 // Vercel builds run in UTC — always format in the mosque's time zone
 const TZ = "America/Los_Angeles";
 
-export type DetailKind = "announcement" | "event";
+type DetailKind = "announcement" | "event";
 
 export interface DetailItem {
   id: string;
@@ -90,7 +90,7 @@ function escapeHtml(s: string) {
 }
 
 // Escaped so text typed in Sanity can never inject markup into the page
-export function portableTextToHtml(blocks: any[] = []): string {
+function portableTextToHtml(blocks: any[] = []): string {
   let html = "";
   let openList: "ul" | "ol" | null = null;
 
@@ -140,7 +140,7 @@ export function portableTextToHtml(blocks: any[] = []): string {
   return html;
 }
 
-export function portableTextToPlain(blocks: any[] = []): string {
+function portableTextToPlain(blocks: any[] = []): string {
   return (blocks ?? [])
     .filter((b: any) => b?._type === "block")
     .map((b: any) => (b.children ?? []).map((c: any) => c.text ?? "").join(""))

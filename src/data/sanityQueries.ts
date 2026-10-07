@@ -85,22 +85,6 @@ export async function getAnnouncements(limit = 10) {
   `, { limit })
 }
 
-export async function getAnnouncementBySlug(slug: string) {
-  return sanityClient.fetch(`
-    *[_type == "announcement"
-      && status == "approved"
-      && slug.current == $slug][0] {
-      _id,
-      title,
-      slug,
-      category,
-      publishDate,
-      body,
-      image
-    }
-  `, { slug })
-}
-
 // ── Programs ──────────────────────────────────────────
 export async function getUpcomingPrograms(limit = 10) {
   return sanityClient.fetch(`
