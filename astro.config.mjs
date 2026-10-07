@@ -17,13 +17,11 @@ export default defineConfig({
     '/about-us/mission': '/about-us',
     '/about-us/faq': '/about-us',
 
-    // Old WordPress site (sajjadiaislamicsociety.org) pages.
-    // Phase 6: point the three campaign pages at the Sajjadia Mosque page.
+    // Old WordPress site (sajjadiaislamicsociety.org) page.
+    // The old pages whose addresses end in a slash are handled by small
+    // endpoint files in src/pages instead (see the comment in those files).
+    // Phase 6: point the campaign pages at the Sajjadia Mosque page.
     '/give/new-location-campaign': '/donate',
-    '/new-location-fundraising-campaign': '/donate',
-    '/new-location-renovation-campaign': '/donate',
-    '/recurring-donations': '/donate',
-    '/thank-you': '/',
   },
   vite: {
     plugins: [tailwindcss()],
