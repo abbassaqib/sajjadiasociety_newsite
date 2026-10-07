@@ -17,11 +17,11 @@ const item = announcementToItem(doc);
 ---
 
 <BaseLayout pageTitle={item.title} description={item.metaDescription} ogImage={item.imageOg}>
-  <main class="layout-base gap-6 py-10">
+  <div class="layout-base gap-6 py-10">
     <a href="/news-events" class="inline-flex w-fit items-center gap-2 font-semibold text-secondary underline-offset-4 hover:underline">
       <ArrowLeft size={18} aria-hidden="true" />
       All news and events
     </a>
     <DetailView item={item} mode="page" client:load />
-  </main>
+  </div>
 </BaseLayout>

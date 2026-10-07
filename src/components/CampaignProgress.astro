@@ -1,0 +1,46 @@
+---
+// Raised-vs-goal summary and progress bar for the mosque fund.
+// tone="dark" is for navy backgrounds (Sajjadia Mosque page header);
+// tone="light" is for regular page backgrounds (Home page section, Phase 6C).
+
+interface Props {
+  raised: number;
+  goal: number;
+  tone?: "light" | "dark";
+}
+
+const { raised, goal, tone = "light" } = Astro.props;
+
+const pct = goal > 0 ? Math.min(Math.round((raised / goal) * 100), 100) : 0;
+const usd = (n: number) =>
+  new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
+
+const dark = tone === "dark";
+const strong = dark ? "text-sidebar-foreground" : "text-foreground";
+const muted = dark ? "text-sidebar-foreground/75" : "text-muted-foreground";
+const track = dark ? "bg-sidebar-foreground/15" : "bg-muted";
+---
+
+<div>
+  <p class="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
+    <span>
+      <strong class={`text-3xl font-semibold ${strong}`}>{usd(raised)}</strong>
+      <span class={muted}> raised</span>
+    </span>
+    <span class={muted}>of {usd(goal)} goal</span>
+  </p>
+
+  <div
+    class={`mt-3 h-3 overflow-hidden rounded-full ${track}`}
+    role="progressbar"
+    aria-label="Mosque fund progress"
+    aria-valuenow={pct}
+    aria-valuemin="0"
+    aria-valuemax="100"
+    aria-valuetext={`${usd(raised)} raised of ${usd(goal)} goal`}
+  >
+    <div class="h-full rounded-full bg-give" style={`width: ${pct}%`}></div>
+  </div>
+
+  <p class={`mt-2 text-sm ${muted}`}>{pct}% funded</p>
+</div>

@@ -4,7 +4,6 @@ import SubscribeForm from "@/components/SubscribeForm";
 import SocialMediaLinks from "@/components/SocialMediaLinks.astro";
 // import { siteConfig } from "@/data/contentCollectionDataFetching";
 import { getSiteSettings } from "@/data/sanityQueries";
-import { getCampaign } from "@/data/sanityQueries";
 import { Mail } from "lucide-react";
 
 // const form = siteConfig?.data.footer?.form;
@@ -13,7 +12,6 @@ import { Mail } from "lucide-react";
 
 // Pull contact + social from Sanity as single source of truth
 const sanitySettings = await getSiteSettings();
-const campaign = await getCampaign();
 const contact = sanitySettings?.contact;
 const socialMedia = sanitySettings?.socialMedia;
 const locations = sanitySettings?.locations;
@@ -35,8 +33,6 @@ const socialLinks = [
 // Primary location (if set)
 const primaryLocation = locations?.find((l: any) => l.isPrimary) ?? locations?.[0];
 
-const donorboxUrl = campaign.donorboxLink ?? ''
-const donorboxCampaign = donorboxUrl.split('/').pop() ?? ''
 ---
 
 <footer class="bg-sidebar text-sidebar-foreground layout-base py-8">
@@ -112,7 +108,11 @@ const donorboxCampaign = donorboxUrl.split('/').pop() ?? ''
         Every contribution makes a difference.
       </p>
 
-      <a href="/donate" class="inline-flex min-h-12 items-center justify-center rounded-lg bg-give px-5 font-semibold text-give-foreground hover:bg-give/90">
+      <!-- Not gold: gold is reserved for the giving cards and the Sajjadia Mosque page button -->
+      <a
+        href="/donate"
+        class="inline-flex min-h-12 w-fit items-center justify-center rounded-lg border border-sidebar-foreground/40 px-5 font-semibold text-sidebar-foreground transition-colors hover:bg-sidebar-foreground/10"
+      >
         Ways to give
       </a>
     </section>

@@ -6,6 +6,7 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 import { siteConfig } from "@/data/contentCollectionDataFetching";
 import HomeNewsEvents from "@/components/HomeNewsEvents.astro";
 import GivingCards from "@/components/GivingCards.astro";
+import HomeMosque from "@/components/HomeMosque.astro";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { urlFor } from "@/lib/sanity";
@@ -182,8 +183,14 @@ const todayLabel = new Date().toLocaleDateString("en-US", {
   <HomeNewsEvents />
 
   <!-- ════════════════════════════════════════════════ -->
-  <!-- GIVING OPTIONS                                   -->
+  <!-- SAJJADIA MOSQUE                                  -->
   <!-- ════════════════════════════════════════════════ -->
-  <GivingCards />
+  <HomeMosque campaign={campaign} />
+
+  <!-- ════════════════════════════════════════════════ -->
+  <!-- GIVING OPTIONS                                   -->
+  <!-- (progress shows in the Mosque section above)     -->
+  <!-- ════════════════════════════════════════════════ -->
+  <GivingCards showProgress={false} />
 
 </BaseLayout>

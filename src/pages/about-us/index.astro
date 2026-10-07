@@ -1,77 +1,241 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
-import { getOrgInfo } from "@/data/sanityQueries";
+import VerticalTimeline from "@/components/VerticalTimeline.astro";
+import { getOrgInfo, getSiteSettings, getTimelineEvents } from "@/data/sanityQueries";
+import { portableTextToHtml } from "@/lib/portableText";
+import { FileText, Flag, Mail, MapPin, Sprout } from "lucide-react";
 
-// const org = await getOrgInfo();
-const [org] = await Promise.all([
+const [org, settings, timelineEvents] = await Promise.all([
   getOrgInfo(),
+  getSiteSettings(),
+  getTimelineEvents(),
 ]);
 
+const foundedYear = settings?.foundedYear ?? 2019;
+
+const aboutHtml = portableTextToHtml(org?.about, {
+  p: "mb-4 leading-relaxed text-muted-foreground",
+  h3: "mt-5 mb-2 text-lg font-semibold text-foreground",
+  h4: "mt-4 mb-2 font-semibold text-foreground",
+  ul: "mb-4 list-disc space-y-1 pl-5 leading-relaxed text-muted-foreground",
+  ol: "mb-4 list-decimal space-y-1 pl-5 leading-relaxed text-muted-foreground",
+  link: "font-semibold text-secondary underline underline-offset-4",
+});
+
+const hasStory = Boolean(aboutHtml || org?.currentSituation || org?.futurePlans);
+
+const documents = org?.resources ?? [];
+
+function fileSize(bytes?: number): string {
+  if (!bytes) return "";
+  return bytes >= 1_000_000 ? `${(bytes / 1_000_000).toFixed(1)} MB` : `${Math.max(1, Math.round(bytes / 1000))} KB`;
+}
+
+const locations = settings?.locations ?? [];
+
+const STORY_MARKER =
+  "flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground";
 ---
 
-<BaseLayout pageTitle="About Us">
-  <main class="layout-base gap-10 py-10">
+<BaseLayout
+  pageTitle="About Us"
+  description={`Who Sajjadia Islamic Society is, what we believe, our story since ${foundedYear}, and where we meet.`}
+>
+  <div class="layout-base gap-10 py-10">
 
+    <!-- ── Header ── -->
     <div class="border-b border-border pb-6">
-      <h1 class="text-3xl font-bold   mb-2">About Us</h1>
+      <h1 class="mb-2 text-3xl font-bold">About Us</h1>
       <p class="text-muted-foreground">
-        Learn about Sajjadia Islamic Society — who we are, what we believe, and where we're headed.
+        Learn about Sajjadia Islamic Society: who we are, what we believe, and where we're headed.
       </p>
     </div>
 
-    <!-- Stat cards -->
-    <section class="grid gap-4 sm:grid-cols-3">
-      <div class="bg-card border border-muted-foreground rounded-xl p-6 text-center">
-          <p class="text-4xl font-bold text-primary mb-1">2019</p>
-          <p class="text-foreground text-sm">Founded</p>
-        </div>
-        <div class="bg-card border border-muted-foreground rounded-xl p-6 text-center">
-          <p class="text-4xl font-bold text-primary mb-1">501c3</p>
-          <p class="text-foreground text-sm">Registered Nonprofit</p>
-        </div>
-        <div class="bg-card border border-muted-foreground rounded-xl p-6 text-center">
-          <p class="text-4xl font-bold text-primary mb-1">Shia</p>
-          <p class="text-foreground text-sm">Ithna Ashari (Twelver)</p>
-        </div>
+    <!-- ── At a glance ── -->
+    <section class="grid gap-4 sm:grid-cols-3" aria-label="At a glance">
+      <div class="rounded-xl border border-muted-foreground bg-card p-6 text-center">
+        <p class="mb-1 text-4xl font-bold text-primary">{foundedYear}</p>
+        <p class="text-sm text-foreground">Founded</p>
+      </div>
+      <div class="rounded-xl border border-muted-foreground bg-card p-6 text-center">
+        <p class="mb-1 text-4xl font-bold text-primary">501c3</p>
+        <p class="text-sm text-foreground">Registered Nonprofit</p>
+      </div>
+      <div class="rounded-xl border border-muted-foreground bg-card p-6 text-center">
+        <p class="mb-1 text-4xl font-bold text-primary">Shia</p>
+        <p class="text-sm text-foreground">Ithna Ashari (Twelver)</p>
+      </div>
     </section>
 
-    <!-- Mission card -->
-    {org?.mission && (
-      <section>
-        <div class="flex items-center gap-3 mb-4">
-          <div class="w-1 h-8 bg-primary rounded-full"></div>
-          <h2 class="text-2xl font-semibold">Mission</h2>
+    <!-- ── Mission and vision ── -->
+    {(org?.mission || org?.vision) && (
+      <div class="grid gap-6 lg:grid-cols-2">
+        {org?.mission && (
+          <section class="flex flex-col" aria-labelledby="mission-title">
+            <div class="mb-4 flex items-center gap-3">
+              <div class="h-8 w-1 rounded-full bg-primary" aria-hidden="true"></div>
+              <h2 id="mission-title" class="text-2xl font-semibold">Mission</h2>
+            </div>
+            <div class="flex-1 rounded-xl border border-border bg-card p-6 md:p-8">
+              <p class="text-lg leading-relaxed text-foreground">{org.mission}</p>
+            </div>
+          </section>
+        )}
+        {org?.vision && (
+          <section class="flex flex-col" aria-labelledby="vision-title">
+            <div class="mb-4 flex items-center gap-3">
+              <div class="h-8 w-1 rounded-full bg-secondary" aria-hidden="true"></div>
+              <h2 id="vision-title" class="text-2xl font-semibold">Vision</h2>
+            </div>
+            <div class="flex-1 rounded-xl border border-border bg-card p-6 md:p-8">
+              <p class="text-lg leading-relaxed text-foreground">{org.vision}</p>
+            </div>
+          </section>
+        )}
+      </div>
+    )}
+
+    <!-- ── Our story (left) and timeline (right) ── -->
+    <div id="our-story" class="scroll-mt-24 flex flex-col gap-12 lg:flex-row">
+
+      {hasStory && (
+        <section class="flex-shrink-0 lg:w-2/5" aria-labelledby="story-title">
+          <div class="flex flex-col gap-8 lg:sticky lg:top-8">
+            <h2 id="story-title" class="text-2xl font-semibold">Our story</h2>
+
+            {aboutHtml && (
+              <div>
+                <div class="mb-4 flex items-center gap-3">
+                  <div class={STORY_MARKER}><Sprout size={16} aria-hidden="true" /></div>
+                  <h3 class="text-xl font-bold">The Beginning</h3>
+                </div>
+                <div class="border-l-2 border-border pl-5" set:html={aboutHtml} />
+              </div>
+            )}
+
+            {org?.currentSituation && (
+              <div>
+                <div class="mb-4 flex items-center gap-3">
+                  <div class={STORY_MARKER}><MapPin size={16} aria-hidden="true" /></div>
+                  <h3 class="text-xl font-bold">Where We Are Today</h3>
+                </div>
+                <div class="border-l-2 border-border pl-5">
+                  <p class="leading-relaxed text-muted-foreground">{org.currentSituation}</p>
+                </div>
+              </div>
+            )}
+
+            {org?.futurePlans && (
+              <div>
+                <div class="mb-4 flex items-center gap-3">
+                  <div class={STORY_MARKER}><Flag size={16} aria-hidden="true" /></div>
+                  <h3 class="text-xl font-bold">Looking Ahead</h3>
+                </div>
+                <div class="border-l-2 border-border pl-5">
+                  <p class="mb-4 leading-relaxed text-muted-foreground">{org.futurePlans}</p>
+                  <a
+                    href="/sajjadia-mosque"
+                    class="font-semibold text-secondary underline-offset-4 hover:underline"
+                  >
+                    See the Sajjadia Mosque plans and progress
+                  </a>
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
+      <section class="min-w-0 lg:w-3/5" aria-labelledby="timeline-title">
+        <div class="mb-8 flex flex-wrap items-center gap-3">
+          <h2 id="timeline-title" class="text-2xl font-semibold">Timeline</h2>
+          {timelineEvents?.length > 0 && (
+            <span class="rounded-full bg-muted px-2 py-1 text-xs text-muted-foreground">
+              Select any event to expand it
+            </span>
+          )}
         </div>
-        <div class="bg-card border border-border rounded-xl p-8">
-          <p class="text-foreground leading-relaxed text-lg">{org.mission}</p>
-        </div>
+
+        {timelineEvents?.length > 0 ? (
+          <VerticalTimeline events={timelineEvents} />
+        ) : (
+          <p class="rounded-xl bg-muted p-8 text-center text-muted-foreground">Timeline coming soon.</p>
+        )}
+      </section>
+    </div>
+
+    <!-- ── Public documents ── -->
+    {documents.length > 0 && (
+      <section aria-labelledby="documents-title">
+        <h2 id="documents-title" class="mb-4 text-2xl font-semibold">Documents</h2>
+        <ul class="grid gap-3 md:grid-cols-2">
+          {documents.map((doc: any) => (
+            <li>
+              <a
+                href={doc.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="flex h-full items-start gap-4 rounded-xl border border-border bg-card p-5 transition-colors hover:bg-muted"
+              >
+                <FileText size={24} strokeWidth={1.75} aria-hidden="true" className="mt-0.5 shrink-0 text-primary" />
+                <span class="flex flex-col gap-1">
+                  <span class="font-semibold text-foreground">{doc.label ?? "Document"}</span>
+                  {doc.description && <span class="text-sm text-muted-foreground">{doc.description}</span>}
+                  <span class="text-sm text-muted-foreground">
+                    PDF{doc.size ? `, ${fileSize(doc.size)}` : ""}
+                    <span class="sr-only"> (opens in a new tab)</span>
+                  </span>
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
       </section>
     )}
 
-    <!-- Vision card -->
-    {org?.vision && (
-      <section>
-        <div class="flex items-center gap-3 mb-4">
-          <div class="w-1 h-8 bg-secondary rounded-full"></div>
-          <h2 class="text-2xl font-semibold">Vision</h2>
-        </div>
-        <div class="bg-card border border-border rounded-xl p-8">
-          <p class="text-foreground leading-relaxed text-lg">{org.vision}</p>
-        </div>
-      </section>
-    )}
+    <!-- ── Where we meet, and how to reach us ── -->
+    <section class="rounded-xl bg-muted p-6 md:p-8" aria-labelledby="visit-title">
+      <h2 id="visit-title" class="mb-4 text-2xl font-semibold">Where we meet</h2>
 
-    <!-- Future Plans -->
-    {org?.futurePlans && (
-      <section class="bg-muted rounded-xl p-8">
-        <h2 class="text-xl font-semibold mb-4">Future Plans</h2>
-        <p class="text-foreground leading-relaxed">{org.futurePlans}</p>
-      </section>
-    )}
+      {locations.length > 0 && (
+        <ul class="mb-6 grid gap-4 md:grid-cols-2">
+          {locations.map((loc: any) => {
+            const cityLine = [loc.city, [loc.state, loc.zip].filter(Boolean).join(" ")].filter(Boolean).join(", ");
+            return (
+              <li class="flex gap-3">
+                <MapPin size={20} aria-hidden="true" className="mt-0.5 shrink-0 text-primary" />
+                <div>
+                  {loc.name && <p class="font-semibold text-foreground">{loc.name}</p>}
+                  {loc.address && <p class="text-muted-foreground">{loc.address}</p>}
+                  {cityLine && <p class="text-muted-foreground">{cityLine}</p>}
+                  {loc.mapUrl && (
+                    <a
+                      href={loc.mapUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="mt-1 inline-block text-sm font-semibold text-secondary underline-offset-4 hover:underline"
+                    >
+                      Open in Google Maps<span class="sr-only"> (opens in a new tab)</span>
+                    </a>
+                  )}
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
 
-    <a href="/our-story" class="inline-flex items-center gap-2 text-secondary font-medium hover:underline underline-offset-4">
-      Read our full story and timeline →
-    </a>
+      <p class="mb-4 text-muted-foreground">
+        Questions about programs, the mosque project, or getting involved? Send us a message.
+      </p>
+      <button
+        type="button"
+        data-contact-trigger
+        class="inline-flex min-h-11 items-center gap-2 rounded-lg bg-primary px-5 font-semibold text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        <Mail size={16} aria-hidden="true" /> Contact Us
+      </button>
+    </section>
 
-  </main>
+  </div>
 </BaseLayout>

@@ -1,0 +1,45 @@
+---
+// Home page section that points people to the Sajjadia Mosque page.
+// Hidden when "Campaign Active?" is switched off in Sanity.
+// Phase 7 adds a concept rendering here once the photo albums exist.
+import CampaignProgress from "@/components/CampaignProgress.astro";
+
+interface Props {
+  campaign: any;
+}
+
+const { campaign } = Astro.props;
+
+const show = Boolean(campaign) && campaign.isActive !== false;
+const raised = campaign?.raisedAmount ?? 0;
+const goal = campaign?.goalAmount ?? 0;
+---
+
+{show && (
+  <section
+    class="layout-full bg-sidebar py-14 text-sidebar-foreground md:py-16"
+    aria-labelledby="home-mosque-title"
+  >
+    <div class="layout-base">
+      <div class="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
+        <div>
+          <h2 id="home-mosque-title" class="text-3xl md:text-4xl">
+            {campaign.title ?? "Sajjadia Mosque"}
+          </h2>
+          {campaign.tagline && (
+            <p class="mt-3 max-w-xl text-lg text-sidebar-foreground/75">{campaign.tagline}</p>
+          )}
+          <!-- Not gold: gold is reserved for the giving cards and the Mosque page button -->
+          <a
+            href="/sajjadia-mosque"
+            class="mt-6 inline-flex min-h-12 items-center rounded-lg bg-sidebar-foreground px-6 font-semibold text-sidebar transition-colors hover:bg-sidebar-foreground/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar"
+          >
+            See the plans and progress
+          </a>
+        </div>
+
+        {goal > 0 && <CampaignProgress raised={raised} goal={goal} tone="dark" />}
+      </div>
+    </div>
+  </section>
+)}

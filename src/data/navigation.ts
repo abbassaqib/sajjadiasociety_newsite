@@ -12,7 +12,7 @@ export interface NavItem {
 export const NAV_ITEMS: NavItem[] = [
   { label: "Home", href: "/" },
   { label: "About Us", href: "/about-us" },
-  { label: "Our Story", href: "/our-story" },
+  { label: "Sajjadia Mosque", href: "/sajjadia-mosque" },
   { label: "News & Events", href: "/news-events", match: ["/programs", "/announcements"] },
   { label: "Support Us", href: "/donate" },
 ];

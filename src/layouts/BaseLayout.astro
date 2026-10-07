@@ -96,8 +96,18 @@ const ogImage = ogImageProp ?? new URL("/og-image.jpg", Astro.site).toString();
     </script>
   </head>
   <body>
+    <!-- Lets keyboard and screen reader users jump past the menu -->
+    <a
+      href="#main-content"
+      class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-background focus:px-4 focus:py-2 focus:font-semibold focus:text-foreground focus:shadow-lg focus:ring-2 focus:ring-ring"
+    >
+      Skip to content
+    </a>
     <Header />
-    <slot />
+    <!-- The one main landmark for every page. Pages don't add their own. -->
+    <main id="main-content" tabindex="-1" class="outline-none">
+      <slot />
+    </main>
     <ContactModal />
     <Footer />
   </body>

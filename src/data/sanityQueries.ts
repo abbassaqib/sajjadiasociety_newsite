@@ -37,6 +37,9 @@ export async function getPrayerTimesConfig() {
 }
 
 // ── Campaign ─────────────────────────────────────────
+// "updates" are the dated mosque updates shown only on the Sajjadia Mosque
+// page. They come back empty until the field is added to the campaign
+// schema in Sanity (Phase 6D).
 export async function getCampaign() {
   return sanityClient.fetch(`
     *[_type == "campaign"][0] {
@@ -59,6 +62,13 @@ export async function getCampaign() {
         url,
         title,
         description
+      },
+      updates[] {
+        _key,
+        date,
+        title,
+        body,
+        image
       }
     }
   `)
@@ -141,7 +151,14 @@ export async function getOrgInfo() {
       denomination,
       nonprofitStatus,
       chatbotPersonality,
-      chatbotBoundaries
+      chatbotBoundaries,
+      "resources": resources[isPublic != false && defined(file.asset)] {
+        _key,
+        label,
+        description,
+        "url": file.asset->url,
+        "size": file.asset->size
+      }
     }
   `)
 }

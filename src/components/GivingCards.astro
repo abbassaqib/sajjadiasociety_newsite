@@ -7,9 +7,11 @@ import { ArrowUpRight, FileText, HandCoins, HandHeart } from "lucide-react";
 interface Props {
   /** true = full homepage band with heading; false = just the cards, for the Support Us page */
   heading?: boolean;
+  /** false hides the Mosque card's progress bar (the home page shows progress in its Mosque section) */
+  showProgress?: boolean;
 }
 
-const { heading = true } = Astro.props;
+const { heading = true, showProgress = true } = Astro.props;
 
 const [campaign, giving, settings] = await Promise.all([getCampaign(), getGivingOptions(), getSiteSettings()]);
 
@@ -75,8 +77,14 @@ const GIVE_BTN =
         <p class={BODY}>
           {giving?.mosqueDescription ?? "Help pay off our property at 2460 S Main St, Corona, and build our permanent Islamic Center."}
         </p>
+        <a
+          href="/sajjadia-mosque"
+          class="mt-3 self-start font-semibold text-secondary underline-offset-4 hover:underline"
+        >
+          See the plans and progress
+        </a>
 
-        {goal > 0 && (
+        {showProgress && goal > 0 && (
           <div class="mt-5">
             <div
               class="h-2.5 overflow-hidden rounded-full bg-muted"
