@@ -64,11 +64,16 @@ export function photoFull(photo: AlbumPhoto): { src: string; width: number; heig
   };
 }
 
-/** 4:3 thumbnail cropped around the hotspot set in Sanity, plus a 2x version for sharp screens. */
+/** Image cropped to width x height around the hotspot set in Sanity, plus a 2x version for sharp screens. */
+export function photoCropped(photo: AlbumPhoto, width: number, height: number): { src: string; srcset: string } {
+  const small = urlFor(photo).width(width).height(height).fit("crop").auto("format").url();
+  const large = urlFor(photo).width(width * 2).height(height * 2).fit("crop").auto("format").url();
+  return { src: small, srcset: `${small} ${width}w, ${large} ${width * 2}w` };
+}
+
+/** 4:3 grid thumbnail */
 export function photoThumb(photo: AlbumPhoto): { src: string; srcset: string } {
-  const small = urlFor(photo).width(600).height(450).fit("crop").auto("format").url();
-  const large = urlFor(photo).width(1200).height(900).fit("crop").auto("format").url();
-  return { src: small, srcset: `${small} 600w, ${large} 1200w` };
+  return photoCropped(photo, 600, 450);
 }
 
 /** Alt text: the photo's own alt text, then its caption, then the album title. */

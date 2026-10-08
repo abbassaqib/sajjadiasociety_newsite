@@ -1,15 +1,28 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
+import AlbumCard from "@/components/AlbumCard.astro";
 import VerticalTimeline from "@/components/VerticalTimeline.astro";
-import { getOrgInfo, getSiteSettings, getTimelineEvents } from "@/data/sanityQueries";
+import YouTubeVideo from "@/components/YouTubeVideo.astro";
+import { getAlbums, getOrgInfo, getSiteSettings, getTimelineEvents } from "@/data/sanityQueries";
+import { getYoutubeId, type Album } from "@/lib/albums";
 import { portableTextToHtml } from "@/lib/portableText";
 import { FileText, Flag, Mail, MapPin, Sprout } from "lucide-react";
 
-const [org, settings, timelineEvents] = await Promise.all([
+const [org, settings, timelineEvents, programAlbums] = await Promise.all([
   getOrgInfo(),
   getSiteSettings(),
   getTimelineEvents(),
+  getAlbums(["programs"]) as Promise<Album[]>,
 ]);
+
+// Community program albums, newest first. Photos open as album cards;
+// any videos in those albums are listed under the cards.
+const photoAlbums = (programAlbums ?? []).filter((a) => (a.photos?.length ?? 0) > 0);
+const programVideos = (programAlbums ?? []).flatMap((album) =>
+  (album.videos ?? [])
+    .map((video) => ({ ...video, ytId: getYoutubeId(video.url ?? ""), albumTitle: album.title }))
+    .filter((video) => video.ytId),
+);
 
 const foundedYear = settings?.foundedYear ?? 2019;
 
@@ -163,6 +176,33 @@ const STORY_MARKER =
         )}
       </section>
     </div>
+
+    <!-- ── Our programs: community program albums ── -->
+    {(photoAlbums.length > 0 || programVideos.length > 0) && (
+      <section aria-labelledby="programs-title">
+        <h2 id="programs-title" class="text-2xl font-semibold">Our programs</h2>
+        <p class="mt-1 mb-6 text-muted-foreground">Moments from our programs and gatherings over the years.</p>
+
+        {photoAlbums.length > 0 && (
+          <ul class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {photoAlbums.map((album) => (
+              <li><AlbumCard album={album} /></li>
+            ))}
+          </ul>
+        )}
+
+        {programVideos.length > 0 && (
+          <div class="mt-8 grid gap-6 sm:grid-cols-2">
+            {programVideos.map((video) => (
+              <div class="flex flex-col gap-2">
+                <YouTubeVideo id={video.ytId!} title={video.title ?? video.albumTitle} />
+                <p class="font-semibold text-foreground">{video.title ?? video.albumTitle}</p>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+    )}
 
     <!-- ── Public documents ── -->
     {documents.length > 0 && (
