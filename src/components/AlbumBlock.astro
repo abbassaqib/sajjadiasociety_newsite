@@ -1,0 +1,48 @@
+---
+// One album: title, date, description, photos (full-screen viewer) and videos.
+// showTitle=false is for a section that holds a single album, so the album
+// title doesn't repeat the section heading.
+import PhotoGallery from "@/components/PhotoGallery.astro";
+import YouTubeVideo from "@/components/YouTubeVideo.astro";
+import { formatMonthYear, getYoutubeId, type Album } from "@/lib/albums";
+
+interface Props {
+  album: Album;
+  showTitle?: boolean;
+}
+
+const { album, showTitle = true } = Astro.props;
+
+const videos = (album.videos ?? [])
+  .map((video) => ({ ...video, ytId: getYoutubeId(video.url ?? "") }))
+  .filter((video) => video.ytId);
+
+const date = formatMonthYear(album.date);
+---
+
+<div class="flex flex-col gap-5">
+  {(showTitle || album.description) && (
+    <div class="max-w-3xl">
+      {showTitle && (
+        <h3 class="text-xl font-semibold text-foreground">
+          {album.title}
+          {date && <span class="ml-2 text-base font-normal text-muted-foreground">{date}</span>}
+        </h3>
+      )}
+      {album.description && <p class="mt-1 leading-relaxed text-muted-foreground">{album.description}</p>}
+    </div>
+  )}
+
+  <PhotoGallery album={album} />
+
+  {videos.length > 0 && (
+    <div class="grid gap-6 sm:grid-cols-2">
+      {videos.map((video) => (
+        <div class="flex flex-col gap-2">
+          <YouTubeVideo id={video.ytId!} title={video.title ?? album.title} />
+          {video.title && <p class="font-semibold text-foreground">{video.title}</p>}
+        </div>
+      ))}
+    </div>
+  )}
+</div>

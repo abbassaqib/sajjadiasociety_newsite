@@ -38,8 +38,7 @@ export async function getPrayerTimesConfig() {
 
 // ── Campaign ─────────────────────────────────────────
 // "updates" are the dated mosque updates shown only on the Sajjadia Mosque
-// page. They come back empty until the field is added to the campaign
-// schema in Sanity (Phase 6D).
+// page. Photos and videos now come from Albums (see getAlbums below).
 export async function getCampaign() {
   return sanityClient.fetch(`
     *[_type == "campaign"][0] {
@@ -54,15 +53,6 @@ export async function getCampaign() {
       milestones,
       callToAction,
       thankYouMessage,
-      images[] {
-        image,
-        caption
-      },
-      videos[] {
-        url,
-        title,
-        description
-      },
       updates[] {
         _key,
         date,
@@ -72,6 +62,42 @@ export async function getCampaign() {
       }
     }
   `)
+}
+
+// ── Albums ───────────────────────────────────────────
+// Photo and video albums. Category values match the album schema in Sanity:
+// "programs", "property", "renderings", "construction".
+// Image dimensions and crop come along so the full-screen viewer can size
+// each photo before it loads.
+export async function getAlbums(categories: string[]) {
+  return sanityClient.fetch(
+    `
+    *[_type == "album" && isPublished != false && category in $categories] | order(date desc) {
+      _id,
+      title,
+      category,
+      date,
+      description,
+      "photos": photos[defined(asset)] {
+        _key,
+        caption,
+        alt,
+        crop,
+        hotspot,
+        asset-> {
+          _id,
+          metadata { lqip, dimensions { width, height } }
+        }
+      },
+      "videos": videos[defined(url)] {
+        _key,
+        url,
+        title
+      }
+    }
+  `,
+    { categories },
+  )
 }
 
 // ── Giving Options ─────────────────────────────────────
