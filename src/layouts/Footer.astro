@@ -4,7 +4,7 @@ import SubscribeForm from "@/components/SubscribeForm";
 import SocialMediaLinks from "@/components/SocialMediaLinks.astro";
 // import { siteConfig } from "@/data/contentCollectionDataFetching";
 import { getSiteSettings } from "@/data/sanityQueries";
-import { Mail } from "lucide-react";
+import { Mail, Smartphone } from "lucide-react";
 
 // const form = siteConfig?.data.footer?.form;
 
@@ -96,6 +96,12 @@ const primaryLocation = locations?.find((l: any) => l.isPrimary) ?? locations?.[
         <p>{sanitySettings?.newsletterDescription}</p>
       </div>
       <SubscribeForm client:visible />
+      <a
+        href="/app"
+        class="inline-flex w-fit items-center gap-2 text-sm font-semibold text-sidebar-foreground/80 underline-offset-4 hover:text-sidebar-foreground hover:underline"
+      >
+        <Smartphone size={16} aria-hidden="true" /> Add Sajjadia to your home screen
+      </a>
     </section>
 
     <!-- Right — Donate -->

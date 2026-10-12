@@ -1,0 +1,160 @@
+---
+// sajjadiamosque.org/app: how to add Sajjadia to your phone's home screen.
+// A link the board can share in WhatsApp.
+// - Android, and Chrome or Edge on a computer: an "Install the app" button
+//   appears when the browser offers installation.
+// - iPhone and iPad: Apple has no install button for websites, so the page
+//   shows the Share > Add to Home Screen steps, and puts them first on iPhones.
+// - Opened from the installed app: says so instead.
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { Check, Download, EllipsisVertical, Share, SquarePlus } from "lucide-react";
+
+const STEP_NUM =
+  "flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground";
+---
+
+<BaseLayout
+  pageTitle="Get the app"
+  description="Add Sajjadia Islamic Society to your phone's home screen for prayer times, programs, and giving in one tap."
+>
+  <section class="layout-full py-12 md:py-16">
+    <div class="layout-base">
+      <div class="max-w-2xl">
+        <h1 class="text-4xl text-foreground md:text-5xl">Get the Sajjadia app</h1>
+        <p class="mt-3 text-lg text-muted-foreground">
+          Add Sajjadia to your home screen. It opens full screen like any other app, with prayer times, programs,
+          and giving one tap away. There's nothing to download from an app store, and it's always up to date.
+        </p>
+
+        <!-- Shown by the script when this page is opened from the installed app.
+             The wrappers carry "hidden" so the inner flex styles can't override it. -->
+        <div id="app-installed" hidden>
+          <p class="mt-8 inline-flex items-center gap-2 rounded-lg bg-muted px-4 py-3 font-semibold text-foreground">
+            <Check size={18} aria-hidden="true" /> You're using the app. You're all set.
+          </p>
+        </div>
+
+        <!-- Shown by the script when the browser offers installation -->
+        <div id="app-install-wrap" hidden>
+          <button
+            id="app-install"
+            type="button"
+            class="mt-8 inline-flex min-h-12 items-center gap-2 rounded-lg bg-primary px-6 font-semibold text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          >
+            <Download size={18} aria-hidden="true" /> Install the app
+          </button>
+        </div>
+      </div>
+
+      <div id="app-steps" class="mt-10 grid gap-6 md:grid-cols-2">
+        <section id="steps-iphone" class="rounded-xl border border-border bg-card p-6" aria-labelledby="iphone-title">
+          <h2 id="iphone-title" class="text-2xl text-foreground">iPhone and iPad</h2>
+          <ol class="mt-5 flex flex-col gap-4">
+            <li class="flex gap-3">
+              <span class={STEP_NUM} aria-hidden="true">1</span>
+              <span class="pt-0.5 text-foreground">Open <strong>sajjadiamosque.org</strong> in Safari.</span>
+            </li>
+            <li class="flex gap-3">
+              <span class={STEP_NUM} aria-hidden="true">2</span>
+              <span class="pt-0.5 text-foreground">
+                Tap the Share button{" "}
+                <Share size={18} aria-hidden="true" className="mx-1 inline align-text-bottom" /><span class="sr-only">(a square with an arrow pointing up)</span>{" "}
+                at the bottom of the screen (at the top on iPad).
+              </span>
+            </li>
+            <li class="flex gap-3">
+              <span class={STEP_NUM} aria-hidden="true">3</span>
+              <span class="pt-0.5 text-foreground">
+                Scroll down and tap <strong>Add to Home Screen</strong>
+                <SquarePlus size={18} aria-hidden="true" className="ml-1 inline align-text-bottom" />.
+              </span>
+            </li>
+            <li class="flex gap-3">
+              <span class={STEP_NUM} aria-hidden="true">4</span>
+              <span class="pt-0.5 text-foreground">Tap <strong>Add</strong>. The Sajjadia icon appears on your home screen.</span>
+            </li>
+          </ol>
+          <p class="mt-5 text-sm text-muted-foreground">
+            On recent iPhones, Chrome and Edge also have Add to Home Screen in their Share menu.
+          </p>
+        </section>
+
+        <section id="steps-android" class="rounded-xl border border-border bg-card p-6" aria-labelledby="android-title">
+          <h2 id="android-title" class="text-2xl text-foreground">Android</h2>
+          <ol class="mt-5 flex flex-col gap-4">
+            <li class="flex gap-3">
+              <span class={STEP_NUM} aria-hidden="true">1</span>
+              <span class="pt-0.5 text-foreground">Open <strong>sajjadiamosque.org</strong> in Chrome.</span>
+            </li>
+            <li class="flex gap-3">
+              <span class={STEP_NUM} aria-hidden="true">2</span>
+              <span class="pt-0.5 text-foreground">
+                Tap the menu{" "}
+                <EllipsisVertical size={18} aria-hidden="true" className="mx-1 inline align-text-bottom" /><span class="sr-only">(three dots)</span>{" "}
+                at the top right.
+              </span>
+            </li>
+            <li class="flex gap-3">
+              <span class={STEP_NUM} aria-hidden="true">3</span>
+              <span class="pt-0.5 text-foreground">
+                Tap <strong>Install app</strong> or <strong>Add to Home screen</strong>.
+              </span>
+            </li>
+            <li class="flex gap-3">
+              <span class={STEP_NUM} aria-hidden="true">4</span>
+              <span class="pt-0.5 text-foreground">Tap <strong>Install</strong>. The Sajjadia icon appears with your other apps.</span>
+            </li>
+          </ol>
+          <p class="mt-5 text-sm text-muted-foreground">
+            On a computer, Chrome and Edge show an install icon at the right end of the address bar.
+          </p>
+        </section>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  const installWrap = document.getElementById("app-install-wrap");
+  const installButton = document.getElementById("app-install") as HTMLButtonElement | null;
+  const installedNote = document.getElementById("app-installed");
+  const iphoneSteps = document.getElementById("steps-iphone");
+
+  const isInstalled =
+    window.matchMedia("(display-mode: standalone)").matches || (navigator as any).standalone === true;
+
+  if (isInstalled) {
+    installedNote?.removeAttribute("hidden");
+  }
+
+  // iPhones and iPads (iPads report themselves as Macs with touch screens)
+  const isApple =
+    /iPhone|iPad|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  if (!isApple) {
+    // Put the Android steps first everywhere except Apple devices
+    iphoneSteps?.classList.add("md:order-last", "order-last");
+  }
+
+  // Android and desktop Chrome/Edge: use the browser's own install prompt
+  let deferredPrompt: any = null;
+
+  window.addEventListener("beforeinstallprompt", (event) => {
+    event.preventDefault();
+    deferredPrompt = event;
+    if (!isInstalled) installWrap?.removeAttribute("hidden");
+  });
+
+  installButton?.addEventListener("click", async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    installWrap?.setAttribute("hidden", "");
+  });
+
+  window.addEventListener("appinstalled", () => {
+    installWrap?.setAttribute("hidden", "");
+    installedNote?.removeAttribute("hidden");
+  });
+</script>

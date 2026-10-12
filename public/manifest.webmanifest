@@ -1,0 +1,35 @@
+{
+  "id": "/",
+  "name": "Sajjadia Islamic Society",
+  "short_name": "Sajjadia",
+  "description": "Prayer times, programs and events, and ways to give at Sajjadia Islamic Society in Corona, California.",
+  "lang": "en-US",
+  "dir": "ltr",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#17203A",
+  "theme_color": "#17203A",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    {
+      "name": "News & Events",
+      "url": "/news-events",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Sajjadia Mosque",
+      "url": "/sajjadia-mosque",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Support Us",
+      "url": "/donate",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    }
+  ]
+}
