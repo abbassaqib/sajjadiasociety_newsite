@@ -7,9 +7,7 @@ import { siteConfig } from "@/data/contentCollectionDataFetching";
 import HomeNewsEvents from "@/components/HomeNewsEvents.astro";
 import GivingCards from "@/components/GivingCards.astro";
 import HomeMosque from "@/components/HomeMosque.astro";
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { urlFor } from "@/lib/sanity";
+import InstallPrompt from "@/components/InstallPrompt.astro";
 import { Clock } from "lucide-react";
 import {
   getCampaign,
@@ -192,5 +190,8 @@ const todayLabel = new Date().toLocaleDateString("en-US", {
   <!-- (progress shows in the Mosque section above)     -->
   <!-- ════════════════════════════════════════════════ -->
   <GivingCards showProgress={false} />
+
+  <!-- Floating "Get the app" card (phones and tablets only) -->
+  <InstallPrompt />
 
 </BaseLayout>

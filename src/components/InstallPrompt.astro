@@ -1,0 +1,158 @@
+---
+// Floating "Get the Sajjadia app" card, shown on phones and tablets only.
+//
+// - Android (Chrome, Edge, Samsung Internet): an Install button that opens the
+//   browser's own install dialog. Appears only when the browser says the site
+//   can be installed, so it never shows a button that doesn't work.
+// - iPhone and iPad: Apple has no install button for websites, so it gives
+//   the one-line Share > Add to Home Screen hint and links to /app for steps.
+// - Hidden inside the installed app, and for 30 days after someone closes it
+//   (or declines the install).
+// - Appears a few seconds after the page loads, so it doesn't compete with
+//   the page itself.
+import { Download, Share, X } from "lucide-react";
+
+const ACTION =
+  "inline-flex min-h-10 items-center gap-2 rounded-lg bg-sidebar-foreground px-4 text-sm font-semibold text-sidebar " +
+  "transition-colors hover:bg-sidebar-foreground/90 focus-visible:outline-none focus-visible:ring-2 " +
+  "focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar";
+---
+
+<aside id="install-prompt" hidden aria-label="Get the Sajjadia app">
+  <div class="install-prompt-card fixed inset-x-3 z-40 mx-auto max-w-md rounded-2xl bg-sidebar p-4 text-sidebar-foreground shadow-2xl">
+    <div class="flex items-start gap-3">
+      <img src="/icon-192.png" alt="" width="48" height="48" class="h-12 w-12 shrink-0 rounded-xl" />
+
+      <div class="min-w-0 flex-1">
+        <p class="font-semibold">Get the Sajjadia app</p>
+
+        <!-- Android: native install -->
+        <div data-variant="native" hidden>
+          <p class="mt-0.5 text-sm text-sidebar-foreground/75">
+            Prayer times, programs, and giving, one tap from your home screen.
+          </p>
+          <div class="mt-3">
+            <button type="button" data-install-button class={ACTION}>
+              <Download size={16} aria-hidden="true" /> Install
+            </button>
+          </div>
+        </div>
+
+        <!-- iPhone and iPad: how to add it -->
+        <div data-variant="ios" hidden>
+          <p class="mt-0.5 text-sm text-sidebar-foreground/75">
+            Tap Share{" "}
+            <Share size={15} aria-hidden="true" className="inline align-text-bottom" /><span class="sr-only">
+              (the square with an arrow)</span>, then <strong class="text-sidebar-foreground">Add to Home Screen</strong>.
+          </p>
+          <div class="mt-3">
+            <a href="/app" class={ACTION}>Show me how</a>
+          </div>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        data-install-close
+        aria-label="Close"
+        class="-mr-1 -mt-1 rounded-full p-1.5 text-sidebar-foreground/70 transition-colors hover:bg-sidebar-foreground/10 hover:text-sidebar-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        <X size={18} aria-hidden="true" />
+      </button>
+    </div>
+  </div>
+</aside>
+
+<style>
+  .install-prompt-card {
+    bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
+    animation: install-prompt-in 0.3s ease-out;
+  }
+  @keyframes install-prompt-in {
+    from {
+      opacity: 0;
+      transform: translateY(1rem);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .install-prompt-card {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  const STORAGE_KEY = "sajjadia-install-prompt-closed";
+  const SNOOZE_DAYS = 30;
+  const SHOW_AFTER_MS = 3000;
+
+  const promptEl = document.getElementById("install-prompt");
+
+  const isInstalled =
+    window.matchMedia("(display-mode: standalone)").matches || (navigator as any).standalone === true;
+  // Phones and tablets only; computers have the browser's own install icon and the /app page
+  const isTouchDevice = window.matchMedia("(pointer: coarse)").matches;
+  const isApple =
+    /iPhone|iPad|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+
+  function recentlyClosed(): boolean {
+    try {
+      const closedAt = Number(localStorage.getItem(STORAGE_KEY));
+      return Boolean(closedAt) && Date.now() - closedAt < SNOOZE_DAYS * 24 * 60 * 60 * 1000;
+    } catch {
+      return false;
+    }
+  }
+
+  function rememberClosed() {
+    try {
+      localStorage.setItem(STORAGE_KEY, String(Date.now()));
+    } catch {
+      // Private browsing can block storage; the card just shows again next visit
+    }
+  }
+
+  const allowed = Boolean(promptEl) && !isInstalled && isTouchDevice && !recentlyClosed();
+  let shown = false;
+
+  function show(variant: "native" | "ios") {
+    if (!allowed || shown || !promptEl) return;
+    shown = true;
+    promptEl.querySelector(`[data-variant="${variant}"]`)?.removeAttribute("hidden");
+    setTimeout(() => promptEl.removeAttribute("hidden"), SHOW_AFTER_MS);
+  }
+
+  function hide() {
+    promptEl?.setAttribute("hidden", "");
+  }
+
+  if (isApple) show("ios");
+
+  // Android: the browser announces when the site can be installed
+  let deferredPrompt: any = null;
+  window.addEventListener("beforeinstallprompt", (event) => {
+    event.preventDefault();
+    deferredPrompt = event;
+    show("native");
+  });
+
+  promptEl?.querySelector("[data-install-button]")?.addEventListener("click", async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    hide();
+    if (outcome !== "accepted") rememberClosed();
+  });
+
+  promptEl?.querySelector("[data-install-close]")?.addEventListener("click", () => {
+    hide();
+    rememberClosed();
+  });
+
+  window.addEventListener("appinstalled", () => {
+    hide();
+    rememberClosed();
+  });
+</script>
