@@ -37,7 +37,7 @@ const ROW =
 
       {announcements.length > 0 ? (
         <ul class="grid gap-3 lg:grid-cols-2">
-          {announcements.map((item) => (
+          {announcements.map((item: any) => (
             <li>
               <a href={item.path} data-detail-id={item.id} class={ROW}>
                 {item.imageThumb ? (
@@ -81,7 +81,7 @@ const ROW =
 
       {upcoming.length > 0 ? (
         <ul class="grid gap-3 lg:grid-cols-2">
-          {upcoming.map((item) => (
+          {upcoming.map((item: any) => (
             <li>
               <a href={item.path} data-detail-id={item.id} class={ROW}>
                 <span class="flex h-20 w-20 flex-none flex-col items-center justify-center rounded-xl bg-muted" aria-hidden="true">
@@ -125,7 +125,7 @@ const ROW =
       <section aria-labelledby="past-title">
         <h2 id="past-title" class="mb-5 text-2xl text-muted-foreground">Past events</h2>
         <ul class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {past.map((item) => (
+          {past.map((item: any) => (
             <li>
               <a href={item.path} data-detail-id={item.id} class={ROW}>
                 {item.imageThumb ? (

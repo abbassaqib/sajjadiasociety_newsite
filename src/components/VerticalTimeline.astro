@@ -35,7 +35,7 @@ function formatDate(dateStr: string) {
 
   <ol class="flex flex-col gap-5">
     {events.map((event) => {
-      const cfg = categoryConfig[event.category] ?? categoryConfig.future;
+      const cfg = categoryConfig[event.category] ?? categoryConfig.future!;
       const CatIcon = cfg.Icon;
       const isUpcoming = event.status === "upcoming";
       const isCurrent = event.status === "current";

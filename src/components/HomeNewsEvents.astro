@@ -51,7 +51,7 @@ const SEE_ALL = "font-semibold text-secondary underline-offset-4 hover:underline
 
         {topAnnouncements.length > 0 ? (
           <ul class="flex flex-col gap-3">
-            {topAnnouncements.map((item) => (
+            {topAnnouncements.map((item: any) => (
               <li>
                 <a href={item.path} data-detail-id={item.id} class={ROW}>
                   {item.imageThumb ? (
@@ -100,7 +100,7 @@ const SEE_ALL = "font-semibold text-secondary underline-offset-4 hover:underline
 
         {events.length > 0 ? (
           <ul class="flex flex-col gap-3">
-            {events.map((item) => (
+            {events.map((item: any) => (
               <li>
                 <a href={item.path} data-detail-id={item.id} class={ROW}>
                   <span class="flex h-[72px] w-[72px] flex-none flex-col items-center justify-center rounded-xl bg-muted" aria-hidden="true">

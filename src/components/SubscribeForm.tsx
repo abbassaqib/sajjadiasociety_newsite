@@ -7,7 +7,7 @@ const SubscribeForm: React.FC = () => {
   const [status, setStatus] = React.useState<"idle" | "loading" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = React.useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!fullName.trim() || !phone.trim()) {
       setErrorMsg("Please fill in both fields.");

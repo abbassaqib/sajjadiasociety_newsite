@@ -2,7 +2,6 @@
 import StyledText from "@/components/StyledText";
 import SubscribeForm from "@/components/SubscribeForm";
 import SocialMediaLinks from "@/components/SocialMediaLinks.astro";
-// import { siteConfig } from "@/data/contentCollectionDataFetching";
 import { getSiteSettings } from "@/data/sanityQueries";
 import { Mail, Smartphone } from "lucide-react";
 
@@ -14,7 +13,6 @@ import { Mail, Smartphone } from "lucide-react";
 const sanitySettings = await getSiteSettings();
 const contact = sanitySettings?.contact;
 const socialMedia = sanitySettings?.socialMedia;
-const locations = sanitySettings?.locations;
 
 // Build social array for SocialMediaLinks component
 const socialLinks = [
@@ -29,9 +27,6 @@ const socialLinks = [
     link: socialMedia.youtube,
   },
 ].filter(Boolean) as { name: string; icon: string; link: string }[];
-
-// Primary location (if set)
-const primaryLocation = locations?.find((l: any) => l.isPrimary) ?? locations?.[0];
 
 ---
 

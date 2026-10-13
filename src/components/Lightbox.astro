@@ -99,7 +99,6 @@ const dialogId = `lightbox-${id}`;
   // Also close when clicking the backdrop div
   document.querySelectorAll('dialog[id^="lightbox-"]').forEach((dialog) => {
     dialog.addEventListener('click', (e) => {
-      const rect = (dialog as HTMLElement).getBoundingClientRect();
       const target = e.target as HTMLElement;
       if (target === dialog) {
         (dialog as HTMLDialogElement).close();

@@ -138,6 +138,7 @@ export async function getPastPrograms(limit = 20) {
 }
 
 // ── FAQ ───────────────────────────────────────────────
+/** @public Reserved for the Phase 8 chatbot */
 export async function getFAQ() {
   return sanityClient.fetch(`
     *[_type == "faqEntry" && isPublished == true]
@@ -151,6 +152,7 @@ export async function getFAQ() {
   `)
 }
 
+/** @public Reserved for the Phase 8 chatbot */
 export async function getChatbotFAQ() {
   // Only entries flagged for chatbot inclusion
   return sanityClient.fetch(`

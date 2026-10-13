@@ -5,14 +5,14 @@
 import { urlFor } from "@/lib/sanity";
 
 // Must match the category values in the album schema in Sanity
-export const ALBUM_CATEGORIES = {
+const ALBUM_CATEGORIES = {
   programs: "Community programs",
   property: "The property today",
   renderings: "Concept renderings",
   construction: "Construction",
 } as const;
 
-export type AlbumCategory = keyof typeof ALBUM_CATEGORIES;
+type AlbumCategory = keyof typeof ALBUM_CATEGORIES;
 
 export interface AlbumPhoto {
   _key: string;
@@ -26,7 +26,7 @@ export interface AlbumPhoto {
   };
 }
 
-export interface AlbumVideo {
+interface AlbumVideo {
   _key: string;
   url: string;
   title?: string;
@@ -89,7 +89,7 @@ export function getYoutubeId(url: string): string | null {
   const match = url.match(
     /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/|live\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/,
   );
-  return match ? match[1] : null;
+  return match?.[1] ?? null;
 }
 
 /** "September 2026" from a Sanity date like "2026-09-14". */
