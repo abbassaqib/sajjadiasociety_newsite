@@ -146,14 +146,13 @@ const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY
   // Turnstile is not loaded with the page. It is downloaded the first time a
   // visitor reaches for a "Contact Us" button (hover, touch, or keyboard focus)
   // and rendered when the form opens. This keeps it off every page view.
-  const TURNSTILE_SRC =
-    'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=onTurnstileLoad'
-
-  const w = window as any
+  // The loader is shared with the WhatsApp sign-up form, so the script is
+  // only ever downloaded once per page.
+  import { loadTurnstile, type TurnstileApi } from '@/lib/turnstile'
 
   let turnstileToken = ''
   let widgetId: string | null = null
-  let turnstileLoading: Promise<void> | null = null
+  let turnstileApi: TurnstileApi | null = null
 
   const modal     = document.getElementById('contact-modal')!
   const backdrop  = document.getElementById('contact-backdrop')!
@@ -179,29 +178,6 @@ const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY
     submitBtn.disabled = true
   }
 
-  // Downloads the Turnstile script once. If the download fails, the next
-  // attempt tries again.
-  function loadTurnstile(): Promise<void> {
-    if (w.turnstile) return Promise.resolve()
-    if (turnstileLoading) return turnstileLoading
-
-    turnstileLoading = new Promise<void>((resolve, reject) => {
-      w.onTurnstileLoad = () => resolve()
-
-      const script = document.createElement('script')
-      script.src = TURNSTILE_SRC
-      script.async = true
-      script.onerror = () => {
-        script.remove()
-        turnstileLoading = null
-        reject(new Error('Turnstile failed to load'))
-      }
-      document.head.appendChild(script)
-    })
-
-    return turnstileLoading
-  }
-
   function preloadTurnstile() {
     loadTurnstile().catch(() => {
       // Ignored here. Opening the form retries and shows an error if needed.
@@ -210,7 +186,7 @@ const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY
 
   async function showVerification() {
     try {
-      await loadTurnstile()
+      turnstileApi = await loadTurnstile()
     } catch {
       showError("The verification check couldn't load. Check your connection, then close and reopen this form.")
       return
@@ -219,7 +195,7 @@ const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY
     // The visitor may have closed the form while the script was loading.
     if (!isOpen() || widgetId !== null) return
 
-    widgetId = w.turnstile.render(container, {
+    widgetId = turnstileApi.render(container, {
       sitekey: container.dataset.sitekey,
       theme: 'auto',
       callback: (token: string) => {
@@ -234,8 +210,8 @@ const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY
 
   function resetVerification() {
     clearToken()
-    if (widgetId !== null && w.turnstile) {
-      w.turnstile.reset(widgetId)
+    if (widgetId !== null && turnstileApi) {
+      turnstileApi.reset(widgetId)
     }
   }
 
