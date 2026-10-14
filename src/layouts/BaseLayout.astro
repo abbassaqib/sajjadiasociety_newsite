@@ -1,5 +1,6 @@
 ---
 import Analytics from "@vercel/analytics/astro";
+import SpeedInsights from "@vercel/speed-insights/astro"
 import { Font } from "astro:assets";
 
 import "@/styles/global.css";
@@ -104,6 +105,7 @@ const ogImage = ogImageProp ?? new URL("/og-image.jpg", Astro.site).toString();
     <ContactModal />
     <Footer />
     <Analytics />
+    <SpeedInsights/>
     <!-- Service worker: offline fallback for the installed app (live site only) -->
     <script>
       if (import.meta.env.PROD && "serviceWorker" in navigator) {
