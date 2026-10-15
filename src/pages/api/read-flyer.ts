@@ -258,16 +258,17 @@ async function readFlyer(kind: 'program' | 'announcement', imageUrl: string): Pr
     },
     body: JSON.stringify({
       model: MODEL,
-      max_tokens: 1500,
+      max_tokens: 2000,
       system: systemPrompt(kind),
       tools: [tool],
-      tool_choice: { type: 'tool', name: tool.name },
+      tool_choice: { type: 'auto' },
+      thinking: { type: 'between_tools' },
       messages: [
         {
           role: 'user',
           content: [
             { type: 'image', source: { type: 'url', url: flyerUrl } },
-            { type: 'text', text: 'Read this flyer and save its details.' },
+            { type: 'text', text: 'Read this flyer and save its details by calling the save_flyer_details tool exactly once. If something is unreadable, use null and explain it in notes.' },
           ],
         },
       ],
