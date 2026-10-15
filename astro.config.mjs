@@ -42,5 +42,5 @@ export default defineConfig({
     react(),
     sitemap(),
   ],
-  adapter: vercel(),
+  adapter: vercel({ maxDuration: 60 }),
 });
