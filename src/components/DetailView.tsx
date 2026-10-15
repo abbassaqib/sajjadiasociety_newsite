@@ -270,10 +270,10 @@ export default function DetailView({ item, mode, onClose, position }: DetailView
                 {item.recurrence}
               </Row>
             )}
-            {item.location && (
+            {(item.location || item.locationAddress) && (
               <Row icon={MapPin} label="Location">
-                <span className="block font-semibold text-foreground">{item.location}</span>
-                {item.locationAddress && <span className="block text-muted-foreground">{item.locationAddress}</span>}
+                <span className="block font-semibold text-foreground">{item.location || item.locationAddress}</span>
+                {item.location && item.locationAddress && <span className="block text-muted-foreground">{item.locationAddress}</span>}
                 {item.mapsUrl && (
                   <a
                     href={item.mapsUrl}
